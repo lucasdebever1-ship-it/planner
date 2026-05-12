@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <title>Vakken</title>
+  <style>
+    body { font-family: sans-serif; max-width: 500px; margin: 40px auto; padding: 0 16px; }
+    input, button { padding: 8px; font-size: 1rem; }
+    input[type="text"] { width: 200px; }
+    input[type="number"] { width: 60px; }
+    button { cursor: pointer; margin-left: 8px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 24px; }
+    th, td { text-align: left; padding: 8px; border-bottom: 1px solid #ddd; }
+    th { background: #f4f4f4; }
+    .delete { color: red; cursor: pointer; background: none; border: none; font-size: 1rem; }
+  </style>
+</head>
+<body>
+  <h2>Vakken</h2>
+  <form id="form">
+    <input type="text" id="naam" placeholder="Naam vak" required>
+    <input type="number" id="moeilijkheid" placeholder="1-10" min="1" max="10" required>
+    <button type="submit">Toevoegen</button>
+  </form>
+
+  <table id="tabel">
+    <thead><tr><th>Vak</th><th>Moeilijkheid</th><th></th></tr></thead>
+    <tbody id="lijst"></tbody>
+  </table>
+
+  <script>
+    const sleutel = 'vakken';
+
+    function laad() {
+      return JSON.parse(localStorage.getItem(sleutel) || '[]');
+    }
+
+    function sla(vakken) {
+      localStorage.setItem(sleutel, JSON.stringify(vakken));
+    }
+
+    function render() {
+      const vakken = laad();
+      const lijst = document.getElementById('lijst');
+      lijst.innerHTML = vakken.map((v, i) => `
+        <tr>
+          <td>${v.naam}</td>
+          <td>${v.moeilijkheid} / 10</td>
+          <td><button class="delete" data-i="${i}">&#x2715;</button></td>
+        </tr>
+      `).join('');
+    }
+
+    document.getElementById('form').addEventListener('submit', e => {
+      e.preventDefault();
+      const naam = document.getElementById('naam').value.trim();
+      const moeilijkheid = parseInt(document.getElementById('moeilijkheid').value);
+      const vakken = laad();
+      vakken.push({ naam, moeilijkheid });
+      sla(vakken);
+      render();
+      e.target.reset();
+      document.getElementById('naam').focus();
+    });
+
+    document.getElementById('lijst').addEventListener('click', e => {
+      if (e.target.classList.contains('delete')) {
+        const i = parseInt(e.target.dataset.i);
+        const vakken = laad();
+        vakken.splice(i, 1);
+        sla(vakken);
+        render();
+      }
+    });
+
+    render();
+  </script>
+</body>
+</html>
