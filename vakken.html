@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>Vakken</title>
   <style>
-    body { font-family: sans-serif; max-width: 560px; margin: 40px auto; padding: 0 16px; }
+    body { font-family: sans-serif; max-width: 620px; margin: 40px auto; padding: 0 16px; }
     input, button { padding: 8px; font-size: 1rem; }
     input[type="text"] { width: 200px; }
     input[type="number"] { width: 60px; }
@@ -13,21 +13,36 @@
     .form-grid { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
     .form-group { display: flex; flex-direction: column; gap: 4px; }
     .form-group label { font-size: 0.8rem; color: #555; }
-    table { width: 100%; border-collapse: collapse; margin-top: 24px; }
-    th, td { text-align: left; padding: 8px; border-bottom: 1px solid #ddd; }
-    th { background: #f4f4f4; }
-    .delete { color: red; cursor: pointer; background: none; border: none; font-size: 1rem; }
-    .edit { cursor: pointer; background: none; border: none; font-size: 1rem; }
-    .acties { display: flex; gap: 4px; }
 
-    /* inline bewerkrij */
+    table { width: 100%; border-collapse: collapse; margin-top: 24px; }
+    th, td { text-align: left; padding: 8px; border-bottom: 1px solid #ddd; vertical-align: top; }
+    th { background: #f4f4f4; }
+
+    .delete  { color: red;    cursor: pointer; background: none; border: none; font-size: 1rem; }
+    .edit    { cursor: pointer; background: none; border: none; font-size: 1rem; }
+    .add-toets { color: #1a7fd4; cursor: pointer; background: none; border: none; font-size: 1.1rem; font-weight: bold; }
+    .acties  { display: flex; gap: 4px; }
+
+    .toets-item { margin-bottom: 6px; }
+    .toets-naam-datum { font-size: 0.9rem; }
+    .toets-delete { color: #bbb; cursor: pointer; background: none; border: none; font-size: 0.8rem; padding: 0 3px; margin-left: 2px; }
+    .toets-delete:hover { color: red; }
+    .leeradvies { font-size: 0.75rem; color: #999; display: block; margin-top: 1px; }
+    .geen-toetsen { color: #bbb; font-size: 0.85rem; }
+
+    /* inline vak bewerken */
     tr.bewerkrij td { padding: 4px 8px; }
-    tr.bewerkrij input[type="text"] { width: 130px; }
+    tr.bewerkrij input[type="text"]   { width: 130px; }
     tr.bewerkrij input[type="number"] { width: 50px; }
-    tr.bewerkrij input[type="date"] { font-size: 0.9rem; }
-    .opslaan { color: green; font-weight: bold; }
-    .annuleer { color: #888; }
-    .leeradvies { font-size: 0.75rem; color: #999; display: block; margin-top: 2px; }
+    .opslaan  { color: green; font-weight: bold; background: none; border: none; font-size: 1.1rem; cursor: pointer; }
+    .annuleer { color: #888; background: none; border: none; font-size: 1.1rem; cursor: pointer; }
+
+    /* toets toevoegen rij */
+    tr.toets-formrij td { background: #f5f8ff; padding: 8px 12px; }
+    .toets-form-inner { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    .toets-formrij input[type="text"] { width: 140px; font-size: 0.9rem; padding: 5px; }
+    .toets-formrij input[type="date"] { font-size: 0.9rem; padding: 5px; }
+    .toets-formrij button { font-size: 0.9rem; padding: 5px 10px; }
   </style>
 </head>
 <body>
@@ -43,17 +58,13 @@
         <input type="number" id="moeilijkheid" placeholder="1-10" min="1" max="10" required>
       </div>
       <div class="form-group">
-        <label for="toetsdatum">Toetsdatum</label>
-        <input type="date" id="toetsdatum">
-      </div>
-      <div class="form-group">
         <button type="submit">Toevoegen</button>
       </div>
     </div>
   </form>
 
   <table id="tabel">
-    <thead><tr><th>Vak</th><th>Moeilijkheid</th><th>Toetsdatum</th><th></th></tr></thead>
+    <thead><tr><th>Vak</th><th>Moeilijkheid</th><th>Toetsen</th><th></th></tr></thead>
     <tbody id="lijst"></tbody>
   </table>
 
@@ -61,7 +72,14 @@
     const sleutel = 'vakken';
 
     function laad() {
-      return JSON.parse(localStorage.getItem(sleutel) || '[]');
+      const vakken = JSON.parse(localStorage.getItem(sleutel) || '[]');
+      return vakken.map(v => {
+        if (!v.toetsen) {
+          v.toetsen = v.toetsdatum ? [{ naam: 'Toets', datum: v.toetsdatum }] : [];
+          delete v.toetsdatum;
+        }
+        return v;
+      });
     }
 
     function sla(vakken) {
@@ -72,62 +90,103 @@
       return d ? new Date(d).toLocaleDateString('nl-NL') : '—';
     }
 
-    function berekenBeginDatum(toetsdatum, moeilijkheid) {
-      if (!toetsdatum) return null;
+    function berekenBeginDatum(datum, moeilijkheid) {
+      if (!datum) return null;
       const dagen = Math.round(moeilijkheid / 2 + 1);
-      const datum = new Date(toetsdatum);
-      datum.setDate(datum.getDate() - dagen);
-      return datum.toLocaleDateString('nl-NL');
+      const d = new Date(datum);
+      d.setDate(d.getDate() - dagen);
+      return d.toLocaleDateString('nl-NL');
+    }
+
+    function renderToetsen(toetsen, moeilijkheid, i) {
+      if (!toetsen.length) return '<span class="geen-toetsen">Geen toetsen</span>';
+      return toetsen.map((t, j) => {
+        const begin = berekenBeginDatum(t.datum, moeilijkheid);
+        return `
+          <div class="toets-item">
+            <span class="toets-naam-datum">
+              <strong>${t.naam}</strong> — ${formatDatum(t.datum)}
+              <button class="toets-delete" data-i="${i}" data-j="${j}" title="Verwijder toets">✕</button>
+            </span>
+            ${begin ? `<span class="leeradvies">📚 Begin op ${begin}</span>` : ''}
+          </div>`;
+      }).join('');
     }
 
     function render() {
       const vakken = laad();
-      const lijst = document.getElementById('lijst');
-      lijst.innerHTML = vakken.map((v, i) => `
+      document.querySelectorAll('.toets-formrij').forEach(r => r.remove());
+      document.getElementById('lijst').innerHTML = vakken.map((v, i) => `
         <tr data-i="${i}">
           <td>${v.naam}</td>
           <td>${v.moeilijkheid} / 10</td>
-          <td>
-            ${formatDatum(v.toetsdatum)}
-            ${berekenBeginDatum(v.toetsdatum, v.moeilijkheid) ? `<span class="leeradvies">📚 Begin op ${berekenBeginDatum(v.toetsdatum, v.moeilijkheid)}</span>` : ''}
-          </td>
+          <td>${renderToetsen(v.toetsen, v.moeilijkheid, i)}</td>
           <td>
             <div class="acties">
-              <button class="edit" data-i="${i}" title="Bewerken">&#x270F;&#xFE0F;</button>
-              <button class="delete" data-i="${i}" title="Verwijderen">&#x2715;</button>
+              <button class="edit"      data-i="${i}" title="Vak bewerken">&#x270F;&#xFE0F;</button>
+              <button class="add-toets" data-i="${i}" title="Toets toevoegen">+</button>
+              <button class="delete"    data-i="${i}" title="Vak verwijderen">&#x2715;</button>
             </div>
           </td>
         </tr>
       `).join('');
     }
 
+    function toonToetsForm(i) {
+      document.querySelectorAll('.toets-formrij').forEach(r => r.remove());
+      const rij = document.querySelector(`tr[data-i="${i}"]`);
+      const formRij = document.createElement('tr');
+      formRij.className = 'toets-formrij';
+      formRij.innerHTML = `
+        <td colspan="4">
+          <div class="toets-form-inner">
+            <input type="text" class="t-naam" placeholder="Naam toets (bijv. proefwerk)">
+            <input type="date" class="t-datum">
+            <button class="toets-opslaan" data-i="${i}">&#x2713; Opslaan</button>
+            <button class="toets-annuleer">&#x2715;</button>
+          </div>
+        </td>`;
+      rij.insertAdjacentElement('afterend', formRij);
+      formRij.querySelector('.t-naam').focus();
+    }
+
+    function slaToetsOp(i) {
+      const formRij = document.querySelector('.toets-formrij');
+      const naam = formRij.querySelector('.t-naam').value.trim();
+      const datum = formRij.querySelector('.t-datum').value || null;
+      if (!naam) { formRij.querySelector('.t-naam').focus(); return; }
+      const vakken = laad();
+      vakken[i].toetsen.push({ naam, datum });
+      sla(vakken);
+      render();
+    }
+
     function startBewerken(i) {
       const vakken = laad();
       const v = vakken[i];
       const rij = document.querySelector(`tr[data-i="${i}"]`);
+      document.querySelectorAll('.toets-formrij').forEach(r => r.remove());
       rij.classList.add('bewerkrij');
       rij.innerHTML = `
         <td><input type="text" class="b-naam" value="${v.naam}" required></td>
         <td><input type="number" class="b-moeilijkheid" value="${v.moeilijkheid}" min="1" max="10" required></td>
-        <td><input type="date" class="b-datum" value="${v.toetsdatum || ''}"></td>
+        <td>${renderToetsen(v.toetsen, v.moeilijkheid, i)}</td>
         <td>
           <div class="acties">
-            <button class="opslaan" data-i="${i}" title="Opslaan">&#x2713;</button>
+            <button class="opslaan"  data-i="${i}" title="Opslaan">&#x2713;</button>
             <button class="annuleer" data-i="${i}" title="Annuleren">&#x2715;</button>
           </div>
-        </td>
-      `;
+        </td>`;
       rij.querySelector('.b-naam').focus();
     }
 
     function slaBewerkingenOp(i) {
-      const rij = document.querySelector(`tr.bewerkrij`);
+      const rij = document.querySelector('tr.bewerkrij');
       const naam = rij.querySelector('.b-naam').value.trim();
       const moeilijkheid = parseInt(rij.querySelector('.b-moeilijkheid').value);
-      const toetsdatum = rij.querySelector('.b-datum').value || null;
       if (!naam || isNaN(moeilijkheid)) return;
       const vakken = laad();
-      vakken[i] = { naam, moeilijkheid, toetsdatum };
+      vakken[i] = { ...vakken[i], naam, moeilijkheid };
       sla(vakken);
       render();
     }
@@ -136,9 +195,8 @@
       e.preventDefault();
       const naam = document.getElementById('naam').value.trim();
       const moeilijkheid = parseInt(document.getElementById('moeilijkheid').value);
-      const toetsdatum = document.getElementById('toetsdatum').value || null;
       const vakken = laad();
-      vakken.push({ naam, moeilijkheid, toetsdatum });
+      vakken.push({ naam, moeilijkheid, toetsen: [] });
       sla(vakken);
       render();
       e.target.reset();
@@ -148,19 +206,31 @@
     document.getElementById('lijst').addEventListener('click', e => {
       const btn = e.target.closest('button');
       if (!btn) return;
-      const i = parseInt(btn.dataset.i);
+      const i = btn.dataset.i !== undefined ? parseInt(btn.dataset.i) : NaN;
+      const j = btn.dataset.j !== undefined ? parseInt(btn.dataset.j) : NaN;
 
-      if (btn.classList.contains('delete')) {
+      if (btn.classList.contains('toets-delete')) {
+        const vakken = laad();
+        vakken[i].toetsen.splice(j, 1);
+        sla(vakken);
+        render();
+      } else if (btn.classList.contains('delete')) {
         const vakken = laad();
         vakken.splice(i, 1);
         sla(vakken);
         render();
       } else if (btn.classList.contains('edit')) {
         startBewerken(i);
+      } else if (btn.classList.contains('add-toets')) {
+        toonToetsForm(i);
       } else if (btn.classList.contains('opslaan')) {
         slaBewerkingenOp(i);
       } else if (btn.classList.contains('annuleer')) {
         render();
+      } else if (btn.classList.contains('toets-opslaan')) {
+        slaToetsOp(i);
+      } else if (btn.classList.contains('toets-annuleer')) {
+        btn.closest('tr').remove();
       }
     });
 
