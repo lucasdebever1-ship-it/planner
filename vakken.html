@@ -13,7 +13,7 @@
       color: #e8e8e8;
       max-width: 640px;
       margin: 48px auto;
-      padding: 0 20px;
+      padding: 0 20px 340px;
     }
 
     /* Header */
@@ -390,6 +390,17 @@
     });
 
     render();
+
+    // Scroll omhoog als een datuminput te dicht bij de onderkant staat,
+    // zodat de kalender-popup altijd volledig zichtbaar is.
+    document.addEventListener('focusin', e => {
+      if (e.target.type !== 'date') return;
+      const rect = e.target.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      if (spaceBelow < 340) {
+        window.scrollBy({ top: 340 - spaceBelow, behavior: 'smooth' });
+      }
+    });
   </script>
 </body>
 </html>
