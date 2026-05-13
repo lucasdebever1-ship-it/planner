@@ -83,6 +83,23 @@
       color: #3dcc7a;
     }
 
+    .waarschuwing {
+      margin-top: 10px;
+      font-size: 0.8rem;
+      color: #e05252;
+    }
+
+    .toets-kaart.verlopen .kaart-vak,
+    .toets-kaart.verlopen .toets-naam-badge,
+    .toets-kaart.verlopen .toets-datum {
+      text-decoration: line-through;
+      color: #444;
+    }
+    .toets-kaart.verlopen .toets-naam-badge {
+      background: #1e1e1e;
+      border-color: #2a2a2a;
+    }
+
     .geen {
       color: #333;
       font-size: 0.9rem;
@@ -150,8 +167,22 @@
       }
 
       lijst.innerHTML = items.map(r => {
-        const verlopen = r.toets.datum && new Date(r.toets.datum) < vandaag;
-        const begin = berekenBeginDatum(r.toets.datum, r.moeilijkheid);
+        const toetsDatum  = r.toets.datum ? new Date(r.toets.datum) : null;
+        const beginDatumStr = berekenBeginDatum(r.toets.datum, r.moeilijkheid);
+        const beginDatum  = beginDatumStr ? (() => { const d = new Date(r.toets.datum); d.setDate(d.getDate() - Math.round(r.moeilijkheid / 2 + 1)); return d; })() : null;
+
+        const verlopen    = toetsDatum && toetsDatum < vandaag;
+        const telaatBegun = !verlopen && beginDatum && beginDatum < vandaag;
+
+        let advies = '';
+        if (verlopen) {
+          advies = '';
+        } else if (telaatBegun) {
+          advies = `<div class="waarschuwing">⚠️ Je had al moeten beginnen</div>`;
+        } else if (beginDatumStr) {
+          advies = `<div class="leeradvies">📚 Begin op ${beginDatumStr}</div>`;
+        }
+
         return `
           <div class="toets-kaart${verlopen ? ' verlopen' : ''}">
             <div class="kaart-vak">${r.vak}</div>
@@ -159,7 +190,7 @@
               <span class="toets-naam-badge">${r.toets.naam}</span>
               <span class="toets-datum">${formatDatum(r.toets.datum)}</span>
             </div>
-            ${begin ? `<div class="leeradvies">📚 Begin op ${begin}</div>` : ''}
+            ${advies}
           </div>`;
       }).join('');
     }
