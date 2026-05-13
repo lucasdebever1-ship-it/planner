@@ -91,13 +91,19 @@
 </head>
 <body>
   <div class="center">
-    <h1 class="tagline">Jouw slimme studiegids.</h1>
+    <h1 class="tagline" id="begroeting"></h1>
     <p class="sub">Weet wat je moet leren. En wanneer.</p>
     <div class="knoppen">
       <a href="vakken.html"    class="btn btn-primary">Mijn vakken</a>
       <a href="overzicht.html" class="btn btn-secondary">Overzicht</a>
     </div>
   </div>
+
+  <script>
+    const profiel = JSON.parse(localStorage.getItem('profiel') || '{}');
+    const naam = profiel.naam ? 'Hé ' + profiel.naam + ',' : 'Hé,';
+    document.getElementById('begroeting').textContent = naam + ' klaar voor vandaag?';
+  </script>
 
   <button class="reset-btn" onclick="localStorage.removeItem('profiel'); location.replace('onboarding.html')">Reset onboarding</button>
 </body>
