@@ -262,9 +262,14 @@
       return d ? new Date(d).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' }) : '—';
     }
 
+    function leerMultiplier() {
+      const profiel = JSON.parse(localStorage.getItem('profiel') || '{}');
+      return ['VWO 5','VWO 6','HAVO 4','HAVO 5'].includes(profiel.niveau) ? 1.5 : 1;
+    }
+
     function berekenBeginDatum(datum, moeilijkheid) {
       if (!datum) return null;
-      const dagen = Math.round(moeilijkheid / 2 + 1);
+      const dagen = Math.round((moeilijkheid / 2 + 1) * leerMultiplier());
       const d = new Date(datum);
       d.setDate(d.getDate() - dagen);
       return d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' });

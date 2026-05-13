@@ -166,6 +166,11 @@
       });
     }
 
+    function leerMultiplier() {
+      const profiel = JSON.parse(localStorage.getItem('profiel') || '{}');
+      return ['VWO 5','VWO 6','HAVO 4','HAVO 5'].includes(profiel.niveau) ? 1.5 : 1;
+    }
+
     function formatDatum(d) {
       if (!d) return '—';
       return new Date(d).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' });
@@ -217,7 +222,7 @@
       } else if (categorie !== 'verlopen' && dagsTotBegin !== null) {
         const extraDagen = r.drukkeWeek ? 2 : 0;
         const beginD = new Date(toets.datum);
-        beginD.setDate(beginD.getDate() - Math.round(moeilijkheid / 2 + 1) - extraDagen);
+        beginD.setDate(beginD.getDate() - Math.round((moeilijkheid / 2 + 1) * leerMultiplier()) - extraDagen);
         advies = `<div class="kaart-advies leeradvies">📚 Begin op ${beginD.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' })}</div>`;
       }
 
@@ -248,7 +253,7 @@
             d.setHours(0, 0, 0, 0);
             dagsTotToets = Math.round((d - vandaag) / 86400000);
           }
-          const startDagen = Math.round(v.moeilijkheid / 2 + 1);
+          const startDagen = Math.round((v.moeilijkheid / 2 + 1) * leerMultiplier());
           const dagsTotBegin = dagsTotToets !== null ? dagsTotToets - startDagen : null;
           const categorie = categoriseer(dagsTotToets, dagsTotBegin);
           items.push({ vak: v.naam, moeilijkheid: v.moeilijkheid, toets: t, dagsTotToets, dagsTotBegin, categorie });
