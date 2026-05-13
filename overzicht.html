@@ -213,7 +213,7 @@
 
       let advies = '';
       if (categorie === 'urgent') {
-        advies = `<div class="kaart-advies waarschuwing">⚠️ Je had al moeten beginnen</div>`;
+        advies = `<div class="kaart-advies waarschuwing">⚠️ Je bent te laat met beginnen!</div>`;
       } else if (categorie !== 'verlopen' && dagsTotBegin !== null) {
         const extraDagen = r.drukkeWeek ? 2 : 0;
         const beginD = new Date(toets.datum);
@@ -282,7 +282,7 @@
       }
 
       const secties = [
-        { id: 'urgent',        label: 'Urgent',        dot: '#e05252' },
+        { id: 'urgent',        label: 'Op tijd beginnen', dot: '#e05252' },
         { id: 'deze-week',     label: 'Deze week',     dot: '#f0a050' },
         { id: 'volgende-week', label: 'Volgende week', dot: '#d4c040' },
         { id: 'later',         label: 'Later',         dot: '#444'    },
@@ -313,7 +313,7 @@
             <summary>
               <div class="groep-header">
                 <span class="groep-dot" style="background:#333"></span>
-                <span class="groep-label">Voorbij</span>
+                <span class="groep-label">Afgelopen</span>
                 <span class="groep-count">${verlopen.length}</span>
               </div>
             </summary>
