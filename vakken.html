@@ -277,15 +277,17 @@
 
     const STANDAARD_DAGEN = { Mondeling:7, Proefwerk:4, SO:1, Luistertoets:0, Schrijfvaardigheid:2, PO:14, Anders:3 };
 
-    function getLeerDagen(type) {
+    function getLeerDagen(type, moeilijkheid) {
       const inst = JSON.parse(localStorage.getItem('instellingen') || '{}');
       const key = type || 'Anders';
-      return inst[key] !== undefined ? inst[key] : (STANDAARD_DAGEN[key] !== undefined ? STANDAARD_DAGEN[key] : STANDAARD_DAGEN.Anders);
+      const basis = inst[key] !== undefined ? inst[key] : (STANDAARD_DAGEN[key] !== undefined ? STANDAARD_DAGEN[key] : STANDAARD_DAGEN.Anders);
+      if (basis === 0) return 0;
+      return Math.max(1, Math.round(basis * ((moeilijkheid || 5) / 5)));
     }
 
-    function berekenBeginDatum(datum, type) {
+    function berekenBeginDatum(datum, type, moeilijkheid) {
       if (!datum) return null;
-      const dagen = getLeerDagen(type);
+      const dagen = getLeerDagen(type, moeilijkheid);
       if (dagen === 0) return null;
       const d = new Date(datum);
       d.setDate(d.getDate() - dagen);
@@ -297,7 +299,7 @@
         return '<span class="geen-toetsen">Nog geen toetsen — gebruik + om er een toe te voegen</span>';
       }
       return '<div class="toetsen-grid">' + toetsen.map((t, j) => {
-        const begin = berekenBeginDatum(t.datum, t.type);
+        const begin = berekenBeginDatum(t.datum, t.type, moeilijkheid);
         return `
           <div class="toets-chip-group">
             <div class="toets-chip">

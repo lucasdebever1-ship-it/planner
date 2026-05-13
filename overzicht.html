@@ -168,10 +168,12 @@
 
     const STANDAARD_DAGEN = { Mondeling:7, Proefwerk:4, SO:1, Luistertoets:0, Schrijfvaardigheid:2, PO:14, Anders:3 };
 
-    function getLeerDagen(type) {
+    function getLeerDagen(type, moeilijkheid) {
       const inst = JSON.parse(localStorage.getItem('instellingen') || '{}');
       const key = type || 'Anders';
-      return inst[key] !== undefined ? inst[key] : (STANDAARD_DAGEN[key] !== undefined ? STANDAARD_DAGEN[key] : STANDAARD_DAGEN.Anders);
+      const basis = inst[key] !== undefined ? inst[key] : (STANDAARD_DAGEN[key] !== undefined ? STANDAARD_DAGEN[key] : STANDAARD_DAGEN.Anders);
+      if (basis === 0) return 0;
+      return Math.max(1, Math.round(basis * ((moeilijkheid || 5) / 5)));
     }
 
     function formatDatum(d) {
@@ -225,7 +227,7 @@
       } else if (categorie !== 'verlopen' && dagsTotBegin !== null) {
         const extraDagen = r.drukkeWeek ? 2 : 0;
         const beginD = new Date(toets.datum);
-        beginD.setDate(beginD.getDate() - getLeerDagen(toets.type) - extraDagen);
+        beginD.setDate(beginD.getDate() - getLeerDagen(toets.type, moeilijkheid) - extraDagen);
         advies = `<div class="kaart-advies leeradvies">📚 Begin op ${beginD.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' })}</div>`;
       }
 
@@ -256,7 +258,7 @@
             d.setHours(0, 0, 0, 0);
             dagsTotToets = Math.round((d - vandaag) / 86400000);
           }
-          const startDagen = getLeerDagen(t.type);
+          const startDagen = getLeerDagen(t.type, v.moeilijkheid);
           const dagsTotBegin = dagsTotToets !== null ? dagsTotToets - startDagen : null;
           const categorie = categoriseer(dagsTotToets, dagsTotBegin);
           items.push({ vak: v.naam, moeilijkheid: v.moeilijkheid, toets: t, dagsTotToets, dagsTotBegin, categorie });
