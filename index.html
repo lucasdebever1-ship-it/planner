@@ -72,6 +72,21 @@
       border: 1px solid #262626;
     }
     .btn-secondary:hover { border-color: #404040; background: #1c1c1c; }
+
+    .reset-btn {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      background: none;
+      border: 1px solid #2a2a2a;
+      color: #444;
+      font-size: 0.72rem;
+      padding: 6px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .reset-btn:hover { color: #e8e8e8; border-color: #555; }
   </style>
 </head>
 <body>
@@ -83,5 +98,7 @@
       <a href="overzicht.html" class="btn btn-secondary">Overzicht</a>
     </div>
   </div>
+
+  <button class="reset-btn" onclick="localStorage.removeItem('profiel'); location.replace('onboarding.html')">Reset onboarding</button>
 </body>
 </html>
