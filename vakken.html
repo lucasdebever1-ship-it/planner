@@ -2,74 +2,224 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8">
+  <meta name="color-scheme" content="dark">
   <title>Vakken</title>
   <style>
-    body { font-family: sans-serif; max-width: 620px; margin: 40px auto; padding: 0 16px; }
-    input, button { padding: 8px; font-size: 1rem; }
-    input[type="text"] { width: 200px; }
-    input[type="number"] { width: 60px; }
-    input[type="date"] { padding: 8px; font-size: 1rem; }
-    button { cursor: pointer; margin-left: 8px; }
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0f0f0f;
+      color: #e8e8e8;
+      max-width: 640px;
+      margin: 48px auto;
+      padding: 0 20px;
+    }
+
+    /* Header */
+    .pagina-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+    .pagina-header h1 { margin: 0; font-size: 1.5rem; font-weight: 700; letter-spacing: -0.3px; }
+    .nav-link { font-size: 0.85rem; color: #4f8ef7; text-decoration: none; }
+    .nav-link:hover { text-decoration: underline; }
+
+    /* Form panel */
+    .form-panel {
+      background: #161616;
+      border: 1px solid #242424;
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 28px;
+    }
     .form-grid { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
-    .form-group { display: flex; flex-direction: column; gap: 4px; }
-    .form-group label { font-size: 0.8rem; color: #555; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-group label { font-size: 0.7rem; color: #666; text-transform: uppercase; letter-spacing: 0.7px; }
 
-    table { width: 100%; border-collapse: collapse; margin-top: 24px; }
-    th, td { text-align: left; padding: 8px; border-bottom: 1px solid #ddd; vertical-align: top; }
-    th { background: #f4f4f4; }
+    input[type="text"],
+    input[type="number"],
+    input[type="date"] {
+      background: #1e1e1e;
+      border: 1px solid #2e2e2e;
+      border-radius: 8px;
+      color: #e8e8e8;
+      padding: 8px 12px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    input[type="date"]:focus { border-color: #4f8ef7; }
+    input[type="text"]   { width: 180px; }
+    input[type="number"] { width: 70px; }
 
-    .delete  { color: red;    cursor: pointer; background: none; border: none; font-size: 1rem; }
-    .edit    { cursor: pointer; background: none; border: none; font-size: 1rem; }
-    .add-toets { color: #1a7fd4; cursor: pointer; background: none; border: none; font-size: 1.1rem; font-weight: bold; }
-    .acties  { display: flex; gap: 4px; }
+    .btn-primary {
+      background: #4f8ef7;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 9px 20px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-primary:hover { background: #3a7ef0; }
 
-    .toets-item { margin-bottom: 6px; }
-    .toets-naam-datum { font-size: 0.9rem; }
-    .toets-delete { color: #bbb; cursor: pointer; background: none; border: none; font-size: 0.8rem; padding: 0 3px; margin-left: 2px; }
-    .toets-delete:hover { color: red; }
-    .leeradvies { font-size: 0.75rem; color: #999; display: block; margin-top: 1px; }
-    .geen-toetsen { color: #bbb; font-size: 0.85rem; }
+    /* Kaarten lijst */
+    #lijst { display: flex; flex-direction: column; gap: 14px; }
 
-    /* inline vak bewerken */
-    tr.bewerkrij td { padding: 4px 8px; }
-    tr.bewerkrij input[type="text"]   { width: 130px; }
-    tr.bewerkrij input[type="number"] { width: 50px; }
-    .opslaan  { color: green; font-weight: bold; background: none; border: none; font-size: 1.1rem; cursor: pointer; }
-    .annuleer { color: #888; background: none; border: none; font-size: 1.1rem; cursor: pointer; }
+    .kaart {
+      background: #161616;
+      border: 1px solid #242424;
+      border-radius: 14px;
+      padding: 18px 20px;
+      transition: border-color 0.15s;
+    }
+    .kaart:hover { border-color: #303030; }
+    .kaart.bewerkrij { border-color: #4f8ef7; }
 
-    /* toets toevoegen rij */
-    tr.toets-formrij td { background: #f5f8ff; padding: 8px 12px; }
-    .toets-form-inner { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-    .toets-formrij input[type="text"] { width: 140px; font-size: 0.9rem; padding: 5px; }
-    .toets-formrij input[type="date"] { font-size: 0.9rem; padding: 5px; }
-    .toets-formrij button { font-size: 0.9rem; padding: 5px 10px; }
+    .kaart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+    .kaart-titel { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .vak-naam { font-size: 1.1rem; font-weight: 700; }
+    .moeilijkheid-badge {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #4f8ef7;
+      background: #192840;
+      border-radius: 20px;
+      padding: 3px 9px;
+      letter-spacing: 0.3px;
+    }
+
+    /* Actie-knoppen */
+    .acties { display: flex; gap: 2px; flex-shrink: 0; }
+    .acties button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      border-radius: 7px;
+      padding: 5px 8px;
+      font-size: 1rem;
+      color: #444;
+      transition: color 0.15s, background 0.15s;
+      line-height: 1;
+    }
+    .acties .edit:hover      { color: #4f8ef7; background: #192840; }
+    .acties .add-toets       { color: #4f8ef7; font-size: 1.25rem; font-weight: 400; }
+    .acties .add-toets:hover { background: #192840; }
+    .acties .delete:hover    { color: #e05252; background: #2d1818; }
+    .acties .opslaan         { color: #3dcc7a; font-size: 1.1rem; }
+    .acties .opslaan:hover   { background: #182d20; }
+    .acties .annuleer        { color: #444; font-size: 1.1rem; }
+    .acties .annuleer:hover  { color: #888; }
+
+    /* Edit inputs in kaart */
+    .kaart.bewerkrij .b-naam         { width: 150px; }
+    .kaart.bewerkrij .b-moeilijkheid { width: 55px; }
+
+    /* Toets chips */
+    .toetsen-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+    .toets-chip-group { display: flex; flex-direction: column; gap: 4px; }
+
+    .toets-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #192840;
+      border: 1px solid #1e3558;
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 0.82rem;
+      color: #7fb3ff;
+      white-space: nowrap;
+    }
+    .toets-delete {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #2a4870;
+      font-size: 0.68rem;
+      padding: 0;
+      line-height: 1;
+      transition: color 0.15s;
+    }
+    .toets-delete:hover { color: #e05252; }
+
+    .leeradvies   { font-size: 0.72rem; color: #3dcc7a; padding-left: 10px; }
+    .geen-toetsen { font-size: 0.82rem; color: #333; }
+
+    /* Toets toevoegen form */
+    .toets-formrij {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid #1e1e1e;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    .toets-formrij .t-naam { width: 155px; }
+    .toets-formrij .btn-save {
+      background: #4f8ef7;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 7px 14px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .toets-formrij .btn-save:hover { background: #3a7ef0; }
+    .toets-formrij .btn-cancel {
+      background: none;
+      border: none;
+      color: #444;
+      font-size: 0.95rem;
+      cursor: pointer;
+      padding: 5px 8px;
+      border-radius: 6px;
+      transition: color 0.15s;
+    }
+    .toets-formrij .btn-cancel:hover { color: #888; }
   </style>
 </head>
 <body>
-  <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:16px;">
-    <h2 style="margin:0">Vakken</h2>
-    <a href="overzicht.html" style="font-size:0.9rem; color:#1a7fd4; text-decoration:none;">Ga naar overzicht →</a>
+  <div class="pagina-header">
+    <h1>Vakken</h1>
+    <a href="overzicht.html" class="nav-link">Ga naar overzicht →</a>
   </div>
-  <form id="form">
-    <div class="form-grid">
-      <div class="form-group">
-        <label for="naam">Naam vak</label>
-        <input type="text" id="naam" placeholder="Naam vak" required>
-      </div>
-      <div class="form-group">
-        <label for="moeilijkheid">Moeilijkheid</label>
-        <input type="number" id="moeilijkheid" placeholder="1-10" min="1" max="10" required>
-      </div>
-      <div class="form-group">
-        <button type="submit">Toevoegen</button>
-      </div>
-    </div>
-  </form>
 
-  <table id="tabel">
-    <thead><tr><th>Vak</th><th>Moeilijkheid</th><th>Toetsen</th><th></th></tr></thead>
-    <tbody id="lijst"></tbody>
-  </table>
+  <div class="form-panel">
+    <form id="form">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="naam">Naam vak</label>
+          <input type="text" id="naam" placeholder="Bijv. Wiskunde" required>
+        </div>
+        <div class="form-group">
+          <label for="moeilijkheid">Moeilijkheid</label>
+          <input type="number" id="moeilijkheid" placeholder="1–10" min="1" max="10" required>
+        </div>
+        <div class="form-group">
+          <label>&nbsp;</label>
+          <button type="submit" class="btn-primary">Toevoegen</button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div id="lijst"></div>
 
   <script>
     const sleutel = 'vakken';
@@ -102,62 +252,62 @@
     }
 
     function renderToetsen(toetsen, moeilijkheid, i) {
-      if (!toetsen.length) return '<span class="geen-toetsen">Geen toetsen</span>';
-      return toetsen.map((t, j) => {
+      if (!toetsen.length) {
+        return '<span class="geen-toetsen">Nog geen toetsen — gebruik + om er een toe te voegen</span>';
+      }
+      return '<div class="toetsen-grid">' + toetsen.map((t, j) => {
         const begin = berekenBeginDatum(t.datum, moeilijkheid);
         return `
-          <div class="toets-item">
-            <span class="toets-naam-datum">
-              <strong>${t.naam}</strong> — ${formatDatum(t.datum)}
+          <div class="toets-chip-group">
+            <div class="toets-chip">
+              ${t.naam} · ${formatDatum(t.datum)}
               <button class="toets-delete" data-i="${i}" data-j="${j}" title="Verwijder toets">✕</button>
-            </span>
-            ${begin ? `<span class="leeradvies">📚 Begin op ${begin}</span>` : ''}
+            </div>
+            ${begin ? `<div class="leeradvies">📚 Begin op ${begin}</div>` : ''}
           </div>`;
-      }).join('');
+      }).join('') + '</div>';
     }
 
     function render() {
       const vakken = laad();
       document.querySelectorAll('.toets-formrij').forEach(r => r.remove());
       document.getElementById('lijst').innerHTML = vakken.map((v, i) => `
-        <tr data-i="${i}">
-          <td>${v.naam}</td>
-          <td>${v.moeilijkheid} / 10</td>
-          <td>${renderToetsen(v.toetsen, v.moeilijkheid, i)}</td>
-          <td>
+        <div class="kaart" data-i="${i}">
+          <div class="kaart-header">
+            <div class="kaart-titel">
+              <span class="vak-naam">${v.naam}</span>
+              <span class="moeilijkheid-badge">${v.moeilijkheid} / 10</span>
+            </div>
             <div class="acties">
-              <button class="edit"      data-i="${i}" title="Vak bewerken">&#x270F;&#xFE0F;</button>
+              <button class="edit"      data-i="${i}" title="Vak bewerken">&#x270F;</button>
               <button class="add-toets" data-i="${i}" title="Toets toevoegen">+</button>
               <button class="delete"    data-i="${i}" title="Vak verwijderen">&#x2715;</button>
             </div>
-          </td>
-        </tr>
+          </div>
+          ${renderToetsen(v.toetsen, v.moeilijkheid, i)}
+        </div>
       `).join('');
     }
 
     function toonToetsForm(i) {
       document.querySelectorAll('.toets-formrij').forEach(r => r.remove());
-      const rij = document.querySelector(`tr[data-i="${i}"]`);
-      const formRij = document.createElement('tr');
-      formRij.className = 'toets-formrij';
-      formRij.innerHTML = `
-        <td colspan="4">
-          <div class="toets-form-inner">
-            <input type="text" class="t-naam" placeholder="Naam toets (bijv. proefwerk)">
-            <input type="date" class="t-datum">
-            <button class="toets-opslaan" data-i="${i}">&#x2713; Opslaan</button>
-            <button class="toets-annuleer">&#x2715;</button>
-          </div>
-        </td>`;
-      rij.insertAdjacentElement('afterend', formRij);
-      formRij.querySelector('.t-naam').focus();
+      const kaart = document.querySelector(`.kaart[data-i="${i}"]`);
+      const formDiv = document.createElement('div');
+      formDiv.className = 'toets-formrij';
+      formDiv.innerHTML = `
+        <input type="text" class="t-naam" placeholder="Naam toets (bijv. proefwerk)">
+        <input type="date" class="t-datum">
+        <button class="toets-opslaan btn-save" data-i="${i}">&#x2713; Opslaan</button>
+        <button class="toets-annuleer btn-cancel">&#x2715;</button>`;
+      kaart.appendChild(formDiv);
+      formDiv.querySelector('.t-naam').focus();
     }
 
     function slaToetsOp(i) {
-      const formRij = document.querySelector('.toets-formrij');
-      const naam = formRij.querySelector('.t-naam').value.trim();
-      const datum = formRij.querySelector('.t-datum').value || null;
-      if (!naam) { formRij.querySelector('.t-naam').focus(); return; }
+      const formDiv = document.querySelector('.toets-formrij');
+      const naam = formDiv.querySelector('.t-naam').value.trim();
+      const datum = formDiv.querySelector('.t-datum').value || null;
+      if (!naam) { formDiv.querySelector('.t-naam').focus(); return; }
       const vakken = laad();
       vakken[i].toetsen.push({ naam, datum });
       sla(vakken);
@@ -167,26 +317,28 @@
     function startBewerken(i) {
       const vakken = laad();
       const v = vakken[i];
-      const rij = document.querySelector(`tr[data-i="${i}"]`);
       document.querySelectorAll('.toets-formrij').forEach(r => r.remove());
-      rij.classList.add('bewerkrij');
-      rij.innerHTML = `
-        <td><input type="text" class="b-naam" value="${v.naam}" required></td>
-        <td><input type="number" class="b-moeilijkheid" value="${v.moeilijkheid}" min="1" max="10" required></td>
-        <td>${renderToetsen(v.toetsen, v.moeilijkheid, i)}</td>
-        <td>
+      const kaart = document.querySelector(`.kaart[data-i="${i}"]`);
+      kaart.classList.add('bewerkrij');
+      kaart.innerHTML = `
+        <div class="kaart-header">
+          <div class="kaart-titel">
+            <input type="text"   class="b-naam"         value="${v.naam}" required>
+            <input type="number" class="b-moeilijkheid" value="${v.moeilijkheid}" min="1" max="10" required>
+          </div>
           <div class="acties">
             <button class="opslaan"  data-i="${i}" title="Opslaan">&#x2713;</button>
             <button class="annuleer" data-i="${i}" title="Annuleren">&#x2715;</button>
           </div>
-        </td>`;
-      rij.querySelector('.b-naam').focus();
+        </div>
+        ${renderToetsen(v.toetsen, v.moeilijkheid, i)}`;
+      kaart.querySelector('.b-naam').focus();
     }
 
     function slaBewerkingenOp(i) {
-      const rij = document.querySelector('tr.bewerkrij');
-      const naam = rij.querySelector('.b-naam').value.trim();
-      const moeilijkheid = parseInt(rij.querySelector('.b-moeilijkheid').value);
+      const kaart = document.querySelector('.kaart.bewerkrij');
+      const naam = kaart.querySelector('.b-naam').value.trim();
+      const moeilijkheid = parseInt(kaart.querySelector('.b-moeilijkheid').value);
       if (!naam || isNaN(moeilijkheid)) return;
       const vakken = laad();
       vakken[i] = { ...vakken[i], naam, moeilijkheid };
@@ -233,7 +385,7 @@
       } else if (btn.classList.contains('toets-opslaan')) {
         slaToetsOp(i);
       } else if (btn.classList.contains('toets-annuleer')) {
-        btn.closest('tr').remove();
+        btn.closest('.toets-formrij').remove();
       }
     });
 
