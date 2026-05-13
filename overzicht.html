@@ -2,6 +2,7 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
   <title>Toetsoverzicht</title>
   <style>
@@ -11,19 +12,18 @@
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       background: #0f0f0f;
       color: #e8e8e8;
-      max-width: 640px;
-      margin: 48px auto;
-      padding: 0 20px;
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 40px 20px 60px;
     }
 
-    /* Header */
     .pagina-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 32px;
+      margin-bottom: 36px;
     }
-    .pagina-header h1 { margin: 0; font-size: 1.5rem; font-weight: 700; letter-spacing: -0.3px; }
+    .pagina-header h1 { margin: 0; font-size: 1.4rem; font-weight: 700; letter-spacing: -0.3px; }
 
     .btn-terug {
       background: #161616;
@@ -38,21 +38,15 @@
     .btn-terug:hover { background: #192840; border-color: #4f8ef7; }
 
     /* Secties */
-    .groep { margin-bottom: 28px; }
+    .groep { margin-bottom: 36px; }
 
     .groep-header {
       display: flex;
       align-items: center;
       gap: 8px;
-      margin-bottom: 12px;
-      cursor: default;
+      margin-bottom: 16px;
     }
-    .groep-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
+    .groep-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
     .groep-label {
       font-size: 0.72rem;
       font-weight: 700;
@@ -68,84 +62,82 @@
       padding: 1px 8px;
     }
 
-    /* Inklapbare "Voorbij" sectie */
-    details.groep { margin-bottom: 20px; }
     details.groep summary { list-style: none; }
     details.groep summary::-webkit-details-marker { display: none; }
     details.groep summary .groep-header { cursor: pointer; }
-    details.groep summary .groep-label  { color: #444; }
-    details.groep summary .groep-count  { background: #181818; }
-    details.groep[open] summary .groep-header { margin-bottom: 12px; }
+    details.groep summary .groep-label { color: #444; }
+    details.groep summary .groep-count { background: #181818; }
 
-    .groep-kaarten { display: flex; flex-direction: column; gap: 10px; }
+    .groep-kaarten { display: flex; flex-direction: column; gap: 16px; }
 
-    /* Toets-kaarten */
+    /* Kaarten */
     .toets-kaart {
       background: #161616;
       border: 1px solid #242424;
-      border-radius: 14px;
-      padding: 16px 18px;
+      border-radius: 16px;
+      padding: 20px;
       transition: border-color 0.15s;
     }
     .toets-kaart:hover { border-color: #303030; }
-
-    .toets-kaart.urgent {
-      background: #160e0e;
-      border-color: #3a1515;
-    }
-    .toets-kaart.urgent:hover { border-color: #5a2020; }
-
+    .toets-kaart.urgent { background: #160e0e; border-color: #3a1515; }
     .toets-kaart.verlopen { opacity: 0.35; }
 
-    .kaart-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-      gap: 10px;
+    .drukke-badge {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #f0a050;
+      background: #2a1a05;
+      border: 1px solid #4a2e08;
+      border-radius: 20px;
+      padding: 3px 10px;
+      margin-bottom: 12px;
+      letter-spacing: 0.03em;
     }
 
     .vak-naam {
-      font-size: 1.05rem;
-      font-weight: 700;
+      font-size: 1.3rem;
+      font-weight: 800;
       line-height: 1.2;
+      margin-bottom: 4px;
+      letter-spacing: -0.2px;
     }
     .verlopen .vak-naam { text-decoration: line-through; color: #3a3a3a; }
 
-    .dagen-pill {
-      font-size: 0.72rem;
+    .toets-type {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 14px;
+    }
+
+    .kaart-midden {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 10px;
+    }
+
+    .toets-datum-groot {
+      font-size: 1.05rem;
       font-weight: 600;
+      color: #bbb;
+    }
+
+    .dagen-pill {
+      font-size: 0.8rem;
+      font-weight: 700;
       border-radius: 20px;
-      padding: 3px 10px;
+      padding: 5px 12px;
       white-space: nowrap;
       flex-shrink: 0;
     }
 
-    .kaart-meta {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
+    .kaart-advies {
+      margin-top: 14px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      line-height: 1.4;
     }
-
-    .toets-naam-badge {
-      font-size: 0.8rem;
-      color: #7fb3ff;
-      background: #192840;
-      border: 1px solid #1e3558;
-      border-radius: 20px;
-      padding: 2px 10px;
-    }
-    .verlopen .toets-naam-badge {
-      color: #333;
-      background: #181818;
-      border-color: #222;
-      text-decoration: line-through;
-    }
-
-    .toets-datum { font-size: 0.82rem; color: #555; }
-
-    .kaart-advies { margin-top: 10px; font-size: 0.78rem; }
     .leeradvies   { color: #3dcc7a; }
     .waarschuwing { color: #e05252; }
 
@@ -155,7 +147,7 @@
 <body>
   <div class="pagina-header">
     <h1>Toetsoverzicht</h1>
-    <a href="vakken.html" class="btn-terug">← Terug naar vakken</a>
+    <a href="vakken.html" class="btn-terug">← Terug</a>
   </div>
 
   <div id="inhoud"></div>
@@ -175,13 +167,14 @@
     }
 
     function formatDatum(d) {
-      return d ? new Date(d).toLocaleDateString('nl-NL') : '—';
+      if (!d) return '—';
+      return new Date(d).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' });
     }
 
     function dagenTekst(n) {
       if (n === 0) return 'vandaag';
       if (n === 1) return 'morgen';
-      if (n < 0) return `${Math.abs(n)} ${Math.abs(n) === 1 ? 'dag' : 'dagen'} geleden`;
+      if (n < 0) return `${Math.abs(n)}d geleden`;
       return `over ${n} dagen`;
     }
 
@@ -194,18 +187,17 @@
     }
 
     function categoriseer(dagsTotToets, dagsTotBegin) {
-      if (dagsTotToets === null)  return 'later';
-      if (dagsTotToets < 0)       return 'verlopen';
-      if (dagsTotBegin < 0)       return 'urgent';
-      if (dagsTotToets <= 7)      return 'deze-week';
-      if (dagsTotToets <= 14)     return 'volgende-week';
+      if (dagsTotToets === null) return 'later';
+      if (dagsTotToets < 0)      return 'verlopen';
+      if (dagsTotBegin < 0)      return 'urgent';
+      if (dagsTotToets <= 7)     return 'deze-week';
+      if (dagsTotToets <= 14)    return 'volgende-week';
       return 'later';
     }
 
     function renderKaart(r) {
       const { categorie, dagsTotToets, dagsTotBegin, vak, moeilijkheid, toets } = r;
 
-      // Dagen-pill stijl per categorie
       const pilStijl = {
         'urgent':         'background:#2d1010;color:#e05252',
         'deze-week':      'background:#2a1e08;color:#f0a050',
@@ -216,7 +208,9 @@
 
       const dagenStr = dagsTotToets !== null ? dagenTekst(dagsTotToets) : null;
 
-      // Advies
+      const drukBadge = r.drukkeWeek
+        ? `<div class="drukke-badge">Drukke week</div>` : '';
+
       let advies = '';
       if (categorie === 'urgent') {
         advies = `<div class="kaart-advies waarschuwing">⚠️ Je had al moeten beginnen</div>`;
@@ -224,19 +218,17 @@
         const extraDagen = r.drukkeWeek ? 2 : 0;
         const beginD = new Date(toets.datum);
         beginD.setDate(beginD.getDate() - Math.round(moeilijkheid / 2 + 1) - extraDagen);
-        const suffix = r.drukkeWeek ? ' <span style="opacity:0.6">(drukke week)</span>' : '';
-        advies = `<div class="kaart-advies leeradvies">📚 Begin op ${beginD.toLocaleDateString('nl-NL')}${suffix}</div>`;
+        advies = `<div class="kaart-advies leeradvies">📚 Begin op ${beginD.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' })}</div>`;
       }
 
       return `
         <div class="toets-kaart ${categorie}">
-          <div class="kaart-top">
-            <span class="vak-naam">${vak}</span>
+          ${drukBadge}
+          <div class="vak-naam">${vak}</div>
+          <div class="toets-type">${toets.naam}</div>
+          <div class="kaart-midden">
+            <span class="toets-datum-groot">${formatDatum(toets.datum)}</span>
             ${dagenStr ? `<span class="dagen-pill" style="${pilStijl}">${dagenStr}</span>` : ''}
-          </div>
-          <div class="kaart-meta">
-            <span class="toets-naam-badge">${toets.naam}</span>
-            <span class="toets-datum">${formatDatum(toets.datum)}</span>
           </div>
           ${advies}
         </div>`;
@@ -263,7 +255,6 @@
         });
       });
 
-      // Markeer drukke weken (>1 niet-verlopen toets in dezelfde ISO-week)
       const weekTelling = {};
       items.forEach(r => {
         if (r.toets.datum && r.categorie !== 'verlopen') {
@@ -275,7 +266,6 @@
         r.drukkeWeek = !!(r.toets.datum && r.categorie !== 'verlopen' && weekTelling[isoWeek(r.toets.datum)] > 1);
       });
 
-      // Sorteer op datum oplopend (geen datum achteraan)
       items.sort((a, b) => {
         if (!a.toets.datum && !b.toets.datum) return 0;
         if (!a.toets.datum) return 1;
