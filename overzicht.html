@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <title>Toetsoverzicht</title>
+  <style>
+    body { font-family: sans-serif; max-width: 580px; margin: 40px auto; padding: 0 16px; }
+    h2 { margin-bottom: 4px; }
+    .nav { margin-bottom: 24px; }
+    .nav a { font-size: 0.9rem; color: #1a7fd4; text-decoration: none; }
+    .nav a:hover { text-decoration: underline; }
+    table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid #ddd; }
+    th { background: #f4f4f4; }
+    .leeradvies { font-size: 0.75rem; color: #999; display: block; margin-top: 2px; }
+    .geen { color: #bbb; margin-top: 24px; }
+    .verlopen td { color: #bbb; }
+  </style>
+</head>
+<body>
+  <h2>Toetsoverzicht</h2>
+  <div class="nav"><a href="vakken.html">← Terug naar vakken</a></div>
+
+  <table id="tabel">
+    <thead>
+      <tr>
+        <th>Vak</th>
+        <th>Toets</th>
+        <th>Datum</th>
+        <th>Leeradvies</th>
+      </tr>
+    </thead>
+    <tbody id="lijst"></tbody>
+  </table>
+  <p id="leeg" class="geen" style="display:none">Geen toetsen gevonden.</p>
+
+  <script>
+    function laad() {
+      const vakken = JSON.parse(localStorage.getItem('vakken') || '[]');
+      return vakken.map(v => {
+        if (!v.toetsen) {
+          v.toetsen = v.toetsdatum ? [{ naam: 'Toets', datum: v.toetsdatum }] : [];
+        }
+        return v;
+      });
+    }
+
+    function formatDatum(d) {
+      return d ? new Date(d).toLocaleDateString('nl-NL') : '—';
+    }
+
+    function berekenBeginDatum(datum, moeilijkheid) {
+      if (!datum) return null;
+      const dagen = Math.round(moeilijkheid / 2 + 1);
+      const d = new Date(datum);
+      d.setDate(d.getDate() - dagen);
+      return d.toLocaleDateString('nl-NL');
+    }
+
+    function render() {
+      const vakken = laad();
+      const vandaag = new Date();
+      vandaag.setHours(0, 0, 0, 0);
+
+      const rijen = [];
+      vakken.forEach(v => {
+        v.toetsen.forEach(t => {
+          rijen.push({ vak: v.naam, moeilijkheid: v.moeilijkheid, toets: t });
+        });
+      });
+
+      // sorteer: toetsen zonder datum achteraan, rest op datum oplopend
+      rijen.sort((a, b) => {
+        if (!a.toets.datum && !b.toets.datum) return 0;
+        if (!a.toets.datum) return 1;
+        if (!b.toets.datum) return -1;
+        return new Date(a.toets.datum) - new Date(b.toets.datum);
+      });
+
+      const lijst = document.getElementById('lijst');
+      if (!rijen.length) {
+        document.getElementById('leeg').style.display = '';
+        lijst.innerHTML = '';
+        return;
+      }
+
+      lijst.innerHTML = rijen.map(r => {
+        const verlopen = r.toets.datum && new Date(r.toets.datum) < vandaag;
+        const begin = berekenBeginDatum(r.toets.datum, r.moeilijkheid);
+        return `
+          <tr class="${verlopen ? 'verlopen' : ''}">
+            <td>${r.vak}</td>
+            <td>${r.toets.naam}</td>
+            <td>${formatDatum(r.toets.datum)}</td>
+            <td>${begin ? `<span>Begin op ${begin}</span>` : '—'}</td>
+          </tr>`;
+      }).join('');
+    }
+
+    render();
+  </script>
+</body>
+</html>
