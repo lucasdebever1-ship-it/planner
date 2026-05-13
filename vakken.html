@@ -2,6 +2,7 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
   <title>Vakken</title>
   <style>
@@ -11,9 +12,9 @@
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       background: #0f0f0f;
       color: #e8e8e8;
-      max-width: 640px;
-      margin: 48px auto;
-      padding: 0 20px 340px;
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 40px 20px 360px;
     }
 
     /* Header */
@@ -23,7 +24,7 @@
       align-items: center;
       margin-bottom: 28px;
     }
-    .pagina-header h1 { margin: 0; font-size: 1.5rem; font-weight: 700; letter-spacing: -0.3px; }
+    .pagina-header h1 { margin: 0; font-size: 1.4rem; font-weight: 700; letter-spacing: -0.3px; }
     .nav-link { font-size: 0.85rem; color: #4f8ef7; text-decoration: none; }
     .nav-link:hover { text-decoration: underline; }
 
@@ -33,20 +34,28 @@
       border: 1px solid #242424;
       border-radius: 14px;
       padding: 20px;
-      margin-bottom: 28px;
+      margin-bottom: 24px;
     }
-    .form-grid { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+
+    .form-rij {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
     .form-group { display: flex; flex-direction: column; gap: 5px; }
     .form-group label { font-size: 0.7rem; color: #666; text-transform: uppercase; letter-spacing: 0.7px; }
+    .form-group.flex1 { flex: 1; }
 
     input[type="text"],
     input[type="number"],
     input[type="date"] {
+      width: 100%;
       background: #1e1e1e;
       border: 1px solid #2e2e2e;
       border-radius: 8px;
       color: #e8e8e8;
-      padding: 8px 12px;
+      padding: 10px 12px;
       font-size: 0.95rem;
       outline: none;
       transition: border-color 0.15s;
@@ -54,15 +63,16 @@
     input[type="text"]:focus,
     input[type="number"]:focus,
     input[type="date"]:focus { border-color: #4f8ef7; }
-    input[type="text"]   { width: 180px; }
-    input[type="number"] { width: 70px; }
+
+    input[type="number"] { width: 80px; }
 
     .btn-primary {
+      width: 100%;
       background: #4f8ef7;
       color: #fff;
       border: none;
       border-radius: 8px;
-      padding: 9px 20px;
+      padding: 11px;
       font-size: 0.95rem;
       font-weight: 600;
       cursor: pointer;
@@ -71,13 +81,13 @@
     .btn-primary:hover { background: #3a7ef0; }
 
     /* Kaarten lijst */
-    #lijst { display: flex; flex-direction: column; gap: 14px; }
+    #lijst { display: flex; flex-direction: column; gap: 16px; }
 
     .kaart {
       background: #161616;
       border: 1px solid #242424;
-      border-radius: 14px;
-      padding: 18px 20px;
+      border-radius: 16px;
+      padding: 18px;
       transition: border-color 0.15s;
     }
     .kaart:hover { border-color: #303030; }
@@ -88,9 +98,17 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 14px;
+      gap: 10px;
     }
-    .kaart-titel { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .vak-naam { font-size: 1.1rem; font-weight: 700; }
+    .kaart-titel { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0; }
+    .vak-naam {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
     .moeilijkheid-badge {
       font-size: 0.68rem;
       font-weight: 700;
@@ -98,7 +116,7 @@
       background: #192840;
       border-radius: 20px;
       padding: 3px 9px;
-      letter-spacing: 0.3px;
+      flex-shrink: 0;
     }
 
     /* Actie-knoppen */
@@ -108,14 +126,14 @@
       border: none;
       cursor: pointer;
       border-radius: 7px;
-      padding: 5px 8px;
+      padding: 7px 9px;
       font-size: 1rem;
       color: #444;
       transition: color 0.15s, background 0.15s;
       line-height: 1;
     }
     .acties .edit:hover      { color: #4f8ef7; background: #192840; }
-    .acties .add-toets       { color: #4f8ef7; font-size: 1.25rem; font-weight: 400; }
+    .acties .add-toets       { color: #4f8ef7; font-size: 1.3rem; font-weight: 400; }
     .acties .add-toets:hover { background: #192840; }
     .acties .delete:hover    { color: #e05252; background: #2d1818; }
     .acties .opslaan         { color: #3dcc7a; font-size: 1.1rem; }
@@ -124,39 +142,40 @@
     .acties .annuleer:hover  { color: #888; }
 
     /* Edit inputs in kaart */
-    .kaart.bewerkrij .b-naam         { width: 150px; }
-    .kaart.bewerkrij .b-moeilijkheid { width: 55px; }
+    .kaart.bewerkrij .b-naam         { flex: 1; }
+    .kaart.bewerkrij .b-moeilijkheid { width: 65px; }
 
     /* Toets chips */
-    .toetsen-grid { display: flex; flex-wrap: wrap; gap: 10px; }
-    .toets-chip-group { display: flex; flex-direction: column; gap: 4px; }
+    .toetsen-grid { display: flex; flex-direction: column; gap: 10px; }
 
     .toets-chip {
-      display: inline-flex;
+      display: flex;
       align-items: center;
-      gap: 6px;
+      justify-content: space-between;
+      gap: 8px;
       background: #192840;
       border: 1px solid #1e3558;
-      border-radius: 20px;
-      padding: 5px 12px;
-      font-size: 0.82rem;
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 0.88rem;
       color: #7fb3ff;
-      white-space: nowrap;
     }
+    .toets-chip-naam { flex: 1; }
     .toets-delete {
       background: none;
       border: none;
       cursor: pointer;
       color: #2a4870;
-      font-size: 0.68rem;
+      font-size: 0.75rem;
       padding: 0;
       line-height: 1;
       transition: color 0.15s;
+      flex-shrink: 0;
     }
     .toets-delete:hover { color: #e05252; }
 
-    .leeradvies   { font-size: 0.72rem; color: #3dcc7a; padding-left: 10px; }
-    .geen-toetsen { font-size: 0.82rem; color: #333; }
+    .leeradvies   { font-size: 0.78rem; color: #3dcc7a; margin-top: 3px; padding-left: 2px; }
+    .geen-toetsen { font-size: 0.85rem; color: #333; }
 
     /* Toets toevoegen form */
     .toets-formrij {
@@ -164,46 +183,49 @@
       padding-top: 14px;
       border-top: 1px solid #1e1e1e;
       display: flex;
-      flex-wrap: wrap;
+      flex-direction: column;
       gap: 8px;
-      align-items: center;
     }
-    .toets-formrij .t-naam { width: 155px; }
+    .toets-formrij-knoppen {
+      display: flex;
+      gap: 8px;
+    }
     .toets-formrij .btn-save {
+      flex: 1;
       background: #4f8ef7;
       color: #fff;
       border: none;
       border-radius: 8px;
-      padding: 7px 14px;
-      font-size: 0.88rem;
+      padding: 9px;
+      font-size: 0.9rem;
       font-weight: 600;
       cursor: pointer;
       transition: background 0.15s;
     }
     .toets-formrij .btn-save:hover { background: #3a7ef0; }
     .toets-formrij .btn-cancel {
-      background: none;
-      border: none;
-      color: #444;
-      font-size: 0.95rem;
+      background: #1e1e1e;
+      border: 1px solid #2e2e2e;
+      color: #666;
+      font-size: 0.9rem;
       cursor: pointer;
-      padding: 5px 8px;
-      border-radius: 6px;
+      padding: 9px 14px;
+      border-radius: 8px;
       transition: color 0.15s;
     }
-    .toets-formrij .btn-cancel:hover { color: #888; }
+    .toets-formrij .btn-cancel:hover { color: #aaa; }
   </style>
 </head>
 <body>
   <div class="pagina-header">
     <h1>Vakken</h1>
-    <a href="overzicht.html" class="nav-link">Ga naar overzicht →</a>
+    <a href="overzicht.html" class="nav-link">Overzicht →</a>
   </div>
 
   <div class="form-panel">
     <form id="form">
-      <div class="form-grid">
-        <div class="form-group">
+      <div class="form-rij">
+        <div class="form-group flex1">
           <label for="naam">Naam vak</label>
           <input type="text" id="naam" placeholder="Bijv. Wiskunde" required>
         </div>
@@ -211,11 +233,8 @@
           <label for="moeilijkheid">Moeilijkheid</label>
           <input type="number" id="moeilijkheid" placeholder="1–10" min="1" max="10" required>
         </div>
-        <div class="form-group">
-          <label>&nbsp;</label>
-          <button type="submit" class="btn-primary">Toevoegen</button>
-        </div>
       </div>
+      <button type="submit" class="btn-primary">Vak toevoegen</button>
     </form>
   </div>
 
@@ -240,7 +259,7 @@
     }
 
     function formatDatum(d) {
-      return d ? new Date(d).toLocaleDateString('nl-NL') : '—';
+      return d ? new Date(d).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' }) : '—';
     }
 
     function berekenBeginDatum(datum, moeilijkheid) {
@@ -248,7 +267,7 @@
       const dagen = Math.round(moeilijkheid / 2 + 1);
       const d = new Date(datum);
       d.setDate(d.getDate() - dagen);
-      return d.toLocaleDateString('nl-NL');
+      return d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' });
     }
 
     function renderToetsen(toetsen, moeilijkheid, i) {
@@ -260,7 +279,7 @@
         return `
           <div class="toets-chip-group">
             <div class="toets-chip">
-              ${t.naam} · ${formatDatum(t.datum)}
+              <span class="toets-chip-naam">${t.naam} · ${formatDatum(t.datum)}</span>
               <button class="toets-delete" data-i="${i}" data-j="${j}" title="Verwijder toets">✕</button>
             </div>
             ${begin ? `<div class="leeradvies">📚 Begin op ${begin}</div>` : ''}
@@ -297,8 +316,10 @@
       formDiv.innerHTML = `
         <input type="text" class="t-naam" placeholder="Naam toets (bijv. proefwerk)">
         <input type="date" class="t-datum">
-        <button class="toets-opslaan btn-save" data-i="${i}">&#x2713; Opslaan</button>
-        <button class="toets-annuleer btn-cancel">&#x2715;</button>`;
+        <div class="toets-formrij-knoppen">
+          <button class="toets-opslaan btn-save" data-i="${i}">&#x2713; Opslaan</button>
+          <button class="toets-annuleer btn-cancel">&#x2715;</button>
+        </div>`;
       kaart.appendChild(formDiv);
       formDiv.querySelector('.t-naam').focus();
     }
@@ -322,7 +343,7 @@
       kaart.classList.add('bewerkrij');
       kaart.innerHTML = `
         <div class="kaart-header">
-          <div class="kaart-titel">
+          <div class="kaart-titel" style="flex:1;gap:8px">
             <input type="text"   class="b-naam"         value="${v.naam}" required>
             <input type="number" class="b-moeilijkheid" value="${v.moeilijkheid}" min="1" max="10" required>
           </div>
@@ -391,8 +412,6 @@
 
     render();
 
-    // Scroll omhoog als een datuminput te dicht bij de onderkant staat,
-    // zodat de kalender-popup altijd volledig zichtbaar is.
     document.addEventListener('focusin', e => {
       if (e.target.type !== 'date') return;
       const rect = e.target.getBoundingClientRect();
