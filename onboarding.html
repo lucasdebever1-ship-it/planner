@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="color-scheme" content="dark">
+  <title>Welkom – Studiegids</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0f0f0f;
+      color: #e8e8e8;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    .kaart {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .stappen {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 36px;
+    }
+    .stap-balk {
+      flex: 1;
+      height: 4px;
+      border-radius: 2px;
+      background: #1e1e1e;
+      transition: background 0.3s;
+    }
+    .stap-balk.actief { background: #4f8ef7; }
+    .stap-balk.gedaan { background: #2a5cbf; }
+
+    .stap { display: none; }
+    .stap.zichtbaar { display: block; }
+
+    .stap-label {
+      font-size: 0.78rem;
+      color: #555;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin: 0 0 10px;
+    }
+
+    h2 {
+      font-size: 1.55rem;
+      font-weight: 700;
+      margin: 0 0 8px;
+      line-height: 1.25;
+      letter-spacing: -0.3px;
+    }
+
+    .hint {
+      font-size: 0.9rem;
+      color: #555;
+      margin: 0 0 28px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      color: #888;
+      margin-bottom: 8px;
+    }
+
+    input[type="text"],
+    select {
+      width: 100%;
+      background: #161616;
+      border: 1px solid #262626;
+      border-radius: 10px;
+      color: #e8e8e8;
+      font-size: 1rem;
+      padding: 14px 16px;
+      margin-bottom: 20px;
+      appearance: none;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    input[type="text"]:focus,
+    select:focus { border-color: #4f8ef7; }
+
+    .select-wrap {
+      position: relative;
+    }
+    .select-wrap::after {
+      content: '▾';
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-60%);
+      color: #555;
+      pointer-events: none;
+      font-size: 0.85rem;
+    }
+
+    .acties {
+      display: flex;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 16px;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .btn:active { transform: scale(0.98); }
+
+    .btn-terug {
+      background: #161616;
+      color: #888;
+      border: 1px solid #262626;
+      flex: 0 0 auto;
+      padding: 16px 20px;
+    }
+    .btn-terug:hover { background: #1c1c1c; color: #e8e8e8; }
+
+    .btn-verder {
+      background: #4f8ef7;
+      color: #fff;
+    }
+    .btn-verder:hover { background: #3a7ef0; }
+    .btn-verder:disabled {
+      background: #1e2a40;
+      color: #3a5080;
+      cursor: default;
+    }
+  </style>
+</head>
+<body>
+<div class="kaart">
+
+  <div class="stappen">
+    <div class="stap-balk" id="balk-0"></div>
+    <div class="stap-balk" id="balk-1"></div>
+  </div>
+
+  <!-- Stap 1: Naam -->
+  <div class="stap zichtbaar" id="stap-0">
+    <p class="stap-label">Stap 1 van 2</p>
+    <h2>Hoe heet je?</h2>
+    <p class="hint">Zo weten we hoe we je moeten aanspreken.</p>
+    <label for="naam">Voornaam</label>
+    <input type="text" id="naam" placeholder="bijv. Emma" autocomplete="given-name" autofocus>
+    <div class="acties">
+      <button class="btn btn-verder" id="verder-0" onclick="naarStap(1)" disabled>Verder →</button>
+    </div>
+  </div>
+
+  <!-- Stap 2: Schoolniveau -->
+  <div class="stap" id="stap-1">
+    <p class="stap-label">Stap 2 van 2</p>
+    <h2>Welk niveau zit je op?</h2>
+    <p class="hint">Kies je huidige schoolniveau en leerjaar.</p>
+    <label for="niveau">Schoolniveau</label>
+    <div class="select-wrap">
+      <select id="niveau">
+        <option value="" disabled selected>Selecteer je niveau</option>
+        <optgroup label="VWO">
+          <option value="VWO 1">VWO 1</option>
+          <option value="VWO 2">VWO 2</option>
+          <option value="VWO 3">VWO 3</option>
+          <option value="VWO 4">VWO 4</option>
+          <option value="VWO 5">VWO 5</option>
+          <option value="VWO 6">VWO 6</option>
+        </optgroup>
+        <optgroup label="HAVO">
+          <option value="HAVO 1">HAVO 1</option>
+          <option value="HAVO 2">HAVO 2</option>
+          <option value="HAVO 3">HAVO 3</option>
+          <option value="HAVO 4">HAVO 4</option>
+          <option value="HAVO 5">HAVO 5</option>
+        </optgroup>
+        <optgroup label="MBO">
+          <option value="MBO 1">MBO 1</option>
+          <option value="MBO 2">MBO 2</option>
+          <option value="MBO 3">MBO 3</option>
+          <option value="MBO 4">MBO 4</option>
+        </optgroup>
+      </select>
+    </div>
+    <div class="acties">
+      <button class="btn btn-terug" onclick="naarStap(0)">←</button>
+      <button class="btn btn-verder" id="verder-1" onclick="afronden()" disabled>Klaar ✓</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  if (localStorage.getItem('profiel')) {
+    location.replace('index.html');
+  }
+
+  let huidigeStap = 0;
+
+  function naarStap(stap) {
+    document.getElementById('stap-' + huidigeStap).classList.remove('zichtbaar');
+    huidigeStap = stap;
+    document.getElementById('stap-' + huidigeStap).classList.add('zichtbaar');
+    updateBalken();
+  }
+
+  function updateBalken() {
+    for (let i = 0; i < 2; i++) {
+      const b = document.getElementById('balk-' + i);
+      b.className = 'stap-balk';
+      if (i < huidigeStap)  b.classList.add('gedaan');
+      if (i === huidigeStap) b.classList.add('actief');
+    }
+  }
+
+  const naamInput = document.getElementById('naam');
+  naamInput.addEventListener('input', () => {
+    document.getElementById('verder-0').disabled = naamInput.value.trim() === '';
+  });
+  naamInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && naamInput.value.trim()) naarStap(1);
+  });
+
+  document.getElementById('niveau').addEventListener('change', () => {
+    document.getElementById('verder-1').disabled = false;
+  });
+
+  function afronden() {
+    const profiel = {
+      naam:   document.getElementById('naam').value.trim(),
+      niveau: document.getElementById('niveau').value,
+    };
+    localStorage.setItem('profiel', JSON.stringify(profiel));
+    location.replace('index.html');
+  }
+
+  updateBalken();
+</script>
+</body>
+</html>

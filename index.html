@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="color-scheme" content="dark">
   <title>Studiegids</title>
+  <script>
+    if (!localStorage.getItem('profiel')) location.replace('onboarding.html');
+  </script>
   <style>
     *, *::before, *::after { box-sizing: border-box; }
 
