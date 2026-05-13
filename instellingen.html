@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Instellingen</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0f0f0f;
+      color: #e8e8e8;
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 40px 20px 60px;
+    }
+
+    .pagina-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 36px;
+    }
+    .pagina-header h1 { margin: 0; font-size: 1.4rem; font-weight: 700; letter-spacing: -0.3px; }
+
+    .btn-terug {
+      background: #161616;
+      border: 1px solid #2e2e2e;
+      border-radius: 8px;
+      color: #4f8ef7;
+      font-size: 0.85rem;
+      padding: 7px 14px;
+      text-decoration: none;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .btn-terug:hover { background: #192840; border-color: #4f8ef7; }
+
+    .sectie-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.9px;
+      color: #555;
+      margin: 0 0 14px;
+    }
+
+    .kaart {
+      background: #161616;
+      border: 1px solid #242424;
+      border-radius: 16px;
+      padding: 4px 0;
+      margin-bottom: 24px;
+    }
+
+    .instelling-rij {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      border-bottom: 1px solid #1e1e1e;
+      gap: 16px;
+    }
+    .instelling-rij:last-child { border-bottom: none; }
+
+    .instelling-naam {
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .instelling-rij-rechts {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    input[type="number"] {
+      width: 64px;
+      background: #1e1e1e;
+      border: 1px solid #2e2e2e;
+      border-radius: 8px;
+      color: #e8e8e8;
+      padding: 8px 10px;
+      font-size: 0.95rem;
+      text-align: center;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    input[type="number"]:focus { border-color: #4f8ef7; }
+
+    .dagen-label {
+      font-size: 0.85rem;
+      color: #555;
+      min-width: 30px;
+    }
+
+    .acties {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-opslaan {
+      flex: 1;
+      background: #4f8ef7;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 13px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .btn-opslaan:active { transform: scale(0.98); }
+    .btn-opslaan:hover { background: #3a7ef0; }
+
+    .btn-reset {
+      background: #161616;
+      color: #666;
+      border: 1px solid #262626;
+      border-radius: 10px;
+      padding: 13px 16px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .btn-reset:hover { color: #e8e8e8; border-color: #444; }
+
+    .feedback {
+      font-size: 0.85rem;
+      color: #3dcc7a;
+      text-align: center;
+      margin-top: 14px;
+      min-height: 20px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .feedback.zichtbaar { opacity: 1; }
+  </style>
+</head>
+<body>
+  <div class="pagina-header">
+    <h1>Instellingen</h1>
+    <a href="index.html" class="btn-terug">← Terug</a>
+  </div>
+
+  <p class="sectie-label">Dagen van tevoren beginnen</p>
+
+  <div class="kaart" id="instellingen-kaart"></div>
+
+  <div class="acties">
+    <button class="btn-opslaan" onclick="opslaan()">Opslaan</button>
+    <button class="btn-reset"   onclick="herstelStandaard()">Standaard</button>
+  </div>
+  <div class="feedback" id="feedback">Instellingen opgeslagen ✓</div>
+
+  <script>
+    const STANDAARD = {
+      Mondeling:       7,
+      Proefwerk:       4,
+      SO:              1,
+      Luistertoets:    0,
+      Schrijfvaardigheid: 2,
+      PO:             14,
+      Anders:          3,
+    };
+
+    function laadInstellingen() {
+      const opgeslagen = JSON.parse(localStorage.getItem('instellingen') || '{}');
+      return Object.fromEntries(
+        Object.keys(STANDAARD).map(k => [k, opgeslagen[k] !== undefined ? opgeslagen[k] : STANDAARD[k]])
+      );
+    }
+
+    function renderKaart(waarden) {
+      const kaart = document.getElementById('instellingen-kaart');
+      kaart.innerHTML = Object.entries(waarden).map(([type, dagen]) => `
+        <div class="instelling-rij">
+          <span class="instelling-naam">${type}</span>
+          <div class="instelling-rij-rechts">
+            <input type="number" id="inst-${type}" value="${dagen}" min="0" max="60">
+            <span class="dagen-label">dagen</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function opslaan() {
+      const waarden = {};
+      Object.keys(STANDAARD).forEach(type => {
+        const input = document.getElementById('inst-' + type);
+        const val = parseInt(input.value);
+        waarden[type] = isNaN(val) || val < 0 ? STANDAARD[type] : val;
+        input.value = waarden[type];
+      });
+      localStorage.setItem('instellingen', JSON.stringify(waarden));
+      const fb = document.getElementById('feedback');
+      fb.classList.add('zichtbaar');
+      setTimeout(() => fb.classList.remove('zichtbaar'), 2000);
+    }
+
+    function herstelStandaard() {
+      localStorage.removeItem('instellingen');
+      renderKaart(STANDAARD);
+    }
+
+    renderKaart(laadInstellingen());
+  </script>
+</body>
+</html>
