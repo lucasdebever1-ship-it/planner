@@ -27,6 +27,7 @@
     tr.bewerkrij input[type="date"] { font-size: 0.9rem; }
     .opslaan { color: green; font-weight: bold; }
     .annuleer { color: #888; }
+    .leeradvies { font-size: 0.75rem; color: #999; display: block; margin-top: 2px; }
   </style>
 </head>
 <body>
@@ -71,6 +72,14 @@
       return d ? new Date(d).toLocaleDateString('nl-NL') : '—';
     }
 
+    function berekenBeginDatum(toetsdatum, moeilijkheid) {
+      if (!toetsdatum) return null;
+      const dagen = Math.round(moeilijkheid / 2 + 1);
+      const datum = new Date(toetsdatum);
+      datum.setDate(datum.getDate() - dagen);
+      return datum.toLocaleDateString('nl-NL');
+    }
+
     function render() {
       const vakken = laad();
       const lijst = document.getElementById('lijst');
@@ -78,7 +87,10 @@
         <tr data-i="${i}">
           <td>${v.naam}</td>
           <td>${v.moeilijkheid} / 10</td>
-          <td>${formatDatum(v.toetsdatum)}</td>
+          <td>
+            ${formatDatum(v.toetsdatum)}
+            ${berekenBeginDatum(v.toetsdatum, v.moeilijkheid) ? `<span class="leeradvies">📚 Begin op ${berekenBeginDatum(v.toetsdatum, v.moeilijkheid)}</span>` : ''}
+          </td>
           <td>
             <div class="acties">
               <button class="edit" data-i="${i}" title="Bewerken">&#x270F;&#xFE0F;</button>
