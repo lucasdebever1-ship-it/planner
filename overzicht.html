@@ -16,11 +16,12 @@
       padding: 0 20px;
     }
 
+    /* Header */
     .pagina-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 28px;
+      margin-bottom: 32px;
     }
     .pagina-header h1 { margin: 0; font-size: 1.5rem; font-weight: 700; letter-spacing: -0.3px; }
 
@@ -31,80 +32,124 @@
       color: #4f8ef7;
       font-size: 0.85rem;
       padding: 7px 14px;
-      cursor: pointer;
       text-decoration: none;
       transition: border-color 0.15s, background 0.15s;
     }
     .btn-terug:hover { background: #192840; border-color: #4f8ef7; }
 
-    /* Kaarten */
-    #lijst { display: flex; flex-direction: column; gap: 12px; }
+    /* Secties */
+    .groep { margin-bottom: 28px; }
 
+    .groep-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      cursor: default;
+    }
+    .groep-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .groep-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.9px;
+      color: #777;
+    }
+    .groep-count {
+      font-size: 0.7rem;
+      color: #555;
+      background: #1e1e1e;
+      border-radius: 20px;
+      padding: 1px 8px;
+    }
+
+    /* Inklapbare "Voorbij" sectie */
+    details.groep { margin-bottom: 20px; }
+    details.groep summary { list-style: none; }
+    details.groep summary::-webkit-details-marker { display: none; }
+    details.groep summary .groep-header { cursor: pointer; }
+    details.groep summary .groep-label  { color: #444; }
+    details.groep summary .groep-count  { background: #181818; }
+    details.groep[open] summary .groep-header { margin-bottom: 12px; }
+
+    .groep-kaarten { display: flex; flex-direction: column; gap: 10px; }
+
+    /* Toets-kaarten */
     .toets-kaart {
       background: #161616;
       border: 1px solid #242424;
       border-radius: 14px;
-      padding: 18px 20px;
+      padding: 16px 18px;
       transition: border-color 0.15s;
     }
     .toets-kaart:hover { border-color: #303030; }
-    .toets-kaart.verlopen { opacity: 0.4; }
 
-    .kaart-vak {
-      font-size: 1.1rem;
+    .toets-kaart.urgent {
+      background: #160e0e;
+      border-color: #3a1515;
+    }
+    .toets-kaart.urgent:hover { border-color: #5a2020; }
+
+    .toets-kaart.verlopen { opacity: 0.35; }
+
+    .kaart-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      gap: 10px;
+    }
+
+    .vak-naam {
+      font-size: 1.05rem;
       font-weight: 700;
-      margin-bottom: 6px;
+      line-height: 1.2;
+    }
+    .verlopen .vak-naam { text-decoration: line-through; color: #3a3a3a; }
+
+    .dagen-pill {
+      font-size: 0.72rem;
+      font-weight: 600;
+      border-radius: 20px;
+      padding: 3px 10px;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .kaart-meta {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       flex-wrap: wrap;
     }
 
     .toets-naam-badge {
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       color: #7fb3ff;
       background: #192840;
       border: 1px solid #1e3558;
       border-radius: 20px;
-      padding: 3px 11px;
+      padding: 2px 10px;
     }
-
-    .toets-datum {
-      font-size: 0.85rem;
-      color: #888;
-    }
-
-    .leeradvies {
-      margin-top: 10px;
-      font-size: 0.8rem;
-      color: #3dcc7a;
-    }
-
-    .waarschuwing {
-      margin-top: 10px;
-      font-size: 0.8rem;
-      color: #e05252;
-    }
-
-    .toets-kaart.verlopen .kaart-vak,
-    .toets-kaart.verlopen .toets-naam-badge,
-    .toets-kaart.verlopen .toets-datum {
-      text-decoration: line-through;
-      color: #444;
-    }
-    .toets-kaart.verlopen .toets-naam-badge {
-      background: #1e1e1e;
-      border-color: #2a2a2a;
-    }
-
-    .geen {
+    .verlopen .toets-naam-badge {
       color: #333;
-      font-size: 0.9rem;
-      margin-top: 8px;
+      background: #181818;
+      border-color: #222;
+      text-decoration: line-through;
     }
+
+    .toets-datum { font-size: 0.82rem; color: #555; }
+
+    .kaart-advies { margin-top: 10px; font-size: 0.78rem; }
+    .leeradvies   { color: #3dcc7a; }
+    .waarschuwing { color: #e05252; }
+
+    .geen { color: #333; font-size: 0.9rem; margin-top: 8px; }
   </style>
 </head>
 <body>
@@ -113,8 +158,10 @@
     <a href="vakken.html" class="btn-terug">← Terug naar vakken</a>
   </div>
 
-  <div id="lijst"></div>
-  <p id="leeg" class="geen" style="display:none">Geen toetsen gevonden. Voeg vakken en toetsen toe via de vakken-pagina.</p>
+  <div id="inhoud"></div>
+  <p id="leeg" class="geen" style="display:none">
+    Geen toetsen gevonden. Voeg vakken en toetsen toe via de vakken-pagina.
+  </p>
 
   <script>
     function laad() {
@@ -131,12 +178,58 @@
       return d ? new Date(d).toLocaleDateString('nl-NL') : '—';
     }
 
-    function berekenBeginDatum(datum, moeilijkheid) {
-      if (!datum) return null;
-      const dagen = Math.round(moeilijkheid / 2 + 1);
-      const d = new Date(datum);
-      d.setDate(d.getDate() - dagen);
-      return d.toLocaleDateString('nl-NL');
+    function dagenTekst(n) {
+      if (n === 0) return 'vandaag';
+      if (n === 1) return 'morgen';
+      if (n < 0) return `${Math.abs(n)} ${Math.abs(n) === 1 ? 'dag' : 'dagen'} geleden`;
+      return `over ${n} dagen`;
+    }
+
+    function categoriseer(dagsTotToets, dagsTotBegin) {
+      if (dagsTotToets === null)  return 'later';
+      if (dagsTotToets < 0)       return 'verlopen';
+      if (dagsTotBegin < 0)       return 'urgent';
+      if (dagsTotToets <= 7)      return 'deze-week';
+      if (dagsTotToets <= 14)     return 'volgende-week';
+      return 'later';
+    }
+
+    function renderKaart(r) {
+      const { categorie, dagsTotToets, dagsTotBegin, vak, moeilijkheid, toets } = r;
+
+      // Dagen-pill stijl per categorie
+      const pilStijl = {
+        'urgent':         'background:#2d1010;color:#e05252',
+        'deze-week':      'background:#2a1e08;color:#f0a050',
+        'volgende-week':  'background:#1e1c08;color:#d4c040',
+        'later':          'background:#1a1a1a;color:#555',
+        'verlopen':       'background:#161616;color:#333',
+      }[categorie] || '';
+
+      const dagenStr = dagsTotToets !== null ? dagenTekst(dagsTotToets) : null;
+
+      // Advies
+      let advies = '';
+      if (categorie === 'urgent') {
+        advies = `<div class="kaart-advies waarschuwing">⚠️ Je had al moeten beginnen</div>`;
+      } else if (categorie !== 'verlopen' && dagsTotBegin !== null) {
+        const beginD = new Date(toets.datum);
+        beginD.setDate(beginD.getDate() - Math.round(moeilijkheid / 2 + 1));
+        advies = `<div class="kaart-advies leeradvies">📚 Begin op ${beginD.toLocaleDateString('nl-NL')}</div>`;
+      }
+
+      return `
+        <div class="toets-kaart ${categorie}">
+          <div class="kaart-top">
+            <span class="vak-naam">${vak}</span>
+            ${dagenStr ? `<span class="dagen-pill" style="${pilStijl}">${dagenStr}</span>` : ''}
+          </div>
+          <div class="kaart-meta">
+            <span class="toets-naam-badge">${toets.naam}</span>
+            <span class="toets-datum">${formatDatum(toets.datum)}</span>
+          </div>
+          ${advies}
+        </div>`;
     }
 
     function render() {
@@ -147,10 +240,20 @@
       const items = [];
       vakken.forEach(v => {
         v.toetsen.forEach(t => {
-          items.push({ vak: v.naam, moeilijkheid: v.moeilijkheid, toets: t });
+          let dagsTotToets = null;
+          if (t.datum) {
+            const d = new Date(t.datum);
+            d.setHours(0, 0, 0, 0);
+            dagsTotToets = Math.round((d - vandaag) / 86400000);
+          }
+          const startDagen = Math.round(v.moeilijkheid / 2 + 1);
+          const dagsTotBegin = dagsTotToets !== null ? dagsTotToets - startDagen : null;
+          const categorie = categoriseer(dagsTotToets, dagsTotBegin);
+          items.push({ vak: v.naam, moeilijkheid: v.moeilijkheid, toets: t, dagsTotToets, dagsTotBegin, categorie });
         });
       });
 
+      // Sorteer op datum oplopend (geen datum achteraan)
       items.sort((a, b) => {
         if (!a.toets.datum && !b.toets.datum) return 0;
         if (!a.toets.datum) return 1;
@@ -158,41 +261,57 @@
         return new Date(a.toets.datum) - new Date(b.toets.datum);
       });
 
-      const lijst = document.getElementById('lijst');
+      const inhoud = document.getElementById('inhoud');
 
       if (!items.length) {
         document.getElementById('leeg').style.display = '';
-        lijst.innerHTML = '';
+        inhoud.innerHTML = '';
         return;
       }
 
-      lijst.innerHTML = items.map(r => {
-        const toetsDatum  = r.toets.datum ? new Date(r.toets.datum) : null;
-        const beginDatumStr = berekenBeginDatum(r.toets.datum, r.moeilijkheid);
-        const beginDatum  = beginDatumStr ? (() => { const d = new Date(r.toets.datum); d.setDate(d.getDate() - Math.round(r.moeilijkheid / 2 + 1)); return d; })() : null;
+      const secties = [
+        { id: 'urgent',        label: 'Urgent',        dot: '#e05252' },
+        { id: 'deze-week',     label: 'Deze week',     dot: '#f0a050' },
+        { id: 'volgende-week', label: 'Volgende week', dot: '#d4c040' },
+        { id: 'later',         label: 'Later',         dot: '#444'    },
+      ];
 
-        const verlopen    = toetsDatum && toetsDatum < vandaag;
-        const telaatBegun = !verlopen && beginDatum && beginDatum < vandaag;
+      const verlopen = items.filter(r => r.categorie === 'verlopen');
+      let html = '';
 
-        let advies = '';
-        if (verlopen) {
-          advies = '';
-        } else if (telaatBegun) {
-          advies = `<div class="waarschuwing">⚠️ Je had al moeten beginnen</div>`;
-        } else if (beginDatumStr) {
-          advies = `<div class="leeradvies">📚 Begin op ${beginDatumStr}</div>`;
-        }
-
-        return `
-          <div class="toets-kaart${verlopen ? ' verlopen' : ''}">
-            <div class="kaart-vak">${r.vak}</div>
-            <div class="kaart-meta">
-              <span class="toets-naam-badge">${r.toets.naam}</span>
-              <span class="toets-datum">${formatDatum(r.toets.datum)}</span>
+      secties.forEach(s => {
+        const groep = items.filter(r => r.categorie === s.id);
+        if (!groep.length) return;
+        html += `
+          <section class="groep">
+            <div class="groep-header">
+              <span class="groep-dot" style="background:${s.dot}"></span>
+              <span class="groep-label">${s.label}</span>
+              <span class="groep-count">${groep.length}</span>
             </div>
-            ${advies}
-          </div>`;
-      }).join('');
+            <div class="groep-kaarten">
+              ${groep.map(renderKaart).join('')}
+            </div>
+          </section>`;
+      });
+
+      if (verlopen.length) {
+        html += `
+          <details class="groep">
+            <summary>
+              <div class="groep-header">
+                <span class="groep-dot" style="background:#333"></span>
+                <span class="groep-label">Voorbij</span>
+                <span class="groep-count">${verlopen.length}</span>
+              </div>
+            </summary>
+            <div class="groep-kaarten">
+              ${verlopen.map(renderKaart).join('')}
+            </div>
+          </details>`;
+      }
+
+      inhoud.innerHTML = html;
     }
 
     render();
