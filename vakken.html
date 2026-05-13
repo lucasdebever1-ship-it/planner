@@ -49,7 +49,8 @@
 
     input[type="text"],
     input[type="number"],
-    input[type="date"] {
+    input[type="date"],
+    select {
       width: 100%;
       background: #1e1e1e;
       border: 1px solid #2e2e2e;
@@ -62,7 +63,9 @@
     }
     input[type="text"]:focus,
     input[type="number"]:focus,
-    input[type="date"]:focus { border-color: #4f8ef7; }
+    input[type="date"]:focus,
+    select:focus { border-color: #4f8ef7; }
+    select { appearance: none; }
 
     input[type="number"] { width: 80px; }
 
@@ -177,6 +180,16 @@
     .leeradvies   { font-size: 0.78rem; color: #3dcc7a; margin-top: 3px; padding-left: 2px; }
     .geen-toetsen { font-size: 0.85rem; color: #333; }
 
+    .toets-type-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #888;
+      background: #1e1e1e;
+      border-radius: 20px;
+      padding: 2px 8px;
+      flex-shrink: 0;
+    }
+
     /* Toets toevoegen form */
     .toets-formrij {
       margin-top: 14px;
@@ -285,6 +298,7 @@
           <div class="toets-chip-group">
             <div class="toets-chip">
               <span class="toets-chip-naam">${t.naam} · ${formatDatum(t.datum)}</span>
+              ${t.type ? `<span class="toets-type-label">${t.type}</span>` : ''}
               <button class="toets-delete" data-i="${i}" data-j="${j}" title="Verwijder toets">✕</button>
             </div>
             ${begin ? `<div class="leeradvies">📚 Begin op ${begin}</div>` : ''}
@@ -319,7 +333,16 @@
       const formDiv = document.createElement('div');
       formDiv.className = 'toets-formrij';
       formDiv.innerHTML = `
-        <input type="text" class="t-naam" placeholder="Naam toets (bijv. proefwerk)">
+        <input type="text" class="t-naam" placeholder="Naam toets (bijv. hoofdstuk 3)">
+        <select class="t-type">
+          <option value="Proefwerk">Proefwerk</option>
+          <option value="SO">SO</option>
+          <option value="Mondeling">Mondeling</option>
+          <option value="Luistertoets">Luistertoets</option>
+          <option value="Schrijfvaardigheid">Schrijfvaardigheid</option>
+          <option value="PO">PO</option>
+          <option value="Anders">Anders</option>
+        </select>
         <input type="date" class="t-datum">
         <div class="toets-formrij-knoppen">
           <button class="toets-opslaan btn-save" data-i="${i}">&#x2713; Opslaan</button>
@@ -332,10 +355,11 @@
     function slaToetsOp(i) {
       const formDiv = document.querySelector('.toets-formrij');
       const naam = formDiv.querySelector('.t-naam').value.trim();
+      const type = formDiv.querySelector('.t-type').value;
       const datum = formDiv.querySelector('.t-datum').value || null;
       if (!naam) { formDiv.querySelector('.t-naam').focus(); return; }
       const vakken = laad();
-      vakken[i].toetsen.push({ naam, datum });
+      vakken[i].toetsen.push({ naam, type, datum });
       sla(vakken);
       render();
     }
