@@ -2,37 +2,102 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8">
+  <meta name="color-scheme" content="dark">
   <title>Toetsoverzicht</title>
   <style>
-    body { font-family: sans-serif; max-width: 580px; margin: 40px auto; padding: 0 16px; }
-    h2 { margin-bottom: 4px; }
-    .nav { margin-bottom: 24px; }
-    .nav a { font-size: 0.9rem; color: #1a7fd4; text-decoration: none; }
-    .nav a:hover { text-decoration: underline; }
-    table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-    th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid #ddd; }
-    th { background: #f4f4f4; }
-    .leeradvies { font-size: 0.75rem; color: #999; display: block; margin-top: 2px; }
-    .geen { color: #bbb; margin-top: 24px; }
-    .verlopen td { color: #bbb; }
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0f0f0f;
+      color: #e8e8e8;
+      max-width: 640px;
+      margin: 48px auto;
+      padding: 0 20px;
+    }
+
+    .pagina-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+    .pagina-header h1 { margin: 0; font-size: 1.5rem; font-weight: 700; letter-spacing: -0.3px; }
+
+    .btn-terug {
+      background: #161616;
+      border: 1px solid #2e2e2e;
+      border-radius: 8px;
+      color: #4f8ef7;
+      font-size: 0.85rem;
+      padding: 7px 14px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .btn-terug:hover { background: #192840; border-color: #4f8ef7; }
+
+    /* Kaarten */
+    #lijst { display: flex; flex-direction: column; gap: 12px; }
+
+    .toets-kaart {
+      background: #161616;
+      border: 1px solid #242424;
+      border-radius: 14px;
+      padding: 18px 20px;
+      transition: border-color 0.15s;
+    }
+    .toets-kaart:hover { border-color: #303030; }
+    .toets-kaart.verlopen { opacity: 0.4; }
+
+    .kaart-vak {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .kaart-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .toets-naam-badge {
+      font-size: 0.82rem;
+      color: #7fb3ff;
+      background: #192840;
+      border: 1px solid #1e3558;
+      border-radius: 20px;
+      padding: 3px 11px;
+    }
+
+    .toets-datum {
+      font-size: 0.85rem;
+      color: #888;
+    }
+
+    .leeradvies {
+      margin-top: 10px;
+      font-size: 0.8rem;
+      color: #3dcc7a;
+    }
+
+    .geen {
+      color: #333;
+      font-size: 0.9rem;
+      margin-top: 8px;
+    }
   </style>
 </head>
 <body>
-  <h2>Toetsoverzicht</h2>
-  <div class="nav"><a href="vakken.html">← Terug naar vakken</a></div>
+  <div class="pagina-header">
+    <h1>Toetsoverzicht</h1>
+    <a href="vakken.html" class="btn-terug">← Terug naar vakken</a>
+  </div>
 
-  <table id="tabel">
-    <thead>
-      <tr>
-        <th>Vak</th>
-        <th>Toets</th>
-        <th>Datum</th>
-        <th>Leeradvies</th>
-      </tr>
-    </thead>
-    <tbody id="lijst"></tbody>
-  </table>
-  <p id="leeg" class="geen" style="display:none">Geen toetsen gevonden.</p>
+  <div id="lijst"></div>
+  <p id="leeg" class="geen" style="display:none">Geen toetsen gevonden. Voeg vakken en toetsen toe via de vakken-pagina.</p>
 
   <script>
     function laad() {
@@ -62,15 +127,14 @@
       const vandaag = new Date();
       vandaag.setHours(0, 0, 0, 0);
 
-      const rijen = [];
+      const items = [];
       vakken.forEach(v => {
         v.toetsen.forEach(t => {
-          rijen.push({ vak: v.naam, moeilijkheid: v.moeilijkheid, toets: t });
+          items.push({ vak: v.naam, moeilijkheid: v.moeilijkheid, toets: t });
         });
       });
 
-      // sorteer: toetsen zonder datum achteraan, rest op datum oplopend
-      rijen.sort((a, b) => {
+      items.sort((a, b) => {
         if (!a.toets.datum && !b.toets.datum) return 0;
         if (!a.toets.datum) return 1;
         if (!b.toets.datum) return -1;
@@ -78,22 +142,25 @@
       });
 
       const lijst = document.getElementById('lijst');
-      if (!rijen.length) {
+
+      if (!items.length) {
         document.getElementById('leeg').style.display = '';
         lijst.innerHTML = '';
         return;
       }
 
-      lijst.innerHTML = rijen.map(r => {
+      lijst.innerHTML = items.map(r => {
         const verlopen = r.toets.datum && new Date(r.toets.datum) < vandaag;
         const begin = berekenBeginDatum(r.toets.datum, r.moeilijkheid);
         return `
-          <tr class="${verlopen ? 'verlopen' : ''}">
-            <td>${r.vak}</td>
-            <td>${r.toets.naam}</td>
-            <td>${formatDatum(r.toets.datum)}</td>
-            <td>${begin ? `<span>Begin op ${begin}</span>` : '—'}</td>
-          </tr>`;
+          <div class="toets-kaart${verlopen ? ' verlopen' : ''}">
+            <div class="kaart-vak">${r.vak}</div>
+            <div class="kaart-meta">
+              <span class="toets-naam-badge">${r.toets.naam}</span>
+              <span class="toets-datum">${formatDatum(r.toets.datum)}</span>
+            </div>
+            ${begin ? `<div class="leeradvies">📚 Begin op ${begin}</div>` : ''}
+          </div>`;
       }).join('');
     }
 
