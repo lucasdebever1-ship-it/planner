@@ -2,6 +2,7 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
   <title>Studiegids</title>
   <script>
@@ -16,45 +17,107 @@
       color: #e8e8e8;
       margin: 0;
       min-height: 100vh;
+      padding: 48px 20px 60px;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 40px 20px;
     }
 
     .center {
-      text-align: center;
-      max-width: 420px;
       width: 100%;
+      max-width: 480px;
     }
 
     .tagline {
-      font-size: 2rem;
+      font-size: 1.9rem;
       font-weight: 700;
       letter-spacing: -0.5px;
-      margin: 0 0 8px;
+      margin: 0 0 6px;
       line-height: 1.2;
     }
 
     .sub {
       font-size: 0.95rem;
       color: #444;
-      margin: 0 0 48px;
+      margin: 0 0 32px;
     }
 
+    /* Vandaag sectie */
+    .sectie-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.9px;
+      color: #555;
+      margin: 0 0 12px;
+    }
+
+    #vandaag-lijst {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .vandaag-kaart {
+      background: #161616;
+      border: 1px solid #242424;
+      border-radius: 14px;
+      padding: 16px 18px;
+    }
+
+    .vandaag-kaart.te-laat {
+      background: #160e0e;
+      border-color: #3a1515;
+    }
+
+    .vandaag-vak {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.2px;
+      margin-bottom: 2px;
+    }
+
+    .vandaag-toets {
+      font-size: 0.88rem;
+      color: #666;
+      margin-bottom: 10px;
+    }
+
+    .vandaag-datum {
+      font-size: 0.95rem;
+      color: #888;
+      margin-bottom: 8px;
+    }
+
+    .vandaag-status-begin  { font-size: 0.95rem; font-weight: 600; color: #3dcc7a; }
+    .vandaag-status-laat   { font-size: 0.95rem; font-weight: 600; color: #e05252; }
+
+    .vandaag-leeg {
+      font-size: 0.95rem;
+      color: #444;
+      margin-bottom: 32px;
+      padding: 16px 18px;
+      background: #111;
+      border-radius: 14px;
+      border: 1px solid #1e1e1e;
+    }
+
+    /* Navigatieknoppen */
     .knoppen {
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 12px;
     }
 
     .btn {
       display: block;
-      padding: 18px 24px;
+      padding: 16px 24px;
       border-radius: 14px;
-      font-size: 1.05rem;
+      font-size: 1rem;
       font-weight: 600;
       text-decoration: none;
+      text-align: center;
       transition: background 0.15s, border-color 0.15s, transform 0.1s;
     }
     .btn:active { transform: scale(0.98); }
@@ -93,18 +156,75 @@
   <div class="center">
     <h1 class="tagline" id="begroeting"></h1>
     <p class="sub">Weet wat je moet leren. En wanneer.</p>
+
+    <p class="sectie-label">Vandaag</p>
+    <div id="vandaag-lijst"></div>
+
     <div class="knoppen">
       <a href="vakken.html"    class="btn btn-primary">Mijn vakken</a>
       <a href="overzicht.html" class="btn btn-secondary">Overzicht</a>
     </div>
   </div>
 
-  <script>
-    const profiel = JSON.parse(localStorage.getItem('profiel') || '{}');
-    const naam = profiel.naam ? 'Hé ' + profiel.naam + ',' : 'Hé,';
-    document.getElementById('begroeting').textContent = naam + ' klaar voor vandaag?';
-  </script>
-
   <button class="reset-btn" onclick="localStorage.removeItem('profiel'); location.replace('onboarding.html')">Reset onboarding</button>
+
+  <script>
+    // Begroeting
+    const profiel = JSON.parse(localStorage.getItem('profiel') || '{}');
+    const naamDeel = profiel.naam ? 'Hé ' + profiel.naam + ',' : 'Hé,';
+    document.getElementById('begroeting').textContent = naamDeel + ' klaar voor vandaag?';
+
+    // Schoolniveau multiplier
+    function leerMultiplier() {
+      return ['VWO 5','VWO 6','HAVO 4','HAVO 5'].includes(profiel.niveau) ? 1.5 : 1;
+    }
+
+    // Vandaag-sectie
+    (function() {
+      const vakken = JSON.parse(localStorage.getItem('vakken') || '[]');
+      const vandaag = new Date();
+      vandaag.setHours(0, 0, 0, 0);
+
+      const items = [];
+      vakken.forEach(v => {
+        const toetsen = v.toetsen || (v.toetsdatum ? [{ naam: 'Toets', datum: v.toetsdatum }] : []);
+        toetsen.forEach(t => {
+          if (!t.datum) return;
+          const toetsDatum = new Date(t.datum);
+          toetsDatum.setHours(0, 0, 0, 0);
+          const dagsTotToets = Math.round((toetsDatum - vandaag) / 86400000);
+          if (dagsTotToets < 0) return; // toets al geweest
+          const startDagen = Math.round((v.moeilijkheid / 2 + 1) * leerMultiplier());
+          const dagsTotBegin = dagsTotToets - startDagen;
+          if (dagsTotBegin > 0) return; // nog niet aan de beurt
+          items.push({ vak: v.naam, toets: t, dagsTotBegin, toetsDatum });
+        });
+      });
+
+      const lijst = document.getElementById('vandaag-lijst');
+
+      if (!items.length) {
+        lijst.innerHTML = '<div class="vandaag-leeg">Geen toetsen voor vandaag — geniet ervan 🎉</div>';
+        return;
+      }
+
+      items.sort((a, b) => a.toetsDatum - b.toetsDatum);
+
+      lijst.innerHTML = items.map(r => {
+        const teLaat = r.dagsTotBegin < 0;
+        const datumStr = r.toetsDatum.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' });
+        const status = teLaat
+          ? '<div class="vandaag-status-laat">⚠️ Je bent te laat met beginnen!</div>'
+          : '<div class="vandaag-status-begin">📚 Begin vandaag</div>';
+        return `
+          <div class="vandaag-kaart${teLaat ? ' te-laat' : ''}">
+            <div class="vandaag-vak">${r.vak}</div>
+            <div class="vandaag-toets">${r.toets.naam}</div>
+            <div class="vandaag-datum">Toets op ${datumStr}</div>
+            ${status}
+          </div>`;
+      }).join('');
+    })();
+  </script>
 </body>
 </html>
