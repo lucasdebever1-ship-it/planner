@@ -17,7 +17,6 @@
       padding: 40px 20px 360px;
     }
 
-    /* Header */
     .pagina-header {
       display: flex;
       justify-content: space-between;
@@ -28,7 +27,6 @@
     .nav-link { font-size: 0.85rem; color: #4f8ef7; text-decoration: none; }
     .nav-link:hover { text-decoration: underline; }
 
-    /* Form panel */
     .form-panel {
       background: #161616;
       border: 1px solid #242424;
@@ -37,11 +35,7 @@
       margin-bottom: 24px;
     }
 
-    .form-rij {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
+    .form-rij { display: flex; gap: 10px; margin-bottom: 10px; }
 
     .form-group { display: flex; flex-direction: column; gap: 5px; }
     .form-group label { font-size: 0.7rem; color: #666; text-transform: uppercase; letter-spacing: 0.7px; }
@@ -66,7 +60,6 @@
     input[type="date"]:focus,
     select:focus { border-color: #4f8ef7; }
     select { appearance: none; }
-
     input[type="number"] { width: 80px; }
 
     .btn-primary {
@@ -83,7 +76,6 @@
     }
     .btn-primary:hover { background: #3a7ef0; }
 
-    /* Kaarten lijst */
     #lijst { display: flex; flex-direction: column; gap: 16px; }
 
     .kaart {
@@ -122,7 +114,6 @@
       flex-shrink: 0;
     }
 
-    /* Actie-knoppen */
     .acties { display: flex; gap: 2px; flex-shrink: 0; }
     .acties button {
       background: none;
@@ -144,11 +135,10 @@
     .acties .annuleer        { color: #444; font-size: 1.1rem; }
     .acties .annuleer:hover  { color: #888; }
 
-    /* Edit inputs in kaart */
     .kaart.bewerkrij .b-naam         { flex: 1; }
     .kaart.bewerkrij .b-moeilijkheid { width: 65px; }
 
-    /* Toets chips */
+    /* Toetsen */
     .toetsen-grid { display: flex; flex-direction: column; gap: 10px; }
 
     .toets-chip {
@@ -190,7 +180,7 @@
       flex-shrink: 0;
     }
 
-    /* Toets toevoegen form */
+    /* Toets form */
     .toets-formrij {
       margin-top: 14px;
       padding-top: 14px;
@@ -199,10 +189,7 @@
       flex-direction: column;
       gap: 8px;
     }
-    .toets-formrij-knoppen {
-      display: flex;
-      gap: 8px;
-    }
+    .toets-formrij-knoppen { display: flex; gap: 8px; }
     .toets-formrij .btn-save {
       flex: 1;
       background: #4f8ef7;
@@ -227,6 +214,142 @@
       transition: color 0.15s;
     }
     .toets-formrij .btn-cancel:hover { color: #aaa; }
+
+    /* ── Huiswerk ── */
+    .huiswerk-sectie {
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid #1e1e1e;
+    }
+
+    .sectie-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      margin-bottom: 8px;
+    }
+
+    .geen-hw { font-size: 0.82rem; color: #333; margin-bottom: 8px; display: block; }
+
+    .huiswerk-lijst {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .huiswerk-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #1a1a1a;
+      border: 1px solid #242424;
+      border-radius: 8px;
+      padding: 8px 10px;
+      transition: opacity 0.2s;
+    }
+    .huiswerk-item.gedaan { opacity: 0.4; }
+    .huiswerk-item.gedaan .hw-omschrijving { text-decoration: line-through; color: #555; }
+
+    .hw-vink {
+      flex-shrink: 0;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 2px solid #2e2e2e;
+      background: none;
+      color: transparent;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.15s, background 0.15s, color 0.15s;
+      line-height: 1;
+      padding: 0;
+    }
+    .hw-vink:hover   { border-color: #3dcc7a; color: #3dcc7a; }
+    .hw-vink.gevinkd { border-color: #3dcc7a; background: #0f2a1a; color: #3dcc7a; }
+
+    .hw-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+    .hw-omschrijving {
+      font-size: 0.88rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .hw-datum { font-size: 0.73rem; color: #555; }
+
+    .hw-delete {
+      flex-shrink: 0;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #2a2a2a;
+      font-size: 0.73rem;
+      padding: 4px 6px;
+      line-height: 1;
+      transition: color 0.15s;
+    }
+    .hw-delete:hover { color: #e05252; }
+
+    .btn-add-hw {
+      width: 100%;
+      background: none;
+      border: 1px dashed #282828;
+      border-radius: 8px;
+      color: #444;
+      font-size: 0.82rem;
+      padding: 7px 12px;
+      cursor: pointer;
+      text-align: left;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .btn-add-hw:hover { border-color: #454545; color: #888; }
+
+    /* Huiswerk form */
+    .hw-formrij {
+      margin-bottom: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .hw-weekdag-info { font-size: 0.78rem; color: #3dcc7a; padding-left: 2px; }
+    .hw-formrij-knoppen { display: flex; gap: 8px; }
+    .hw-formrij .btn-save {
+      flex: 1;
+      background: #2a7a45;
+      color: #d4f5e4;
+      border: none;
+      border-radius: 8px;
+      padding: 9px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .hw-formrij .btn-save:hover { background: #236638; }
+    .hw-formrij .btn-cancel {
+      background: #1e1e1e;
+      border: 1px solid #2e2e2e;
+      color: #666;
+      font-size: 0.9rem;
+      cursor: pointer;
+      padding: 9px 14px;
+      border-radius: 8px;
+      transition: color 0.15s;
+    }
+    .hw-formrij .btn-cancel:hover { color: #aaa; }
   </style>
 </head>
 <body>
@@ -255,16 +378,54 @@
 
   <script>
     const sleutel = 'vakken';
+    const dagNamen = ['Zondag','Maandag','Dinsdag','Woensdag','Donderdag','Vrijdag','Zaterdag'];
+
+    function eerstvolgendeWeekdag(dagNr) {
+      const d = new Date();
+      d.setHours(0, 0, 0, 0);
+      const diff = (dagNr - d.getDay() + 7) % 7;
+      // diff === 0 means today — return today so it shows immediately
+      d.setDate(d.getDate() + diff);
+      return d.toISOString().slice(0, 10);
+    }
 
     function laad() {
       const vakken = JSON.parse(localStorage.getItem(sleutel) || '[]');
-      return vakken.map(v => {
+      const vandaag = new Date();
+      vandaag.setHours(0, 0, 0, 0);
+      let veranderd = false;
+
+      const result = vakken.map(v => {
+        // Migreer oud formaat
         if (!v.toetsen) {
           v.toetsen = v.toetsdatum ? [{ naam: 'Toets', datum: v.toetsdatum }] : [];
           delete v.toetsdatum;
         }
+        if (!v.huiswerk) v.huiswerk = [];
+
+        // Cleanup: verwijder afgevinkt éénmalig huiswerk na inleverdatum
+        // Terugkerend huiswerk: reset naar volgende week
+        v.huiswerk = v.huiswerk.filter(h => {
+          if (!h.inleverdatum) return true;
+          const datum = new Date(h.inleverdatum);
+          datum.setHours(0, 0, 0, 0);
+          if (h.gedaan && datum < vandaag) {
+            if (h.weekdag != null) {
+              h.gedaan = false;
+              h.inleverdatum = eerstvolgendeWeekdag(h.weekdag);
+              veranderd = true;
+              return true;
+            }
+            veranderd = true;
+            return false;
+          }
+          return true;
+        });
         return v;
       });
+
+      if (veranderd) localStorage.setItem(sleutel, JSON.stringify(result));
+      return result;
     }
 
     function sla(vakken) {
@@ -272,7 +433,7 @@
     }
 
     function formatDatum(d) {
-      return d ? new Date(d).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' }) : '—';
+      return d ? new Date(d + 'T00:00:00').toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' }) : '—';
     }
 
     const STANDAARD_DAGEN = { Mondeling:7, Proefwerk:4, SO:1, Luistertoets:0, Schrijfvaardigheid:2, PO:14, Anders:3 };
@@ -312,9 +473,40 @@
       }).join('') + '</div>';
     }
 
+    function renderHuiswerk(huiswerk, i) {
+      let html = '<div class="huiswerk-sectie"><div class="sectie-label">Huiswerk</div>';
+
+      if (huiswerk.length) {
+        html += '<div class="huiswerk-lijst">';
+        huiswerk.forEach((h, j) => {
+          const datumTekst = h.inleverdatum ? formatDatum(h.inleverdatum) : '—';
+          const herhalTekst = h.weekdag != null ? ` · elke ${dagNamen[h.weekdag].toLowerCase()}` : '';
+          html += `
+            <div class="huiswerk-item${h.gedaan ? ' gedaan' : ''}">
+              <button class="hw-vink${h.gedaan ? ' gevinkd' : ''}" data-i="${i}" data-j="${j}" title="${h.gedaan ? 'Markeer als niet gedaan' : 'Markeer als gedaan'}">✓</button>
+              <div class="hw-info">
+                <span class="hw-omschrijving">${h.omschrijving}</span>
+                <span class="hw-datum">📅 ${datumTekst}${herhalTekst}</span>
+              </div>
+              <button class="hw-delete" data-i="${i}" data-j="${j}" title="Verwijder">✕</button>
+            </div>`;
+        });
+        html += '</div>';
+      } else {
+        html += '<span class="geen-hw">Nog geen huiswerk</span>';
+      }
+
+      html += `<button class="btn-add-hw" data-i="${i}">📋 Huiswerk toevoegen</button></div>`;
+      return html;
+    }
+
+    function sluitForms() {
+      document.querySelectorAll('.toets-formrij, .hw-formrij').forEach(r => r.remove());
+    }
+
     function render() {
       const vakken = laad();
-      document.querySelectorAll('.toets-formrij').forEach(r => r.remove());
+      sluitForms();
       document.getElementById('lijst').innerHTML = vakken.map((v, i) => `
         <div class="kaart" data-i="${i}">
           <div class="kaart-header">
@@ -329,12 +521,13 @@
             </div>
           </div>
           ${renderToetsen(v.toetsen, v.moeilijkheid, i)}
+          ${renderHuiswerk(v.huiswerk, i)}
         </div>
       `).join('');
     }
 
     function toonToetsForm(i) {
-      document.querySelectorAll('.toets-formrij').forEach(r => r.remove());
+      sluitForms();
       const kaart = document.querySelector(`.kaart[data-i="${i}"]`);
       const formDiv = document.createElement('div');
       formDiv.className = 'toets-formrij';
@@ -360,8 +553,8 @@
 
     function slaToetsOp(i) {
       const formDiv = document.querySelector('.toets-formrij');
-      const naam = formDiv.querySelector('.t-naam').value.trim();
-      const type = formDiv.querySelector('.t-type').value;
+      const naam  = formDiv.querySelector('.t-naam').value.trim();
+      const type  = formDiv.querySelector('.t-type').value;
       const datum = formDiv.querySelector('.t-datum').value || null;
       if (!naam) { formDiv.querySelector('.t-naam').focus(); return; }
       const vakken = laad();
@@ -370,10 +563,82 @@
       render();
     }
 
+    function toonHuiswerkForm(i) {
+      sluitForms();
+      const kaart  = document.querySelector(`.kaart[data-i="${i}"]`);
+      const sectie = kaart.querySelector('.huiswerk-sectie');
+      const addBtn = sectie.querySelector('.btn-add-hw');
+
+      const formDiv = document.createElement('div');
+      formDiv.className = 'hw-formrij';
+      formDiv.innerHTML = `
+        <input type="text" class="hw-oms" placeholder="Omschrijving huiswerk">
+        <select class="hw-wdag">
+          <option value="">Eenmalig (kies datum)</option>
+          <option value="1">Altijd maandag</option>
+          <option value="2">Altijd dinsdag</option>
+          <option value="3">Altijd woensdag</option>
+          <option value="4">Altijd donderdag</option>
+          <option value="5">Altijd vrijdag</option>
+          <option value="6">Altijd zaterdag</option>
+          <option value="0">Altijd zondag</option>
+        </select>
+        <input type="date" class="hw-datum-input">
+        <div class="hw-weekdag-info" style="display:none"></div>
+        <div class="hw-formrij-knoppen">
+          <button class="hw-opslaan btn-save" data-i="${i}">✓ Opslaan</button>
+          <button class="hw-annuleer btn-cancel">✕</button>
+        </div>`;
+
+      sectie.insertBefore(formDiv, addBtn);
+
+      const select     = formDiv.querySelector('.hw-wdag');
+      const datumInput = formDiv.querySelector('.hw-datum-input');
+      const info       = formDiv.querySelector('.hw-weekdag-info');
+
+      select.addEventListener('change', () => {
+        if (select.value === '') {
+          datumInput.style.display = '';
+          info.style.display = 'none';
+        } else {
+          datumInput.style.display = 'none';
+          const datum = eerstvolgendeWeekdag(parseInt(select.value));
+          info.textContent = '📅 Eerst op: ' + new Date(datum + 'T00:00:00').toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' });
+          info.style.display = '';
+        }
+      });
+
+      formDiv.querySelector('.hw-oms').focus();
+    }
+
+    function slaHuiswerkOp(i) {
+      const formDiv     = document.querySelector('.hw-formrij');
+      const omschrijving = formDiv.querySelector('.hw-oms').value.trim();
+      const weekdagVal  = formDiv.querySelector('.hw-wdag').value;
+      const datumVal    = formDiv.querySelector('.hw-datum-input').value;
+
+      if (!omschrijving) { formDiv.querySelector('.hw-oms').focus(); return; }
+
+      let weekdag = null;
+      let inleverdatum = null;
+
+      if (weekdagVal !== '') {
+        weekdag = parseInt(weekdagVal);
+        inleverdatum = eerstvolgendeWeekdag(weekdag);
+      } else {
+        inleverdatum = datumVal || null;
+      }
+
+      const vakken = laad();
+      vakken[i].huiswerk.push({ id: Date.now(), omschrijving, inleverdatum, weekdag, gedaan: false });
+      sla(vakken);
+      render();
+    }
+
     function startBewerken(i) {
       const vakken = laad();
       const v = vakken[i];
-      document.querySelectorAll('.toets-formrij').forEach(r => r.remove());
+      sluitForms();
       const kaart = document.querySelector(`.kaart[data-i="${i}"]`);
       kaart.classList.add('bewerkrij');
       kaart.innerHTML = `
@@ -387,7 +652,8 @@
             <button class="annuleer" data-i="${i}" title="Annuleren">&#x2715;</button>
           </div>
         </div>
-        ${renderToetsen(v.toetsen, v.moeilijkheid, i)}`;
+        ${renderToetsen(v.toetsen, v.moeilijkheid, i)}
+        ${renderHuiswerk(v.huiswerk, i)}`;
       kaart.querySelector('.b-naam').focus();
     }
 
@@ -407,7 +673,7 @@
       const naam = document.getElementById('naam').value.trim();
       const moeilijkheid = parseInt(document.getElementById('moeilijkheid').value);
       const vakken = laad();
-      vakken.push({ naam, moeilijkheid, toetsen: [] });
+      vakken.push({ naam, moeilijkheid, toetsen: [], huiswerk: [] });
       sla(vakken);
       render();
       e.target.reset();
@@ -421,15 +687,9 @@
       const j = btn.dataset.j !== undefined ? parseInt(btn.dataset.j) : NaN;
 
       if (btn.classList.contains('toets-delete')) {
-        const vakken = laad();
-        vakken[i].toetsen.splice(j, 1);
-        sla(vakken);
-        render();
+        const vakken = laad(); vakken[i].toetsen.splice(j, 1); sla(vakken); render();
       } else if (btn.classList.contains('delete')) {
-        const vakken = laad();
-        vakken.splice(i, 1);
-        sla(vakken);
-        render();
+        const vakken = laad(); vakken.splice(i, 1); sla(vakken); render();
       } else if (btn.classList.contains('edit')) {
         startBewerken(i);
       } else if (btn.classList.contains('add-toets')) {
@@ -442,6 +702,18 @@
         slaToetsOp(i);
       } else if (btn.classList.contains('toets-annuleer')) {
         btn.closest('.toets-formrij').remove();
+      } else if (btn.classList.contains('hw-vink')) {
+        const vakken = laad();
+        vakken[i].huiswerk[j].gedaan = !vakken[i].huiswerk[j].gedaan;
+        sla(vakken); render();
+      } else if (btn.classList.contains('hw-delete')) {
+        const vakken = laad(); vakken[i].huiswerk.splice(j, 1); sla(vakken); render();
+      } else if (btn.classList.contains('btn-add-hw')) {
+        toonHuiswerkForm(i);
+      } else if (btn.classList.contains('hw-opslaan')) {
+        slaHuiswerkOp(i);
+      } else if (btn.classList.contains('hw-annuleer')) {
+        btn.closest('.hw-formrij').remove();
       }
     });
 
@@ -451,9 +723,7 @@
       if (e.target.type !== 'date') return;
       const rect = e.target.getBoundingClientRect();
       const spaceBelow = window.innerHeight - rect.bottom;
-      if (spaceBelow < 340) {
-        window.scrollBy({ top: 340 - spaceBelow, behavior: 'smooth' });
-      }
+      if (spaceBelow < 340) window.scrollBy({ top: 340 - spaceBelow, behavior: 'smooth' });
     });
   </script>
 </body>

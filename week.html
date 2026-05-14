@@ -102,9 +102,12 @@
     .item-vak       { font-size: 0.95rem; font-weight: 700; }
     .item-toetsnaam { font-size: 0.8rem; color: #666; }
 
-    .item-status-toets { font-size: 0.85rem; color: #f0c040; font-weight: 600; margin-top: 2px; }
-    .item-status-start { font-size: 0.85rem; color: #3dcc7a; font-weight: 600; margin-top: 2px; }
-    .item-status-bezig { font-size: 0.85rem; color: #888; margin-top: 2px; }
+    .item-status-toets    { font-size: 0.85rem; color: #f0c040; font-weight: 600; margin-top: 2px; }
+    .item-status-start    { font-size: 0.85rem; color: #3dcc7a; font-weight: 600; margin-top: 2px; }
+    .item-status-bezig    { font-size: 0.85rem; color: #888;    margin-top: 2px; }
+    .item-status-huiswerk { font-size: 0.85rem; color: #7fbfaa; margin-top: 2px; }
+
+    .dag-item.huiswerk { background: #111a16; border: 1px solid #1a2e24; }
 
     /* Grote toetsbanner */
     .toets-banner {
@@ -148,6 +151,17 @@
     const multiplier = leerMultiplier();
     const vakken = JSON.parse(localStorage.getItem('vakken') || '[]');
 
+    // Huiswerk: alleen niet-afgevinkte items met een datum
+    const alleHuiswerk = [];
+    vakken.forEach(v => {
+      (v.huiswerk || []).forEach(h => {
+        if (!h.inleverdatum || h.gedaan) return;
+        const datum = new Date(h.inleverdatum + 'T00:00:00');
+        datum.setHours(0, 0, 0, 0);
+        alleHuiswerk.push({ vak: v.naam, omschrijving: h.omschrijving, datum });
+      });
+    });
+
     const alleToetsen = [];
     vakken.forEach(v => {
       const toetsen = v.toetsen || (v.toetsdatum ? [{ naam: 'Toets', datum: v.toetsdatum }] : []);
@@ -175,6 +189,7 @@
       const isVandaag = i === 0;
 
       const toetsItems = [], startItems = [], bezigItems = [];
+      const hwItems = alleHuiswerk.filter(h => dagenTussen(dag, h.datum) === 0);
 
       alleToetsen.forEach(r => {
         const opToetsDag = dagenTussen(dag, r.toetsDatum) === 0;
@@ -187,7 +202,7 @@
       });
 
       // Vrije dag: weglaten
-      if (!toetsItems.length && !startItems.length && !bezigItems.length) continue;
+      if (!toetsItems.length && !startItems.length && !bezigItems.length && !hwItems.length) continue;
 
       // Bepaal randklasse (prioriteit: toets vandaag > toets morgen > start > alleen leren)
       let randKlasse;
@@ -248,6 +263,15 @@
               <span class="item-vak">${r.vak}</span>
               <span class="item-toetsnaam">${r.toets.naam}</span>
               <span class="item-status-bezig">📚 Leren — nog ${dagenTot} dag${dagenTot === 1 ? '' : 'en'} tot de toets</span>
+            </div>`;
+      });
+
+      hwItems.forEach(h => {
+        html += `
+            <div class="dag-item huiswerk">
+              <span class="item-vak">${h.vak}</span>
+              <span class="item-toetsnaam">${h.omschrijving}</span>
+              <span class="item-status-huiswerk">📋 Inleveren</span>
             </div>`;
       });
 
