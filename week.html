@@ -95,12 +95,14 @@
       background: #1a1a1a;
     }
 
+    .dag-item.toets { background: #1a1205; border: 1px solid #3a2a05; }
     .dag-item.start { background: #0f1f12; border: 1px solid #1a3d22; }
     .dag-item.bezig { background: #141414; border: 1px solid #1e1e1e; }
 
     .item-vak       { font-size: 0.95rem; font-weight: 700; }
     .item-toetsnaam { font-size: 0.8rem; color: #666; }
 
+    .item-status-toets { font-size: 0.85rem; color: #f0c040; font-weight: 600; margin-top: 2px; }
     .item-status-start { font-size: 0.85rem; color: #3dcc7a; font-weight: 600; margin-top: 2px; }
     .item-status-bezig { font-size: 0.85rem; color: #888; margin-top: 2px; }
 
@@ -213,12 +215,21 @@
           <div class="dag-items">`;
 
       toetsItems.forEach(r => {
-        html += `
+        if (isVandaag) {
+          html += `
             <div class="toets-banner">
               <div class="banner-emoji">📝</div>
               <div class="banner-titel">TOETS VANDAAG</div>
               <div class="banner-vak">${r.vak} — ${r.toets.naam}</div>
             </div>`;
+        } else {
+          html += `
+            <div class="dag-item toets">
+              <span class="item-vak">${r.vak}</span>
+              <span class="item-toetsnaam">${r.toets.naam}</span>
+              <span class="item-status-toets">📝 Toets!</span>
+            </div>`;
+        }
       });
 
       startItems.forEach(r => {
