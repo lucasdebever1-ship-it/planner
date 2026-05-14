@@ -265,9 +265,9 @@
         });
 
         (v.huiswerk || []).forEach(h => {
-          if (!h.inleverdatum || h.gedaan) return;
-          const hwDatum = parseDatum(h.inleverdatum);
-          if (hwDatum.getTime() === dagMs) {
+          if (!h.inleverdatum || h.gedaan === true) return;
+          // Vergelijk als string om timezone-problemen te vermijden
+          if (h.inleverdatum.slice(0, 10) === toDatumStr(dag)) {
             hwKaarten.push({ vak: v.naam, omschrijving: h.omschrijving });
           }
         });

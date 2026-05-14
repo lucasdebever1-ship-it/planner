@@ -386,7 +386,8 @@
       const diff = (dagNr - d.getDay() + 7) % 7;
       // diff === 0 means today — return today so it shows immediately
       d.setDate(d.getDate() + diff);
-      return d.toISOString().slice(0, 10);
+      const y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, '0'), dd = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${dd}`;
     }
 
     function laad() {
