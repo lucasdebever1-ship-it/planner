@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
-  <title>Weekoverzicht</title>
+  <title>Weekkalender</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; }
 
@@ -17,11 +17,12 @@
       padding: 40px 20px 60px;
     }
 
+    /* Header */
     .pagina-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 36px;
+      margin-bottom: 24px;
     }
     .pagina-header h1 { margin: 0; font-size: 1.4rem; font-weight: 700; letter-spacing: -0.3px; }
 
@@ -37,250 +38,344 @@
     }
     .btn-terug:hover { background: #192840; border-color: #4f8ef7; }
 
-    #week-lijst {
+    /* Week navigatie */
+    .week-nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .btn-week {
+      flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+      background: #161616;
+      border: 1px solid #2a2a2a;
+      border-radius: 10px;
+      color: #666;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.15s, border-color 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-week:hover { color: #e8e8e8; border-color: #4f8ef7; }
+
+    .week-bereik {
+      flex: 1;
+      text-align: center;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #aaa;
+    }
+
+    /* Dag rij */
+    .dag-rij {
+      display: flex;
+      gap: 3px;
+      margin-bottom: 20px;
+    }
+
+    .dag-pill {
+      flex: 1;
+      min-width: 0;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      align-items: center;
+      gap: 5px;
+      padding: 9px 2px;
+      border-radius: 12px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      color: #555;
+      transition: background 0.15s, color 0.15s;
+      -webkit-tap-highlight-color: transparent;
     }
+    .dag-pill:active { opacity: 0.7; }
+    .dag-pill.vandaag:not(.geselecteerd) { color: #4f8ef7; }
+    .dag-pill.geselecteerd { background: #4f8ef7; color: #fff; }
 
-    .dag-kaart {
-      background: #161616;
-      border: 1px solid #242424;
-      border-radius: 16px;
-      padding: 16px 18px;
-    }
-
-    .dag-kaart.vandaag        { border-color: #4f8ef7; background: #0f1a2e; }
-
-    /* Gekleurde dagrand — staan na .vandaag zodat ze die overschrijven */
-    .dag-kaart.alleen-leren       { border-color: #353535; }
-    .dag-kaart.heeft-start        { border-color: #2a7a45; }
-    .dag-kaart.heeft-toets-morgen { border-color: #c87020; }
-    .dag-kaart.heeft-toets-vandaag { border-color: #cc3333; background: #1a0808; }
-    .dag-kaart.vandaag.heeft-toets-vandaag { background: #200a0a; }
-
-    .dag-header {
-      display: flex;
-      align-items: baseline;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-
-    .dag-naam  { font-size: 1rem; font-weight: 800; letter-spacing: -0.1px; }
-    .dag-datum { font-size: 0.85rem; color: #555; }
-
-    .vandaag-chip {
-      font-size: 0.65rem;
+    .dag-letter {
+      font-size: 0.58rem;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: #4f8ef7;
-      background: #192840;
-      border-radius: 20px;
-      padding: 2px 8px;
+      letter-spacing: 0.08em;
+    }
+    .dag-getal {
+      font-size: 1rem;
+      font-weight: 700;
+      line-height: 1;
+      position: relative;
     }
 
-    .dag-items {
+    /* Stip onder vandaag als het niet geselecteerd is */
+    .dag-pill.vandaag:not(.geselecteerd) .dag-getal::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: #4f8ef7;
+    }
+
+    /* Dag inhoud */
+    .dag-inhoud {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
     }
 
-    .dag-item {
+    /* Kaarten */
+    .kaart {
+      border-radius: 14px;
+      padding: 14px 16px;
       display: flex;
       flex-direction: column;
-      gap: 2px;
-      padding: 10px 12px;
-      border-radius: 10px;
-      background: #1a1a1a;
+      gap: 3px;
     }
 
-    .dag-item.toets { background: #1a1205; border: 1px solid #3a2a05; }
-    .dag-item.start { background: #0f1f12; border: 1px solid #1a3d22; }
-    .dag-item.bezig { background: #141414; border: 1px solid #1e1e1e; }
+    .kaart-toets    { background: #1a0808; border: 1px solid #4a1515; }
+    .kaart-huiswerk { background: #080f1a; border: 1px solid #1a2d4a; }
+    .kaart-start    { background: #0a1f0f; border: 1px solid #1a3d22; }
+    .kaart-bezig    { background: #141414; border: 1px solid #272727; }
 
-    .item-vak       { font-size: 0.95rem; font-weight: 700; }
-    .item-toetsnaam { font-size: 0.8rem; color: #666; }
+    .kaart-vak  { font-size: 0.98rem; font-weight: 800; }
+    .kaart-naam { font-size: 0.8rem; color: #555; margin-top: 1px; }
+    .kaart-status { font-size: 0.85rem; font-weight: 600; margin-top: 4px; }
 
-    .item-status-toets    { font-size: 0.85rem; color: #f0c040; font-weight: 600; margin-top: 2px; }
-    .item-status-start    { font-size: 0.85rem; color: #3dcc7a; font-weight: 600; margin-top: 2px; }
-    .item-status-bezig    { font-size: 0.85rem; color: #888;    margin-top: 2px; }
-    .item-status-huiswerk { font-size: 0.85rem; color: #7fbfaa; margin-top: 2px; }
+    .kaart-toets    .kaart-status { color: #e05252; }
+    .kaart-huiswerk .kaart-status { color: #4f8ef7; }
+    .kaart-start    .kaart-status { color: #3dcc7a; }
+    .kaart-bezig    .kaart-status { color: #555; font-weight: 400; }
 
-    .dag-item.huiswerk { background: #111a16; border: 1px solid #1a2e24; }
-
-    /* Grote toetsbanner */
-    .toets-banner {
-      background: linear-gradient(135deg, #2a1800, #1a1000);
-      border: 2px solid #f0c040;
-      border-radius: 12px;
-      padding: 18px 16px;
+    /* Leeg */
+    .leeg {
       text-align: center;
-      box-shadow: 0 0 28px rgba(240, 192, 64, 0.12);
+      color: #3a3a3a;
+      padding: 56px 0 36px;
+      font-size: 1rem;
     }
-    .banner-emoji { font-size: 2rem; line-height: 1; margin-bottom: 6px; }
-    .banner-titel { font-size: 1.1rem; font-weight: 800; color: #f0c040; letter-spacing: 0.07em; }
-    .banner-vak   { font-size: 0.82rem; color: #9a7a30; margin-top: 5px; }
   </style>
 </head>
 <body>
+
   <div class="pagina-header">
-    <h1>Deze week</h1>
+    <h1>Weekkalender</h1>
     <a href="index.html" class="btn-terug">← Terug</a>
   </div>
 
-  <div id="week-lijst"></div>
+  <div class="week-nav">
+    <button class="btn-week" id="btn-vorige">‹</button>
+    <div class="week-bereik" id="week-bereik"></div>
+    <button class="btn-week" id="btn-volgende">›</button>
+  </div>
+
+  <div class="dag-rij" id="dag-rij"></div>
+  <div class="dag-inhoud" id="dag-inhoud"></div>
 
   <script>
-    const dagNamen = ['Zondag','Maandag','Dinsdag','Woensdag','Donderdag','Vrijdag','Zaterdag'];
-    const maandNamen = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+    const DAG_LETTERS  = ['zo','ma','di','wo','do','vr','za'];
+    const MAAND_NAMEN  = ['januari','februari','maart','april','mei','juni','juli',
+                          'augustus','september','oktober','november','december'];
+    const STANDAARD_DAGEN = { Mondeling:7, Proefwerk:4, SO:1, Luistertoets:0,
+                               Schrijfvaardigheid:2, PO:14, Anders:3 };
 
-    function leerMultiplier() {
-      const profiel = JSON.parse(localStorage.getItem('profiel') || '{}');
-      return ['VWO 5','VWO 6','HAVO 4','HAVO 5'].includes(profiel.niveau) ? 1.5 : 1;
+    // ── Datum helpers ──────────────────────────────────────────
+
+    function normaliseer(d) {
+      const r = new Date(d);
+      r.setHours(0, 0, 0, 0);
+      return r;
     }
 
-    function dagenTussen(a, b) {
-      return Math.round((b - a) / 86400000);
+    function addDagen(d, n) {
+      const r = new Date(d);
+      r.setDate(r.getDate() + n);
+      r.setHours(0, 0, 0, 0);
+      return r;
     }
 
-    function datumString(d) {
-      return d.getDate() + ' ' + maandNamen[d.getMonth()];
+    function getMaandag(datum) {
+      const d = normaliseer(datum);
+      const diff = d.getDay() === 0 ? -6 : 1 - d.getDay();
+      return addDagen(d, diff);
     }
 
-    const multiplier = leerMultiplier();
-    const vakken = JSON.parse(localStorage.getItem('vakken') || '[]');
+    function toDatumStr(d) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${dd}`;
+    }
 
-    // Huiswerk: alleen niet-afgevinkte items met een datum
-    const alleHuiswerk = [];
-    vakken.forEach(v => {
-      (v.huiswerk || []).forEach(h => {
-        if (!h.inleverdatum || h.gedaan) return;
-        const datum = new Date(h.inleverdatum + 'T00:00:00');
-        datum.setHours(0, 0, 0, 0);
-        alleHuiswerk.push({ vak: v.naam, omschrijving: h.omschrijving, datum });
-      });
-    });
+    function parseDatum(str) {
+      return normaliseer(new Date(str + 'T00:00:00'));
+    }
 
-    const alleToetsen = [];
-    vakken.forEach(v => {
-      const toetsen = v.toetsen || (v.toetsdatum ? [{ naam: 'Toets', datum: v.toetsdatum }] : []);
-      toetsen.forEach(t => {
-        if (!t.datum) return;
-        const toetsDatum = new Date(t.datum);
-        toetsDatum.setHours(0, 0, 0, 0);
-        const startDagen = Math.round((v.moeilijkheid / 2 + 1) * multiplier);
-        const beginDatum = new Date(toetsDatum);
-        beginDatum.setDate(beginDatum.getDate() - startDagen);
-        alleToetsen.push({ vak: v.naam, toets: t, toetsDatum, beginDatum });
-      });
-    });
-
-    const vandaag = new Date();
-    vandaag.setHours(0, 0, 0, 0);
-
-    const lijst = document.getElementById('week-lijst');
-    let html = '';
-
-    for (let i = 0; i < 7; i++) {
-      const dag = new Date(vandaag);
-      dag.setDate(dag.getDate() + i);
-
-      const isVandaag = i === 0;
-
-      const toetsItems = [], startItems = [], bezigItems = [];
-      const hwItems = alleHuiswerk.filter(h => dagenTussen(dag, h.datum) === 0);
-
-      alleToetsen.forEach(r => {
-        const opToetsDag = dagenTussen(dag, r.toetsDatum) === 0;
-        const opBeginDag = dagenTussen(dag, r.beginDatum) === 0;
-        const bezig      = dag > r.beginDatum && dag < r.toetsDatum;
-
-        if (opToetsDag)       toetsItems.push(r);
-        else if (opBeginDag)  startItems.push(r);
-        else if (bezig)       bezigItems.push(r);
-      });
-
-      // Vrije dag: weglaten
-      if (!toetsItems.length && !startItems.length && !bezigItems.length && !hwItems.length) continue;
-
-      // Bepaal randklasse (prioriteit: toets vandaag > toets morgen > start > alleen leren)
-      let randKlasse;
-      if (toetsItems.length) {
-        randKlasse = 'heeft-toets-vandaag';
-      } else {
-        const morgen = new Date(dag);
-        morgen.setDate(morgen.getDate() + 1);
-        const heeftToetsMorgen = alleToetsen.some(r => dagenTussen(morgen, r.toetsDatum) === 0);
-        if (heeftToetsMorgen)   randKlasse = 'heeft-toets-morgen';
-        else if (startItems.length) randKlasse = 'heeft-start';
-        else                    randKlasse = 'alleen-leren';
+    function weekBereikTekst(maandag) {
+      const zondag = addDagen(maandag, 6);
+      const jaar = zondag.getFullYear();
+      if (maandag.getMonth() === zondag.getMonth()) {
+        return `${maandag.getDate()} – ${zondag.getDate()} ${MAAND_NAMEN[maandag.getMonth()]} ${jaar}`;
       }
-
-      const kaartKlassen = ['dag-kaart', isVandaag ? 'vandaag' : '', randKlasse].filter(Boolean).join(' ');
-      const vandaagChip  = isVandaag ? '<span class="vandaag-chip">vandaag</span>' : '';
-
-      html += `
-        <div class="${kaartKlassen}">
-          <div class="dag-header">
-            <span class="dag-naam">${dagNamen[dag.getDay()]}</span>
-            <span class="dag-datum">${datumString(dag)}</span>
-            ${vandaagChip}
-          </div>
-          <div class="dag-items">`;
-
-      toetsItems.forEach(r => {
-        if (isVandaag) {
-          html += `
-            <div class="toets-banner">
-              <div class="banner-emoji">📝</div>
-              <div class="banner-titel">TOETS VANDAAG</div>
-              <div class="banner-vak">${r.vak} — ${r.toets.naam}</div>
-            </div>`;
-        } else {
-          html += `
-            <div class="dag-item toets">
-              <span class="item-vak">${r.vak}</span>
-              <span class="item-toetsnaam">${r.toets.naam}</span>
-              <span class="item-status-toets">📝 Toets!</span>
-            </div>`;
-        }
-      });
-
-      startItems.forEach(r => {
-        html += `
-            <div class="dag-item start">
-              <span class="item-vak">${r.vak}</span>
-              <span class="item-toetsnaam">${r.toets.naam}</span>
-              <span class="item-status-start">📚 Start vandaag met leren</span>
-            </div>`;
-      });
-
-      bezigItems.forEach(r => {
-        const dagenTot = dagenTussen(dag, r.toetsDatum);
-        html += `
-            <div class="dag-item bezig">
-              <span class="item-vak">${r.vak}</span>
-              <span class="item-toetsnaam">${r.toets.naam}</span>
-              <span class="item-status-bezig">📚 Leren — nog ${dagenTot} dag${dagenTot === 1 ? '' : 'en'} tot de toets</span>
-            </div>`;
-      });
-
-      hwItems.forEach(h => {
-        html += `
-            <div class="dag-item huiswerk">
-              <span class="item-vak">${h.vak}</span>
-              <span class="item-toetsnaam">${h.omschrijving}</span>
-              <span class="item-status-huiswerk">📋 Inleveren</span>
-            </div>`;
-      });
-
-      html += `
-          </div>
-        </div>`;
+      return `${maandag.getDate()} ${MAAND_NAMEN[maandag.getMonth()]} – ${zondag.getDate()} ${MAAND_NAMEN[zondag.getMonth()]} ${jaar}`;
     }
 
-    lijst.innerHTML = html;
+    // ── Data ───────────────────────────────────────────────────
+
+    function getLeerDagen(type, moeilijkheid) {
+      const inst = JSON.parse(localStorage.getItem('instellingen') || '{}');
+      const key  = type || 'Anders';
+      const basis = inst[key] !== undefined
+        ? inst[key]
+        : (STANDAARD_DAGEN[key] !== undefined ? STANDAARD_DAGEN[key] : STANDAARD_DAGEN.Anders);
+      if (basis === 0) return 0;
+      return Math.max(1, Math.round(basis * ((moeilijkheid || 5) / 5)));
+    }
+
+    function berekenKaarten(dag) {
+      const vakken = JSON.parse(localStorage.getItem('vakken') || '[]');
+      const dagMs  = dag.getTime();
+
+      const toetsKaarten = [], hwKaarten = [], startKaarten = [], bezigKaarten = [];
+
+      vakken.forEach(v => {
+        const toetsen = v.toetsen || (v.toetsdatum ? [{ naam: 'Toets', datum: v.toetsdatum }] : []);
+
+        toetsen.forEach(t => {
+          if (!t.datum) return;
+          const toetsDatum  = parseDatum(t.datum);
+          const leerDagen   = getLeerDagen(t.type, v.moeilijkheid);
+          const beginDatum  = leerDagen > 0 ? addDagen(toetsDatum, -leerDagen) : null;
+          const dagenTot    = Math.round((toetsDatum - dag) / 86400000);
+
+          if (toetsDatum.getTime() === dagMs) {
+            toetsKaarten.push({ vak: v.naam, naam: t.naam, type: t.type });
+          } else if (beginDatum && beginDatum.getTime() === dagMs) {
+            startKaarten.push({ vak: v.naam, naam: t.naam, type: t.type, dagenTot });
+          } else if (beginDatum && dag > beginDatum && dag < toetsDatum) {
+            bezigKaarten.push({ vak: v.naam, naam: t.naam, type: t.type, dagenTot });
+          }
+        });
+
+        (v.huiswerk || []).forEach(h => {
+          if (!h.inleverdatum || h.gedaan) return;
+          const hwDatum = parseDatum(h.inleverdatum);
+          if (hwDatum.getTime() === dagMs) {
+            hwKaarten.push({ vak: v.naam, omschrijving: h.omschrijving });
+          }
+        });
+      });
+
+      return { toetsKaarten, hwKaarten, startKaarten, bezigKaarten };
+    }
+
+    // ── State ──────────────────────────────────────────────────
+
+    const vandaag   = normaliseer(new Date());
+    let weekMaandag = getMaandag(vandaag);
+    let gekozenDag  = new Date(vandaag);
+
+    // ── Render ─────────────────────────────────────────────────
+
+    function renderWeekNav() {
+      document.getElementById('week-bereik').textContent = weekBereikTekst(weekMaandag);
+    }
+
+    function renderDagRij() {
+      let html = '';
+      for (let i = 0; i < 7; i++) {
+        const dag = addDagen(weekMaandag, i);
+        const isVandaag      = dag.getTime() === vandaag.getTime();
+        const isGeselecteerd = dag.getTime() === gekozenDag.getTime();
+        const klassen = ['dag-pill',
+          isGeselecteerd ? 'geselecteerd' : '',
+          isVandaag      ? 'vandaag'      : ''
+        ].filter(Boolean).join(' ');
+
+        html += `<button class="${klassen}" data-dag="${toDatumStr(dag)}">
+          <span class="dag-letter">${DAG_LETTERS[dag.getDay()]}</span>
+          <span class="dag-getal">${dag.getDate()}</span>
+        </button>`;
+      }
+      document.getElementById('dag-rij').innerHTML = html;
+    }
+
+    function renderDagInhoud() {
+      const { toetsKaarten, hwKaarten, startKaarten, bezigKaarten } = berekenKaarten(gekozenDag);
+      let html = '';
+
+      toetsKaarten.forEach(k => {
+        html += `<div class="kaart kaart-toets">
+          <div class="kaart-vak">${k.vak}</div>
+          ${k.naam ? `<div class="kaart-naam">${k.naam}${k.type ? ` · ${k.type}` : ''}</div>` : ''}
+          <div class="kaart-status">📝 Toets</div>
+        </div>`;
+      });
+
+      hwKaarten.forEach(k => {
+        html += `<div class="kaart kaart-huiswerk">
+          <div class="kaart-vak">${k.vak}</div>
+          <div class="kaart-naam">${k.omschrijving}</div>
+          <div class="kaart-status">📋 Inleveren</div>
+        </div>`;
+      });
+
+      startKaarten.forEach(k => {
+        const over = k.dagenTot === 1 ? '1 dag' : `${k.dagenTot} dagen`;
+        html += `<div class="kaart kaart-start">
+          <div class="kaart-vak">${k.vak}</div>
+          ${k.naam ? `<div class="kaart-naam">${k.naam}${k.type ? ` · ${k.type}` : ''}</div>` : ''}
+          <div class="kaart-status">📚 Begin met leren · toets over ${over}</div>
+        </div>`;
+      });
+
+      bezigKaarten.forEach(k => {
+        const nog = k.dagenTot === 1 ? '1 dag' : `${k.dagenTot} dagen`;
+        html += `<div class="kaart kaart-bezig">
+          <div class="kaart-vak">${k.vak}</div>
+          ${k.naam ? `<div class="kaart-naam">${k.naam}${k.type ? ` · ${k.type}` : ''}</div>` : ''}
+          <div class="kaart-status">📚 Leren — nog ${nog} tot de toets</div>
+        </div>`;
+      });
+
+      if (!html) html = '<div class="leeg">Niets gepland vandaag 🎉</div>';
+      document.getElementById('dag-inhoud').innerHTML = html;
+    }
+
+    function render() {
+      renderWeekNav();
+      renderDagRij();
+      renderDagInhoud();
+    }
+
+    // ── Events ─────────────────────────────────────────────────
+
+    function navigeerWeek(delta) {
+      const dagInWeek = Math.round((gekozenDag - weekMaandag) / 86400000);
+      weekMaandag = addDagen(weekMaandag, delta * 7);
+      gekozenDag  = addDagen(weekMaandag, dagInWeek);
+      render();
+    }
+
+    document.getElementById('btn-vorige').addEventListener('click', () => navigeerWeek(-1));
+    document.getElementById('btn-volgende').addEventListener('click', () => navigeerWeek(1));
+
+    document.getElementById('dag-rij').addEventListener('click', e => {
+      const pill = e.target.closest('.dag-pill');
+      if (!pill) return;
+      gekozenDag = parseDatum(pill.dataset.dag);
+      renderDagRij();
+      renderDagInhoud();
+    });
+
+    render();
   </script>
 </body>
 </html>
