@@ -37,7 +37,6 @@
     }
     .btn-terug:hover { background: #192840; border-color: #4f8ef7; }
 
-    /* Dag-kaarten */
     #week-lijst {
       display: flex;
       flex-direction: column;
@@ -51,10 +50,14 @@
       padding: 16px 18px;
     }
 
-    .dag-kaart.vandaag {
-      border-color: #4f8ef7;
-      background: #0f1a2e;
-    }
+    .dag-kaart.vandaag        { border-color: #4f8ef7; background: #0f1a2e; }
+
+    /* Gekleurde dagrand — staan na .vandaag zodat ze die overschrijven */
+    .dag-kaart.alleen-leren       { border-color: #353535; }
+    .dag-kaart.heeft-start        { border-color: #2a7a45; }
+    .dag-kaart.heeft-toets-morgen { border-color: #c87020; }
+    .dag-kaart.heeft-toets-vandaag { border-color: #cc3333; background: #1a0808; }
+    .dag-kaart.vandaag.heeft-toets-vandaag { background: #200a0a; }
 
     .dag-header {
       display: flex;
@@ -63,16 +66,8 @@
       margin-bottom: 12px;
     }
 
-    .dag-naam {
-      font-size: 1rem;
-      font-weight: 800;
-      letter-spacing: -0.1px;
-    }
-
-    .dag-datum {
-      font-size: 0.85rem;
-      color: #555;
-    }
+    .dag-naam  { font-size: 1rem; font-weight: 800; letter-spacing: -0.1px; }
+    .dag-datum { font-size: 0.85rem; color: #555; }
 
     .vandaag-chip {
       font-size: 0.65rem;
@@ -85,7 +80,6 @@
       padding: 2px 8px;
     }
 
-    /* Items binnen een dag */
     .dag-items {
       display: flex;
       flex-direction: column;
@@ -101,28 +95,27 @@
       background: #1a1a1a;
     }
 
-    .dag-item.toets   { background: #1a1205; border: 1px solid #3a2a05; }
-    .dag-item.start   { background: #0f1f12; border: 1px solid #1a3d22; }
-    .dag-item.bezig   { background: #141414; border: 1px solid #1e1e1e; }
+    .dag-item.start { background: #0f1f12; border: 1px solid #1a3d22; }
+    .dag-item.bezig { background: #141414; border: 1px solid #1e1e1e; }
 
-    .item-vak {
-      font-size: 0.95rem;
-      font-weight: 700;
+    .item-vak       { font-size: 0.95rem; font-weight: 700; }
+    .item-toetsnaam { font-size: 0.8rem; color: #666; }
+
+    .item-status-start { font-size: 0.85rem; color: #3dcc7a; font-weight: 600; margin-top: 2px; }
+    .item-status-bezig { font-size: 0.85rem; color: #888; margin-top: 2px; }
+
+    /* Grote toetsbanner */
+    .toets-banner {
+      background: linear-gradient(135deg, #2a1800, #1a1000);
+      border: 2px solid #f0c040;
+      border-radius: 12px;
+      padding: 18px 16px;
+      text-align: center;
+      box-shadow: 0 0 28px rgba(240, 192, 64, 0.12);
     }
-
-    .item-toetsnaam {
-      font-size: 0.8rem;
-      color: #666;
-    }
-
-    .item-status-toets  { font-size: 0.85rem; color: #f0c040; font-weight: 600; margin-top: 2px; }
-    .item-status-start  { font-size: 0.85rem; color: #3dcc7a; font-weight: 600; margin-top: 2px; }
-    .item-status-bezig  { font-size: 0.85rem; color: #888;    margin-top: 2px; }
-
-    .dag-vrij {
-      font-size: 0.88rem;
-      color: #333;
-    }
+    .banner-emoji { font-size: 2rem; line-height: 1; margin-bottom: 6px; }
+    .banner-titel { font-size: 1.1rem; font-weight: 800; color: #f0c040; letter-spacing: 0.07em; }
+    .banner-vak   { font-size: 0.82rem; color: #9a7a30; margin-top: 5px; }
   </style>
 </head>
 <body>
@@ -153,7 +146,6 @@
     const multiplier = leerMultiplier();
     const vakken = JSON.parse(localStorage.getItem('vakken') || '[]');
 
-    // Normaliseer toetsen
     const alleToetsen = [];
     vakken.forEach(v => {
       const toetsen = v.toetsen || (v.toetsdatum ? [{ naam: 'Toets', datum: v.toetsdatum }] : []);
@@ -168,7 +160,6 @@
       });
     });
 
-    // Bouw de 7 dagen op
     const vandaag = new Date();
     vandaag.setHours(0, 0, 0, 0);
 
@@ -180,65 +171,74 @@
       dag.setDate(dag.getDate() + i);
 
       const isVandaag = i === 0;
-      const dagStr = dagNamen[dag.getDay()];
-      const datStr = datumString(dag);
 
-      // Verzamel items voor deze dag — gesorteerd: toets > start > bezig
       const toetsItems = [], startItems = [], bezigItems = [];
 
       alleToetsen.forEach(r => {
-        const opToetsDag  = dagenTussen(dag, r.toetsDatum) === 0;
-        const opBeginDag  = dagenTussen(dag, r.beginDatum) === 0;
-        const bezig       = dag > r.beginDatum && dag < r.toetsDatum;
+        const opToetsDag = dagenTussen(dag, r.toetsDatum) === 0;
+        const opBeginDag = dagenTussen(dag, r.beginDatum) === 0;
+        const bezig      = dag > r.beginDatum && dag < r.toetsDatum;
 
-        if (opToetsDag) {
-          toetsItems.push(r);
-        } else if (opBeginDag) {
-          startItems.push(r);
-        } else if (bezig) {
-          bezigItems.push(r);
-        }
+        if (opToetsDag)       toetsItems.push(r);
+        else if (opBeginDag)  startItems.push(r);
+        else if (bezig)       bezigItems.push(r);
       });
 
-      const vandaagChip = isVandaag ? '<span class="vandaag-chip">vandaag</span>' : '';
+      // Vrije dag: weglaten
+      if (!toetsItems.length && !startItems.length && !bezigItems.length) continue;
+
+      // Bepaal randklasse (prioriteit: toets vandaag > toets morgen > start > alleen leren)
+      let randKlasse;
+      if (toetsItems.length) {
+        randKlasse = 'heeft-toets-vandaag';
+      } else {
+        const morgen = new Date(dag);
+        morgen.setDate(morgen.getDate() + 1);
+        const heeftToetsMorgen = alleToetsen.some(r => dagenTussen(morgen, r.toetsDatum) === 0);
+        if (heeftToetsMorgen)   randKlasse = 'heeft-toets-morgen';
+        else if (startItems.length) randKlasse = 'heeft-start';
+        else                    randKlasse = 'alleen-leren';
+      }
+
+      const kaartKlassen = ['dag-kaart', isVandaag ? 'vandaag' : '', randKlasse].filter(Boolean).join(' ');
+      const vandaagChip  = isVandaag ? '<span class="vandaag-chip">vandaag</span>' : '';
 
       html += `
-        <div class="dag-kaart${isVandaag ? ' vandaag' : ''}">
+        <div class="${kaartKlassen}">
           <div class="dag-header">
-            <span class="dag-naam">${dagStr}</span>
-            <span class="dag-datum">${datStr}</span>
+            <span class="dag-naam">${dagNamen[dag.getDay()]}</span>
+            <span class="dag-datum">${datumString(dag)}</span>
             ${vandaagChip}
           </div>
           <div class="dag-items">`;
 
-      if (!toetsItems.length && !startItems.length && !bezigItems.length) {
-        html += '<span class="dag-vrij">Vrij</span>';
-      } else {
-        toetsItems.forEach(r => {
-          html += `
-            <div class="dag-item toets">
-              <span class="item-vak">${r.vak}</span>
-              <span class="item-toetsnaam">${r.toets.naam}</span>
-              <span class="item-status-toets">📝 Toets!</span>
+      toetsItems.forEach(r => {
+        html += `
+            <div class="toets-banner">
+              <div class="banner-emoji">📝</div>
+              <div class="banner-titel">TOETS VANDAAG</div>
+              <div class="banner-vak">${r.vak} — ${r.toets.naam}</div>
             </div>`;
-        });
-        startItems.forEach(r => {
-          html += `
+      });
+
+      startItems.forEach(r => {
+        html += `
             <div class="dag-item start">
               <span class="item-vak">${r.vak}</span>
               <span class="item-toetsnaam">${r.toets.naam}</span>
               <span class="item-status-start">📚 Start vandaag met leren</span>
             </div>`;
-        });
-        bezigItems.forEach(r => {
-          html += `
+      });
+
+      bezigItems.forEach(r => {
+        const dagenTot = dagenTussen(dag, r.toetsDatum);
+        html += `
             <div class="dag-item bezig">
               <span class="item-vak">${r.vak}</span>
               <span class="item-toetsnaam">${r.toets.naam}</span>
-              <span class="item-status-bezig">Blijf leren</span>
+              <span class="item-status-bezig">📚 Leren — nog ${dagenTot} dag${dagenTot === 1 ? '' : 'en'} tot de toets</span>
             </div>`;
-        });
-      }
+      });
 
       html += `
           </div>
