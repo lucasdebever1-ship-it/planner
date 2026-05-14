@@ -17,7 +17,7 @@
       color: #e8e8e8;
       margin: 0;
       min-height: 100vh;
-      padding: 48px 20px 60px;
+      padding: 0 0 90px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -26,6 +26,13 @@
     .center {
       width: 100%;
       max-width: 480px;
+      padding: 0 20px;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: flex-end;
+      padding: 16px 0 8px;
     }
 
     .tagline {
@@ -42,7 +49,6 @@
       margin: 0 0 32px;
     }
 
-    /* Vandaag sectie */
     .sectie-label {
       font-size: 0.72rem;
       font-weight: 700;
@@ -56,7 +62,6 @@
       display: flex;
       flex-direction: column;
       gap: 12px;
-      margin-bottom: 32px;
     }
 
     .vandaag-kaart {
@@ -65,129 +70,140 @@
       border-radius: 14px;
       padding: 16px 18px;
     }
+    .vandaag-kaart.te-laat { background: #160e0e; border-color: #3a1515; }
 
-    .vandaag-kaart.te-laat {
-      background: #160e0e;
-      border-color: #3a1515;
-    }
-
-    .vandaag-vak {
-      font-size: 1.15rem;
-      font-weight: 800;
-      letter-spacing: -0.2px;
-      margin-bottom: 2px;
-    }
-
-    .vandaag-toets {
-      font-size: 0.88rem;
-      color: #666;
-      margin-bottom: 10px;
-    }
-
-    .vandaag-datum {
-      font-size: 0.95rem;
-      color: #888;
-      margin-bottom: 8px;
-    }
-
-    .vandaag-status-begin  { font-size: 0.95rem; font-weight: 600; color: #3dcc7a; }
-    .vandaag-status-laat   { font-size: 0.95rem; font-weight: 600; color: #e05252; }
+    .vandaag-vak    { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.2px; margin-bottom: 2px; }
+    .vandaag-toets  { font-size: 0.88rem; color: #666; margin-bottom: 10px; }
+    .vandaag-datum  { font-size: 0.95rem; color: #888; margin-bottom: 8px; }
+    .vandaag-status-begin { font-size: 0.95rem; font-weight: 600; color: #3dcc7a; }
+    .vandaag-status-laat  { font-size: 0.95rem; font-weight: 600; color: #e05252; }
 
     .vandaag-leeg {
       font-size: 0.95rem;
       color: #444;
-      margin-bottom: 32px;
       padding: 16px 18px;
       background: #111;
       border-radius: 14px;
       border: 1px solid #1e1e1e;
     }
 
-    /* Navigatieknoppen */
-    .knoppen {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
+    /* ── Navigatie ── */
+    .hamburger-btn {
+      background: none; border: none; cursor: pointer;
+      padding: 6px 8px; border-radius: 8px;
+      display: flex; flex-direction: column; gap: 5px; align-items: center;
+      transition: background 0.15s; -webkit-tap-highlight-color: transparent;
     }
+    .hamburger-btn:hover { background: #1a1a1a; }
+    .hamburger-streep { display: block; width: 20px; height: 2px; background: #666; border-radius: 2px; }
 
-    .btn {
-      display: block;
-      padding: 16px 24px;
-      border-radius: 14px;
-      font-size: 1rem;
-      font-weight: 600;
-      text-decoration: none;
-      text-align: center;
-      transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    .menu-overlay { position: fixed; inset: 0; z-index: 200; display: none; }
+    .menu-overlay.open { display: block; }
+    .menu-achtergrond { position: absolute; inset: 0; }
+    .menu-kaart {
+      position: absolute; top: 52px; right: 20px;
+      background: #1c1c1c; border: 1px solid #2e2e2e;
+      border-radius: 12px; min-width: 210px; overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
     }
-    .btn:active { transform: scale(0.98); }
+    .menu-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 18px; text-decoration: none;
+      color: #e8e8e8; font-size: 0.95rem;
+      border: none; background: none; width: 100%;
+      text-align: left; cursor: pointer;
+      border-bottom: 1px solid #242424;
+      transition: background 0.15s; font-family: inherit;
+    }
+    .menu-item:last-child { border-bottom: none; }
+    .menu-item:hover { background: #242424; }
+    .menu-item.rood { color: #e05252; }
 
-    .btn-primary {
-      background: #4f8ef7;
-      color: #fff;
-      border: 1px solid transparent;
+    .tabbar {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #0f0f0f; border-top: 1px solid #1e1e1e;
+      display: flex; z-index: 100;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
     }
-    .btn-primary:hover { background: #3a7ef0; }
-
-    .btn-secondary {
-      background: #161616;
-      color: #e8e8e8;
-      border: 1px solid #262626;
+    .tab {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; gap: 3px;
+      padding: 10px 4px 12px;
+      text-decoration: none; color: #3a3a3a;
+      font-size: 0.6rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      -webkit-tap-highlight-color: transparent;
+      transition: color 0.15s;
     }
-    .btn-secondary:hover { border-color: #404040; background: #1c1c1c; }
-
-    .reset-btn {
-      position: fixed;
-      bottom: 16px;
-      right: 16px;
-      background: none;
-      border: 1px solid #2a2a2a;
-      color: #444;
-      font-size: 0.72rem;
-      padding: 6px 10px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: color 0.15s, border-color 0.15s;
-    }
-    .reset-btn:hover { color: #e8e8e8; border-color: #555; }
+    .tab:active { opacity: 0.7; }
+    .tab.actief { color: #4f8ef7; }
+    .tab-icoon { font-size: 1.35rem; line-height: 1; }
   </style>
 </head>
 <body>
   <div class="center">
+    <div class="top-bar">
+      <button class="hamburger-btn" id="hamburger" aria-label="Menu">
+        <span class="hamburger-streep"></span>
+        <span class="hamburger-streep"></span>
+        <span class="hamburger-streep"></span>
+      </button>
+    </div>
+
     <h1 class="tagline" id="begroeting"></h1>
     <p class="sub">Weet wat je moet leren. En wanneer.</p>
 
     <p class="sectie-label">Vandaag</p>
     <div id="vandaag-lijst"></div>
+  </div>
 
-    <div class="knoppen">
-      <a href="vakken.html"      class="btn btn-primary">Mijn vakken</a>
-      <a href="week.html"        class="btn btn-secondary">Deze week</a>
-      <a href="overzicht.html"   class="btn btn-secondary">Volledig overzicht</a>
-      <a href="instellingen.html" class="btn btn-secondary">Instellingen</a>
+  <!-- Menu -->
+  <div class="menu-overlay" id="menu-overlay">
+    <div class="menu-achtergrond" onclick="sluitMenu()"></div>
+    <div class="menu-kaart">
+      <a href="instellingen.html" class="menu-item" onclick="sluitMenu()">⚙️&nbsp; Instellingen</a>
+      <button class="menu-item rood" onclick="resetProfiel()">🔄&nbsp; Profiel resetten</button>
     </div>
   </div>
 
-  <button class="reset-btn" onclick="localStorage.removeItem('profiel'); location.replace('onboarding.html')">Reset onboarding</button>
+  <!-- Tabbar -->
+  <nav class="tabbar">
+    <a href="index.html"     class="tab actief"><span class="tab-icoon">🏠</span>Home</a>
+    <a href="vakken.html"    class="tab"><span class="tab-icoon">📚</span>Vakken</a>
+    <a href="week.html"      class="tab"><span class="tab-icoon">📅</span>Week</a>
+    <a href="overzicht.html" class="tab"><span class="tab-icoon">📝</span>Toetsen</a>
+  </nav>
 
   <script>
+    // Hamburger
+    document.getElementById('hamburger').addEventListener('click', () => {
+      document.getElementById('menu-overlay').classList.toggle('open');
+    });
+    function sluitMenu() { document.getElementById('menu-overlay').classList.remove('open'); }
+    function resetProfiel() {
+      sluitMenu();
+      if (confirm('Wil je het profiel resetten? Alle gegevens worden verwijderd.')) {
+        localStorage.clear();
+        location.replace('onboarding.html');
+      }
+    }
+
     // Begroeting
     const profiel = JSON.parse(localStorage.getItem('profiel') || '{}');
-    const naamDeel = profiel.naam ? 'Hé ' + profiel.naam + ',' : 'Hé,';
-    document.getElementById('begroeting').textContent = naamDeel + ' klaar voor vandaag?';
-
-    // Schoolniveau multiplier
-    function leerMultiplier() {
-      return ['VWO 5','VWO 6','HAVO 4','HAVO 5'].includes(profiel.niveau) ? 1.5 : 1;
-    }
+    document.getElementById('begroeting').textContent =
+      (profiel.naam ? 'Hé ' + profiel.naam + ',' : 'Hé,') + ' klaar voor vandaag?';
 
     // Vandaag-sectie
     (function() {
+      function leerMultiplier() {
+        return ['VWO 5','VWO 6','HAVO 4','HAVO 5'].includes(profiel.niveau) ? 1.5 : 1;
+      }
+
       const vakken = JSON.parse(localStorage.getItem('vakken') || '[]');
       const vandaag = new Date();
       vandaag.setHours(0, 0, 0, 0);
-
       const items = [];
+
       vakken.forEach(v => {
         const toetsen = v.toetsen || (v.toetsdatum ? [{ naam: 'Toets', datum: v.toetsdatum }] : []);
         toetsen.forEach(t => {
@@ -195,36 +211,33 @@
           const toetsDatum = new Date(t.datum);
           toetsDatum.setHours(0, 0, 0, 0);
           const dagsTotToets = Math.round((toetsDatum - vandaag) / 86400000);
-          if (dagsTotToets < 0) return; // toets al geweest
+          if (dagsTotToets < 0) return;
           const startDagen = Math.round((v.moeilijkheid / 2 + 1) * leerMultiplier());
           const dagsTotBegin = dagsTotToets - startDagen;
-          if (dagsTotBegin > 0) return; // nog niet aan de beurt
+          if (dagsTotBegin > 0) return;
           items.push({ vak: v.naam, toets: t, dagsTotBegin, toetsDatum });
         });
       });
 
       const lijst = document.getElementById('vandaag-lijst');
-
       if (!items.length) {
         lijst.innerHTML = '<div class="vandaag-leeg">Geen toetsen voor vandaag — geniet ervan 🎉</div>';
         return;
       }
 
       items.sort((a, b) => a.toetsDatum - b.toetsDatum);
-
       lijst.innerHTML = items.map(r => {
         const teLaat = r.dagsTotBegin < 0;
         const datumStr = r.toetsDatum.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' });
         const status = teLaat
           ? '<div class="vandaag-status-laat">⚠️ Je bent te laat met beginnen!</div>'
           : '<div class="vandaag-status-begin">📚 Begin vandaag</div>';
-        return `
-          <div class="vandaag-kaart${teLaat ? ' te-laat' : ''}">
-            <div class="vandaag-vak">${r.vak}</div>
-            <div class="vandaag-toets">${r.toets.naam}</div>
-            <div class="vandaag-datum">Toets op ${datumStr}</div>
-            ${status}
-          </div>`;
+        return `<div class="vandaag-kaart${teLaat ? ' te-laat' : ''}">
+          <div class="vandaag-vak">${r.vak}</div>
+          <div class="vandaag-toets">${r.toets.naam}</div>
+          <div class="vandaag-datum">Toets op ${datumStr}</div>
+          ${status}
+        </div>`;
       }).join('');
     })();
   </script>

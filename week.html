@@ -14,7 +14,7 @@
       color: #e8e8e8;
       max-width: 480px;
       margin: 0 auto;
-      padding: 40px 20px 60px;
+      padding: 40px 20px 90px;
     }
 
     /* Header */
@@ -26,17 +26,55 @@
     }
     .pagina-header h1 { margin: 0; font-size: 1.4rem; font-weight: 700; letter-spacing: -0.3px; }
 
-    .btn-terug {
-      background: #161616;
-      border: 1px solid #2e2e2e;
-      border-radius: 8px;
-      color: #4f8ef7;
-      font-size: 0.85rem;
-      padding: 7px 14px;
-      text-decoration: none;
-      transition: border-color 0.15s, background 0.15s;
+    /* ── Navigatie ── */
+    .hamburger-btn {
+      background: none; border: none; cursor: pointer;
+      padding: 6px 8px; border-radius: 8px;
+      display: flex; flex-direction: column; gap: 5px; align-items: center;
+      transition: background 0.15s; -webkit-tap-highlight-color: transparent;
     }
-    .btn-terug:hover { background: #192840; border-color: #4f8ef7; }
+    .hamburger-btn:hover { background: #1a1a1a; }
+    .hamburger-streep { display: block; width: 20px; height: 2px; background: #666; border-radius: 2px; }
+
+    .menu-overlay { position: fixed; inset: 0; z-index: 200; display: none; }
+    .menu-overlay.open { display: block; }
+    .menu-achtergrond { position: absolute; inset: 0; }
+    .menu-kaart {
+      position: absolute; top: 52px; right: 20px;
+      background: #1c1c1c; border: 1px solid #2e2e2e;
+      border-radius: 12px; min-width: 210px; overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+    }
+    .menu-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 18px; text-decoration: none;
+      color: #e8e8e8; font-size: 0.95rem;
+      border: none; background: none; width: 100%;
+      text-align: left; cursor: pointer;
+      border-bottom: 1px solid #242424;
+      transition: background 0.15s; font-family: inherit;
+    }
+    .menu-item:last-child { border-bottom: none; }
+    .menu-item:hover { background: #242424; }
+    .menu-item.rood { color: #e05252; }
+
+    .tabbar {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #0f0f0f; border-top: 1px solid #1e1e1e;
+      display: flex; z-index: 100;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    .tab {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; gap: 3px; padding: 10px 4px 12px;
+      text-decoration: none; color: #3a3a3a;
+      font-size: 0.6rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      -webkit-tap-highlight-color: transparent; transition: color 0.15s;
+    }
+    .tab:active { opacity: 0.7; }
+    .tab.actief { color: #4f8ef7; }
+    .tab-icoon { font-size: 1.35rem; line-height: 1; }
 
     /* Week navigatie */
     .week-nav {
@@ -167,7 +205,11 @@
 
   <div class="pagina-header">
     <h1>Weekkalender</h1>
-    <a href="index.html" class="btn-terug">← Terug</a>
+    <button class="hamburger-btn" id="hamburger" aria-label="Menu">
+      <span class="hamburger-streep"></span>
+      <span class="hamburger-streep"></span>
+      <span class="hamburger-streep"></span>
+    </button>
   </div>
 
   <div class="week-nav">
@@ -179,7 +221,35 @@
   <div class="dag-rij" id="dag-rij"></div>
   <div class="dag-inhoud" id="dag-inhoud"></div>
 
+  <!-- Menu -->
+  <div class="menu-overlay" id="menu-overlay">
+    <div class="menu-achtergrond" onclick="sluitMenu()"></div>
+    <div class="menu-kaart">
+      <a href="instellingen.html" class="menu-item" onclick="sluitMenu()">⚙️&nbsp; Instellingen</a>
+      <button class="menu-item rood" onclick="resetProfiel()">🔄&nbsp; Profiel resetten</button>
+    </div>
+  </div>
+
+  <!-- Tabbar -->
+  <nav class="tabbar">
+    <a href="index.html"     class="tab"><span class="tab-icoon">🏠</span>Home</a>
+    <a href="vakken.html"    class="tab"><span class="tab-icoon">📚</span>Vakken</a>
+    <a href="week.html"      class="tab actief"><span class="tab-icoon">📅</span>Week</a>
+    <a href="overzicht.html" class="tab"><span class="tab-icoon">📝</span>Toetsen</a>
+  </nav>
+
   <script>
+    // Navigatie
+    document.getElementById('hamburger').addEventListener('click', () => {
+      document.getElementById('menu-overlay').classList.toggle('open');
+    });
+    function sluitMenu() { document.getElementById('menu-overlay').classList.remove('open'); }
+    function resetProfiel() {
+      sluitMenu();
+      if (confirm('Wil je het profiel resetten? Alle gegevens worden verwijderd.')) {
+        localStorage.clear(); location.replace('onboarding.html');
+      }
+    }
     const DAG_LETTERS  = ['zo','ma','di','wo','do','vr','za'];
     const MAAND_NAMEN  = ['januari','februari','maart','april','mei','juni','juli',
                           'augustus','september','oktober','november','december'];
