@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="dark">
+  <meta name="color-scheme" content="light">
   <title>Studiegids</title>
   <script>
     if (!localStorage.getItem('profiel')) location.replace('onboarding.html');
@@ -13,8 +13,8 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #0f0f0f;
-      color: #e8e8e8;
+      background: #ffffff;
+      color: #1a1a1a;
       margin: 0;
       min-height: 100vh;
       padding: 0 0 90px;
@@ -41,11 +41,12 @@
       letter-spacing: -0.5px;
       margin: 0 0 6px;
       line-height: 1.2;
+      color: #1a1a1a;
     }
 
     .sub {
       font-size: 0.95rem;
-      color: #444;
+      color: #6b6b6b;
       margin: 0 0 32px;
     }
 
@@ -54,7 +55,7 @@
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.9px;
-      color: #555;
+      color: #aaa;
       margin: 0 0 12px;
     }
 
@@ -65,26 +66,30 @@
     }
 
     .vandaag-kaart {
-      background: #161616;
-      border: 1px solid #242424;
+      background: #f5f5f5;
+      border: 1px solid #ebebeb;
       border-radius: 14px;
       padding: 16px 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
-    .vandaag-kaart.te-laat { background: #160e0e; border-color: #3a1515; }
+    .vandaag-kaart.te-laat {
+      background: #fff5f5;
+      border-color: #ffd0d0;
+    }
 
-    .vandaag-vak    { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.2px; margin-bottom: 2px; }
-    .vandaag-toets  { font-size: 0.88rem; color: #666; margin-bottom: 10px; }
+    .vandaag-vak    { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.2px; margin-bottom: 2px; color: #1a1a1a; }
+    .vandaag-toets  { font-size: 0.88rem; color: #6b6b6b; margin-bottom: 10px; }
     .vandaag-datum  { font-size: 0.95rem; color: #888; margin-bottom: 8px; }
-    .vandaag-status-begin { font-size: 0.95rem; font-weight: 600; color: #3dcc7a; }
+    .vandaag-status-begin { font-size: 0.95rem; font-weight: 600; color: #2bc47e; }
     .vandaag-status-laat  { font-size: 0.95rem; font-weight: 600; color: #e05252; }
 
     .vandaag-leeg {
       font-size: 0.95rem;
-      color: #444;
+      color: #aaa;
       padding: 16px 18px;
-      background: #111;
+      background: #f5f5f5;
       border-radius: 14px;
-      border: 1px solid #1e1e1e;
+      border: 1px solid #ebebeb;
     }
 
     /* ── Navigatie ── */
@@ -94,49 +99,48 @@
       display: flex; flex-direction: column; gap: 5px; align-items: center;
       transition: background 0.15s; -webkit-tap-highlight-color: transparent;
     }
-    .hamburger-btn:hover { background: #1a1a1a; }
-    .hamburger-streep { display: block; width: 20px; height: 2px; background: #666; border-radius: 2px; }
+    .hamburger-btn:hover { background: #f0f0f0; }
+    .hamburger-streep { display: block; width: 20px; height: 2px; background: #888; border-radius: 2px; }
 
     .menu-overlay { position: fixed; inset: 0; z-index: 200; display: none; }
     .menu-overlay.open { display: block; }
     .menu-achtergrond { position: absolute; inset: 0; }
     .menu-kaart {
       position: absolute; top: 52px; right: 20px;
-      background: #1c1c1c; border: 1px solid #2e2e2e;
+      background: #ffffff; border: 1px solid #e8e8e8;
       border-radius: 12px; min-width: 210px; overflow: hidden;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
     }
     .menu-item {
       display: flex; align-items: center; gap: 12px;
       padding: 14px 18px; text-decoration: none;
-      color: #e8e8e8; font-size: 0.95rem;
+      color: #1a1a1a; font-size: 0.95rem;
       border: none; background: none; width: 100%;
       text-align: left; cursor: pointer;
-      border-bottom: 1px solid #242424;
+      border-bottom: 1px solid #f0f0f0;
       transition: background 0.15s; font-family: inherit;
     }
     .menu-item:last-child { border-bottom: none; }
-    .menu-item:hover { background: #242424; }
+    .menu-item:hover { background: #f5f5f5; }
     .menu-item.rood { color: #e05252; }
 
     .tabbar {
       position: fixed; bottom: 0; left: 0; right: 0;
-      background: #0f0f0f; border-top: 1px solid #1e1e1e;
+      background: #ffffff; border-top: 1px solid #ebebeb;
       display: flex; z-index: 100;
       padding-bottom: env(safe-area-inset-bottom, 0px);
+      box-shadow: 0 -2px 12px rgba(0,0,0,0.06);
     }
     .tab {
       flex: 1; display: flex; flex-direction: column;
-      align-items: center; gap: 3px;
-      padding: 10px 4px 12px;
-      text-decoration: none; color: #3a3a3a;
+      align-items: center; gap: 3px; padding: 10px 4px 12px;
+      text-decoration: none; color: #bbb;
       font-size: 0.6rem; font-weight: 700;
       text-transform: uppercase; letter-spacing: 0.05em;
-      -webkit-tap-highlight-color: transparent;
-      transition: color 0.15s;
+      -webkit-tap-highlight-color: transparent; transition: color 0.15s;
     }
     .tab:active { opacity: 0.7; }
-    .tab.actief { color: #4f8ef7; }
+    .tab.actief { color: #3ddc97; }
     .tab-icoon { font-size: 1.35rem; line-height: 1; }
   </style>
 </head>
@@ -175,7 +179,6 @@
   </nav>
 
   <script>
-    // Hamburger
     document.getElementById('hamburger').addEventListener('click', () => {
       document.getElementById('menu-overlay').classList.toggle('open');
     });
@@ -183,27 +186,22 @@
     function resetProfiel() {
       sluitMenu();
       if (confirm('Wil je het profiel resetten? Alle gegevens worden verwijderd.')) {
-        localStorage.clear();
-        location.replace('onboarding.html');
+        localStorage.clear(); location.replace('onboarding.html');
       }
     }
 
-    // Begroeting
     const profiel = JSON.parse(localStorage.getItem('profiel') || '{}');
     document.getElementById('begroeting').textContent =
       (profiel.naam ? 'Hé ' + profiel.naam + ',' : 'Hé,') + ' klaar voor vandaag?';
 
-    // Vandaag-sectie
     (function() {
       function leerMultiplier() {
         return ['VWO 5','VWO 6','HAVO 4','HAVO 5'].includes(profiel.niveau) ? 1.5 : 1;
       }
-
       const vakken = JSON.parse(localStorage.getItem('vakken') || '[]');
       const vandaag = new Date();
       vandaag.setHours(0, 0, 0, 0);
       const items = [];
-
       vakken.forEach(v => {
         const toetsen = v.toetsen || (v.toetsdatum ? [{ naam: 'Toets', datum: v.toetsdatum }] : []);
         toetsen.forEach(t => {
@@ -218,13 +216,11 @@
           items.push({ vak: v.naam, toets: t, dagsTotBegin, toetsDatum });
         });
       });
-
       const lijst = document.getElementById('vandaag-lijst');
       if (!items.length) {
         lijst.innerHTML = '<div class="vandaag-leeg">Geen toetsen voor vandaag — geniet ervan 🎉</div>';
         return;
       }
-
       items.sort((a, b) => a.toetsDatum - b.toetsDatum);
       lijst.innerHTML = items.map(r => {
         const teLaat = r.dagsTotBegin < 0;

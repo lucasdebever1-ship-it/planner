@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="dark">
+  <meta name="color-scheme" content="light">
   <title>Toetsen</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #0f0f0f;
-      color: #e8e8e8;
+      background: #ffffff;
+      color: #1a1a1a;
       max-width: 480px;
       margin: 0 auto;
       padding: 40px 20px 90px;
@@ -23,59 +23,57 @@
       align-items: center;
       margin-bottom: 36px;
     }
-    .pagina-header h1 { margin: 0; font-size: 1.4rem; font-weight: 700; letter-spacing: -0.3px; }
+    .pagina-header h1 { margin: 0; font-size: 1.4rem; font-weight: 700; letter-spacing: -0.3px; color: #1a1a1a; }
 
     .groep { margin-bottom: 36px; }
 
     .groep-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 16px;
+      display: flex; align-items: center; gap: 8px; margin-bottom: 16px;
     }
     .groep-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
     .groep-label {
       font-size: 0.72rem; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.9px; color: #777;
+      text-transform: uppercase; letter-spacing: 0.9px; color: #888;
     }
     .groep-count {
-      font-size: 0.7rem; color: #555;
-      background: #1e1e1e; border-radius: 20px; padding: 1px 8px;
+      font-size: 0.7rem; color: #aaa;
+      background: #f0f0f0; border-radius: 20px; padding: 1px 8px;
     }
 
     details.groep summary { list-style: none; }
     details.groep summary::-webkit-details-marker { display: none; }
     details.groep summary .groep-header { cursor: pointer; }
-    details.groep summary .groep-label { color: #444; }
-    details.groep summary .groep-count { background: #181818; }
+    details.groep summary .groep-label { color: #bbb; }
 
     .groep-kaarten { display: flex; flex-direction: column; gap: 16px; }
 
     .toets-kaart {
-      background: #161616; border: 1px solid #242424;
-      border-radius: 16px; padding: 20px;
-      transition: border-color 0.15s;
+      background: #f5f5f5;
+      border: 1px solid #ebebeb;
+      border-radius: 16px;
+      padding: 20px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
-    .toets-kaart:hover { border-color: #303030; }
-    .toets-kaart.urgent { background: #160e0e; border-color: #3a1515; }
-    .toets-kaart.verlopen { opacity: 0.35; }
+    .toets-kaart:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+    .toets-kaart.urgent  { background: #fff5f5; border-color: #ffd0d0; }
+    .toets-kaart.verlopen { opacity: 0.4; }
 
     .drukke-badge {
       display: inline-block; font-size: 0.72rem; font-weight: 700;
-      color: #f0a050; background: #2a1a05; border: 1px solid #4a2e08;
+      color: #c07820; background: #fff8f0; border: 1px solid #f0c890;
       border-radius: 20px; padding: 3px 10px; margin-bottom: 12px;
       letter-spacing: 0.03em;
     }
 
-    .vak-naam { font-size: 1.3rem; font-weight: 800; line-height: 1.2; margin-bottom: 4px; letter-spacing: -0.2px; }
-    .verlopen .vak-naam { text-decoration: line-through; color: #3a3a3a; }
-    .toets-type { font-size: 0.9rem; color: #666; margin-bottom: 14px; }
+    .vak-naam { font-size: 1.3rem; font-weight: 800; line-height: 1.2; margin-bottom: 4px; letter-spacing: -0.2px; color: #1a1a1a; }
+    .verlopen .vak-naam { text-decoration: line-through; color: #bbb; }
+    .toets-type { font-size: 0.9rem; color: #6b6b6b; margin-bottom: 14px; }
 
     .kaart-midden {
-      display: flex; justify-content: space-between;
-      align-items: flex-end; gap: 10px;
+      display: flex; justify-content: space-between; align-items: flex-end; gap: 10px;
     }
-    .toets-datum-groot { font-size: 1.05rem; font-weight: 600; color: #bbb; }
+    .toets-datum-groot { font-size: 1.05rem; font-weight: 600; color: #444; }
 
     .dagen-pill {
       font-size: 0.8rem; font-weight: 700;
@@ -84,10 +82,10 @@
     }
 
     .kaart-advies { margin-top: 14px; font-size: 0.95rem; font-weight: 600; line-height: 1.4; }
-    .leeradvies   { color: #3dcc7a; }
+    .leeradvies   { color: #2bc47e; }
     .waarschuwing { color: #e05252; }
 
-    .geen { color: #333; font-size: 0.9rem; margin-top: 8px; }
+    .geen { color: #aaa; font-size: 0.9rem; margin-top: 8px; }
 
     /* ── Navigatie ── */
     .hamburger-btn {
@@ -96,49 +94,48 @@
       display: flex; flex-direction: column; gap: 5px; align-items: center;
       transition: background 0.15s; -webkit-tap-highlight-color: transparent;
     }
-    .hamburger-btn:hover { background: #1a1a1a; }
-    .hamburger-streep { display: block; width: 20px; height: 2px; background: #666; border-radius: 2px; }
+    .hamburger-btn:hover { background: #f0f0f0; }
+    .hamburger-streep { display: block; width: 20px; height: 2px; background: #888; border-radius: 2px; }
 
     .menu-overlay { position: fixed; inset: 0; z-index: 200; display: none; }
     .menu-overlay.open { display: block; }
     .menu-achtergrond { position: absolute; inset: 0; }
     .menu-kaart {
       position: absolute; top: 52px; right: 20px;
-      background: #1c1c1c; border: 1px solid #2e2e2e;
+      background: #ffffff; border: 1px solid #e8e8e8;
       border-radius: 12px; min-width: 210px; overflow: hidden;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
     }
     .menu-item {
       display: flex; align-items: center; gap: 12px;
       padding: 14px 18px; text-decoration: none;
-      color: #e8e8e8; font-size: 0.95rem;
+      color: #1a1a1a; font-size: 0.95rem;
       border: none; background: none; width: 100%;
       text-align: left; cursor: pointer;
-      border-bottom: 1px solid #242424;
+      border-bottom: 1px solid #f0f0f0;
       transition: background 0.15s; font-family: inherit;
     }
     .menu-item:last-child { border-bottom: none; }
-    .menu-item:hover { background: #242424; }
+    .menu-item:hover { background: #f5f5f5; }
     .menu-item.rood { color: #e05252; }
 
     .tabbar {
       position: fixed; bottom: 0; left: 0; right: 0;
-      background: #0f0f0f; border-top: 1px solid #1e1e1e;
+      background: #ffffff; border-top: 1px solid #ebebeb;
       display: flex; z-index: 100;
       padding-bottom: env(safe-area-inset-bottom, 0px);
+      box-shadow: 0 -2px 12px rgba(0,0,0,0.06);
     }
     .tab {
       flex: 1; display: flex; flex-direction: column;
-      align-items: center; gap: 3px;
-      padding: 10px 4px 12px;
-      text-decoration: none; color: #3a3a3a;
+      align-items: center; gap: 3px; padding: 10px 4px 12px;
+      text-decoration: none; color: #bbb;
       font-size: 0.6rem; font-weight: 700;
       text-transform: uppercase; letter-spacing: 0.05em;
-      -webkit-tap-highlight-color: transparent;
-      transition: color 0.15s;
+      -webkit-tap-highlight-color: transparent; transition: color 0.15s;
     }
     .tab:active { opacity: 0.7; }
-    .tab.actief { color: #4f8ef7; }
+    .tab.actief { color: #3ddc97; }
     .tab-icoon { font-size: 1.35rem; line-height: 1; }
   </style>
 </head>
@@ -175,7 +172,6 @@
   </nav>
 
   <script>
-    // Navigatie
     document.getElementById('hamburger').addEventListener('click', () => {
       document.getElementById('menu-overlay').classList.toggle('open');
     });
@@ -187,7 +183,6 @@
       }
     }
 
-    // ── Overzicht logica ──
     function laad() {
       const vakken = JSON.parse(localStorage.getItem('vakken') || '[]');
       return vakken.map(v => {
@@ -237,11 +232,11 @@
     function renderKaart(r) {
       const { categorie, dagsTotToets, dagsTotBegin, vak, moeilijkheid, toets } = r;
       const pilStijl = {
-        'urgent':        'background:#2d1010;color:#e05252',
-        'deze-week':     'background:#2a1e08;color:#f0a050',
-        'volgende-week': 'background:#1e1c08;color:#d4c040',
-        'later':         'background:#1a1a1a;color:#555',
-        'verlopen':      'background:#161616;color:#333',
+        'urgent':        'background:#fff0f0;color:#e05252',
+        'deze-week':     'background:#fff8f0;color:#d07030',
+        'volgende-week': 'background:#fffcf0;color:#b09020',
+        'later':         'background:#f0f0f0;color:#888',
+        'verlopen':      'background:#f5f5f5;color:#bbb',
       }[categorie] || '';
       const dagenStr = dagsTotToets !== null ? dagenTekst(dagsTotToets) : null;
       const drukBadge = r.drukkeWeek ? `<div class="drukke-badge">Drukke week</div>` : '';
@@ -271,7 +266,6 @@
       const vandaag = new Date();
       vandaag.setHours(0, 0, 0, 0);
       const items = [];
-
       vakken.forEach(v => {
         v.toetsen.forEach(t => {
           let dagsTotToets = null;
@@ -289,8 +283,7 @@
       const weekTelling = {};
       items.forEach(r => {
         if (r.toets.datum && r.categorie !== 'verlopen') {
-          const w = isoWeek(r.toets.datum);
-          weekTelling[w] = (weekTelling[w] || 0) + 1;
+          const w = isoWeek(r.toets.datum); weekTelling[w] = (weekTelling[w] || 0) + 1;
         }
       });
       items.forEach(r => {
@@ -309,8 +302,8 @@
       const secties = [
         { id: 'urgent',        label: 'Op tijd beginnen', dot: '#e05252' },
         { id: 'deze-week',     label: 'Deze week',        dot: '#f0a050' },
-        { id: 'volgende-week', label: 'Volgende week',    dot: '#d4c040' },
-        { id: 'later',         label: 'Later',            dot: '#444'    },
+        { id: 'volgende-week', label: 'Volgende week',    dot: '#c8b030' },
+        { id: 'later',         label: 'Later',            dot: '#ccc'    },
       ];
       const verlopen = items.filter(r => r.categorie === 'verlopen');
       let html = '';
@@ -330,7 +323,7 @@
         html += `<details class="groep">
           <summary>
             <div class="groep-header">
-              <span class="groep-dot" style="background:#333"></span>
+              <span class="groep-dot" style="background:#ccc"></span>
               <span class="groep-label">Afgelopen</span>
               <span class="groep-count">${verlopen.length}</span>
             </div>

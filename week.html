@@ -3,28 +3,111 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="dark">
+  <meta name="color-scheme" content="light">
   <title>Weekkalender</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #0f0f0f;
-      color: #e8e8e8;
+      background: #ffffff;
+      color: #1a1a1a;
       max-width: 480px;
       margin: 0 auto;
       padding: 40px 20px 90px;
     }
 
-    /* Header */
     .pagina-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 24px;
     }
-    .pagina-header h1 { margin: 0; font-size: 1.4rem; font-weight: 700; letter-spacing: -0.3px; }
+    .pagina-header h1 { margin: 0; font-size: 1.4rem; font-weight: 700; letter-spacing: -0.3px; color: #1a1a1a; }
+
+    /* Week navigatie */
+    .week-nav {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 16px;
+    }
+    .btn-week {
+      flex-shrink: 0; width: 40px; height: 40px;
+      background: #f5f5f5; border: 1px solid #e0e0e0;
+      border-radius: 10px; color: #888; font-size: 1.2rem;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-week:hover { color: #1a1a1a; border-color: #3ddc97; background: #edf8f3; }
+
+    .week-bereik {
+      flex: 1; text-align: center;
+      font-size: 0.88rem; font-weight: 600; color: #6b6b6b;
+    }
+
+    /* Dag rij */
+    .dag-rij {
+      display: flex; gap: 3px; margin-bottom: 20px;
+    }
+
+    .dag-pill {
+      flex: 1; min-width: 0;
+      display: flex; flex-direction: column; align-items: center; gap: 5px;
+      padding: 9px 2px; border-radius: 12px; border: none;
+      background: none; cursor: pointer; color: #bbb;
+      transition: background 0.15s, color 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .dag-pill:active { opacity: 0.7; }
+    .dag-pill.vandaag:not(.geselecteerd) { color: #3ddc97; }
+    .dag-pill.geselecteerd { background: #3ddc97; color: #ffffff; }
+
+    .dag-letter { font-size: 0.58rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
+    .dag-getal  { font-size: 1rem; font-weight: 700; line-height: 1; position: relative; }
+
+    .dag-pill.vandaag:not(.geselecteerd) .dag-getal::after {
+      content: '';
+      position: absolute; bottom: -5px; left: 50%;
+      transform: translateX(-50%);
+      width: 4px; height: 4px; border-radius: 50%;
+      background: #3ddc97;
+    }
+
+    /* Dag inhoud */
+    .dag-inhoud { display: flex; flex-direction: column; gap: 10px; }
+
+    /* Kaarten */
+    .kaart {
+      border-radius: 14px; padding: 14px 16px;
+      display: flex; flex-direction: column; gap: 3px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .kaart-toets    { background: #fff5f5; border: 1px solid #ffd0d0; }
+    .kaart-huiswerk { background: #f0f5ff; border: 1px solid #c8d8ff; }
+    .kaart-start    { background: #f0fbf5; border: 1px solid #b8efd3; }
+    .kaart-bezig    { background: #f5f5f5; border: 1px solid #e8e8e8; }
+
+    .kaart-vak  { font-size: 0.98rem; font-weight: 800; color: #1a1a1a; }
+    .kaart-naam { font-size: 0.8rem; color: #888; margin-top: 1px; }
+    .kaart-status { font-size: 0.85rem; font-weight: 600; margin-top: 4px; }
+
+    .kaart-toets    .kaart-status { color: #e05252; }
+    .kaart-huiswerk .kaart-status { color: #3a6edc; }
+    .kaart-start    .kaart-status { color: #2bc47e; }
+    .kaart-bezig    .kaart-status { color: #888; font-weight: 400; }
+
+    /* Toetsbanner (toets vandaag op de dag zelf) */
+    .toets-banner {
+      background: #fff8f0; border: 2px solid #f0c060;
+      border-radius: 12px; padding: 18px 16px; text-align: center;
+      box-shadow: 0 4px 16px rgba(240,192,64,0.15);
+    }
+    .banner-emoji { font-size: 2rem; line-height: 1; margin-bottom: 6px; }
+    .banner-titel { font-size: 1.1rem; font-weight: 800; color: #c07820; letter-spacing: 0.07em; }
+    .banner-vak   { font-size: 0.82rem; color: #b09060; margin-top: 5px; }
+
+    /* Leeg */
+    .leeg { text-align: center; color: #ccc; padding: 56px 0 36px; font-size: 1rem; }
 
     /* ── Navigatie ── */
     .hamburger-btn {
@@ -33,172 +116,49 @@
       display: flex; flex-direction: column; gap: 5px; align-items: center;
       transition: background 0.15s; -webkit-tap-highlight-color: transparent;
     }
-    .hamburger-btn:hover { background: #1a1a1a; }
-    .hamburger-streep { display: block; width: 20px; height: 2px; background: #666; border-radius: 2px; }
+    .hamburger-btn:hover { background: #f0f0f0; }
+    .hamburger-streep { display: block; width: 20px; height: 2px; background: #888; border-radius: 2px; }
 
     .menu-overlay { position: fixed; inset: 0; z-index: 200; display: none; }
     .menu-overlay.open { display: block; }
     .menu-achtergrond { position: absolute; inset: 0; }
     .menu-kaart {
       position: absolute; top: 52px; right: 20px;
-      background: #1c1c1c; border: 1px solid #2e2e2e;
+      background: #ffffff; border: 1px solid #e8e8e8;
       border-radius: 12px; min-width: 210px; overflow: hidden;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
     }
     .menu-item {
       display: flex; align-items: center; gap: 12px;
       padding: 14px 18px; text-decoration: none;
-      color: #e8e8e8; font-size: 0.95rem;
+      color: #1a1a1a; font-size: 0.95rem;
       border: none; background: none; width: 100%;
       text-align: left; cursor: pointer;
-      border-bottom: 1px solid #242424;
+      border-bottom: 1px solid #f0f0f0;
       transition: background 0.15s; font-family: inherit;
     }
     .menu-item:last-child { border-bottom: none; }
-    .menu-item:hover { background: #242424; }
+    .menu-item:hover { background: #f5f5f5; }
     .menu-item.rood { color: #e05252; }
 
     .tabbar {
       position: fixed; bottom: 0; left: 0; right: 0;
-      background: #0f0f0f; border-top: 1px solid #1e1e1e;
+      background: #ffffff; border-top: 1px solid #ebebeb;
       display: flex; z-index: 100;
       padding-bottom: env(safe-area-inset-bottom, 0px);
+      box-shadow: 0 -2px 12px rgba(0,0,0,0.06);
     }
     .tab {
       flex: 1; display: flex; flex-direction: column;
       align-items: center; gap: 3px; padding: 10px 4px 12px;
-      text-decoration: none; color: #3a3a3a;
+      text-decoration: none; color: #bbb;
       font-size: 0.6rem; font-weight: 700;
       text-transform: uppercase; letter-spacing: 0.05em;
       -webkit-tap-highlight-color: transparent; transition: color 0.15s;
     }
     .tab:active { opacity: 0.7; }
-    .tab.actief { color: #4f8ef7; }
+    .tab.actief { color: #3ddc97; }
     .tab-icoon { font-size: 1.35rem; line-height: 1; }
-
-    /* Week navigatie */
-    .week-nav {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 16px;
-    }
-    .btn-week {
-      flex-shrink: 0;
-      width: 40px;
-      height: 40px;
-      background: #161616;
-      border: 1px solid #2a2a2a;
-      border-radius: 10px;
-      color: #666;
-      font-size: 1.2rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: color 0.15s, border-color 0.15s;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .btn-week:hover { color: #e8e8e8; border-color: #4f8ef7; }
-
-    .week-bereik {
-      flex: 1;
-      text-align: center;
-      font-size: 0.88rem;
-      font-weight: 600;
-      color: #aaa;
-    }
-
-    /* Dag rij */
-    .dag-rij {
-      display: flex;
-      gap: 3px;
-      margin-bottom: 20px;
-    }
-
-    .dag-pill {
-      flex: 1;
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 5px;
-      padding: 9px 2px;
-      border-radius: 12px;
-      border: none;
-      background: none;
-      cursor: pointer;
-      color: #555;
-      transition: background 0.15s, color 0.15s;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .dag-pill:active { opacity: 0.7; }
-    .dag-pill.vandaag:not(.geselecteerd) { color: #4f8ef7; }
-    .dag-pill.geselecteerd { background: #4f8ef7; color: #fff; }
-
-    .dag-letter {
-      font-size: 0.58rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-    .dag-getal {
-      font-size: 1rem;
-      font-weight: 700;
-      line-height: 1;
-      position: relative;
-    }
-
-    /* Stip onder vandaag als het niet geselecteerd is */
-    .dag-pill.vandaag:not(.geselecteerd) .dag-getal::after {
-      content: '';
-      position: absolute;
-      bottom: -5px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
-      background: #4f8ef7;
-    }
-
-    /* Dag inhoud */
-    .dag-inhoud {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    /* Kaarten */
-    .kaart {
-      border-radius: 14px;
-      padding: 14px 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-    }
-
-    .kaart-toets    { background: #1a0808; border: 1px solid #4a1515; }
-    .kaart-huiswerk { background: #080f1a; border: 1px solid #1a2d4a; }
-    .kaart-start    { background: #0a1f0f; border: 1px solid #1a3d22; }
-    .kaart-bezig    { background: #141414; border: 1px solid #272727; }
-
-    .kaart-vak  { font-size: 0.98rem; font-weight: 800; }
-    .kaart-naam { font-size: 0.8rem; color: #555; margin-top: 1px; }
-    .kaart-status { font-size: 0.85rem; font-weight: 600; margin-top: 4px; }
-
-    .kaart-toets    .kaart-status { color: #e05252; }
-    .kaart-huiswerk .kaart-status { color: #4f8ef7; }
-    .kaart-start    .kaart-status { color: #3dcc7a; }
-    .kaart-bezig    .kaart-status { color: #555; font-weight: 400; }
-
-    /* Leeg */
-    .leeg {
-      text-align: center;
-      color: #3a3a3a;
-      padding: 56px 0 36px;
-      font-size: 1rem;
-    }
   </style>
 </head>
 <body>
@@ -250,26 +210,15 @@
         localStorage.clear(); location.replace('onboarding.html');
       }
     }
+
     const DAG_LETTERS  = ['zo','ma','di','wo','do','vr','za'];
     const MAAND_NAMEN  = ['januari','februari','maart','april','mei','juni','juli',
                           'augustus','september','oktober','november','december'];
     const STANDAARD_DAGEN = { Mondeling:7, Proefwerk:4, SO:1, Luistertoets:0,
                                Schrijfvaardigheid:2, PO:14, Anders:3 };
 
-    // ── Datum helpers ──────────────────────────────────────────
-
-    function normaliseer(d) {
-      const r = new Date(d);
-      r.setHours(0, 0, 0, 0);
-      return r;
-    }
-
-    function addDagen(d, n) {
-      const r = new Date(d);
-      r.setDate(r.getDate() + n);
-      r.setHours(0, 0, 0, 0);
-      return r;
-    }
+    function normaliseer(d) { const r = new Date(d); r.setHours(0,0,0,0); return r; }
+    function addDagen(d, n) { const r = new Date(d); r.setDate(r.getDate()+n); r.setHours(0,0,0,0); return r; }
 
     function getMaandag(datum) {
       const d = normaliseer(datum);
@@ -278,15 +227,11 @@
     }
 
     function toDatumStr(d) {
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, '0');
-      const dd = String(d.getDate()).padStart(2, '0');
+      const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), dd = String(d.getDate()).padStart(2,'0');
       return `${y}-${m}-${dd}`;
     }
 
-    function parseDatum(str) {
-      return normaliseer(new Date(str + 'T00:00:00'));
-    }
+    function parseDatum(str) { return normaliseer(new Date(str + 'T00:00:00')); }
 
     function weekBereikTekst(maandag) {
       const zondag = addDagen(maandag, 6);
@@ -297,13 +242,10 @@
       return `${maandag.getDate()} ${MAAND_NAMEN[maandag.getMonth()]} – ${zondag.getDate()} ${MAAND_NAMEN[zondag.getMonth()]} ${jaar}`;
     }
 
-    // ── Data ───────────────────────────────────────────────────
-
     function getLeerDagen(type, moeilijkheid) {
       const inst = JSON.parse(localStorage.getItem('instellingen') || '{}');
       const key  = type || 'Anders';
-      const basis = inst[key] !== undefined
-        ? inst[key]
+      const basis = inst[key] !== undefined ? inst[key]
         : (STANDAARD_DAGEN[key] !== undefined ? STANDAARD_DAGEN[key] : STANDAARD_DAGEN.Anders);
       if (basis === 0) return 0;
       return Math.max(1, Math.round(basis * ((moeilijkheid || 5) / 5)));
@@ -312,19 +254,16 @@
     function berekenKaarten(dag) {
       const vakken = JSON.parse(localStorage.getItem('vakken') || '[]');
       const dagMs  = dag.getTime();
-
       const toetsKaarten = [], hwKaarten = [], startKaarten = [], bezigKaarten = [];
 
       vakken.forEach(v => {
         const toetsen = v.toetsen || (v.toetsdatum ? [{ naam: 'Toets', datum: v.toetsdatum }] : []);
-
         toetsen.forEach(t => {
           if (!t.datum) return;
-          const toetsDatum  = parseDatum(t.datum);
-          const leerDagen   = getLeerDagen(t.type, v.moeilijkheid);
-          const beginDatum  = leerDagen > 0 ? addDagen(toetsDatum, -leerDagen) : null;
-          const dagenTot    = Math.round((toetsDatum - dag) / 86400000);
-
+          const toetsDatum = parseDatum(t.datum);
+          const leerDagen  = getLeerDagen(t.type, v.moeilijkheid);
+          const beginDatum = leerDagen > 0 ? addDagen(toetsDatum, -leerDagen) : null;
+          const dagenTot   = Math.round((toetsDatum - dag) / 86400000);
           if (toetsDatum.getTime() === dagMs) {
             toetsKaarten.push({ vak: v.naam, naam: t.naam, type: t.type });
           } else if (beginDatum && beginDatum.getTime() === dagMs) {
@@ -336,8 +275,7 @@
 
         (v.huiswerk || []).forEach(h => {
           if (!h.inleverdatum || h.gedaan === true) return;
-          // Vergelijk als string om timezone-problemen te vermijden
-          if (h.inleverdatum.slice(0, 10) === toDatumStr(dag)) {
+          if (h.inleverdatum.slice(0,10) === toDatumStr(dag)) {
             hwKaarten.push({ vak: v.naam, omschrijving: h.omschrijving });
           }
         });
@@ -346,13 +284,10 @@
       return { toetsKaarten, hwKaarten, startKaarten, bezigKaarten };
     }
 
-    // ── State ──────────────────────────────────────────────────
-
+    // ── State ──
     const vandaag   = normaliseer(new Date());
     let weekMaandag = getMaandag(vandaag);
     let gekozenDag  = new Date(vandaag);
-
-    // ── Render ─────────────────────────────────────────────────
 
     function renderWeekNav() {
       document.getElementById('week-bereik').textContent = weekBereikTekst(weekMaandag);
@@ -364,11 +299,7 @@
         const dag = addDagen(weekMaandag, i);
         const isVandaag      = dag.getTime() === vandaag.getTime();
         const isGeselecteerd = dag.getTime() === gekozenDag.getTime();
-        const klassen = ['dag-pill',
-          isGeselecteerd ? 'geselecteerd' : '',
-          isVandaag      ? 'vandaag'      : ''
-        ].filter(Boolean).join(' ');
-
+        const klassen = ['dag-pill', isGeselecteerd ? 'geselecteerd' : '', isVandaag ? 'vandaag' : ''].filter(Boolean).join(' ');
         html += `<button class="${klassen}" data-dag="${toDatumStr(dag)}">
           <span class="dag-letter">${DAG_LETTERS[dag.getDay()]}</span>
           <span class="dag-getal">${dag.getDate()}</span>
@@ -378,15 +309,24 @@
     }
 
     function renderDagInhoud() {
+      const isVandaagGeselecteerd = gekozenDag.getTime() === vandaag.getTime();
       const { toetsKaarten, hwKaarten, startKaarten, bezigKaarten } = berekenKaarten(gekozenDag);
       let html = '';
 
       toetsKaarten.forEach(k => {
-        html += `<div class="kaart kaart-toets">
-          <div class="kaart-vak">${k.vak}</div>
-          ${k.naam ? `<div class="kaart-naam">${k.naam}${k.type ? ` · ${k.type}` : ''}</div>` : ''}
-          <div class="kaart-status">📝 Toets</div>
-        </div>`;
+        if (isVandaagGeselecteerd) {
+          html += `<div class="toets-banner">
+            <div class="banner-emoji">📝</div>
+            <div class="banner-titel">TOETS VANDAAG</div>
+            <div class="banner-vak">${k.vak} — ${k.naam}</div>
+          </div>`;
+        } else {
+          html += `<div class="kaart kaart-toets">
+            <div class="kaart-vak">${k.vak}</div>
+            ${k.naam ? `<div class="kaart-naam">${k.naam}${k.type ? ` · ${k.type}` : ''}</div>` : ''}
+            <div class="kaart-status">📝 Toets</div>
+          </div>`;
+        }
       });
 
       hwKaarten.forEach(k => {
@@ -419,13 +359,7 @@
       document.getElementById('dag-inhoud').innerHTML = html;
     }
 
-    function render() {
-      renderWeekNav();
-      renderDagRij();
-      renderDagInhoud();
-    }
-
-    // ── Events ─────────────────────────────────────────────────
+    function render() { renderWeekNav(); renderDagRij(); renderDagInhoud(); }
 
     function navigeerWeek(delta) {
       const dagInWeek = Math.round((gekozenDag - weekMaandag) / 86400000);
@@ -441,8 +375,7 @@
       const pill = e.target.closest('.dag-pill');
       if (!pill) return;
       gekozenDag = parseDatum(pill.dataset.dag);
-      renderDagRij();
-      renderDagInhoud();
+      renderDagRij(); renderDagInhoud();
     });
 
     render();

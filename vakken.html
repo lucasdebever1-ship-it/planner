@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="dark">
+  <meta name="color-scheme" content="light">
   <title>Vakken</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #0f0f0f;
-      color: #e8e8e8;
+      background: #ffffff;
+      color: #1a1a1a;
       max-width: 480px;
       margin: 0 auto;
       padding: 40px 20px 90px;
@@ -23,20 +23,21 @@
       align-items: center;
       margin-bottom: 28px;
     }
-    .pagina-header h1 { margin: 0; font-size: 1.4rem; font-weight: 700; letter-spacing: -0.3px; }
+    .pagina-header h1 { margin: 0; font-size: 1.4rem; font-weight: 700; letter-spacing: -0.3px; color: #1a1a1a; }
 
     .form-panel {
-      background: #161616;
-      border: 1px solid #242424;
+      background: #ffffff;
+      border: 1px solid #e8e8e8;
       border-radius: 14px;
       padding: 20px;
       margin-bottom: 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
     }
 
     .form-rij { display: flex; gap: 10px; margin-bottom: 10px; }
 
     .form-group { display: flex; flex-direction: column; gap: 5px; }
-    .form-group label { font-size: 0.7rem; color: #666; text-transform: uppercase; letter-spacing: 0.7px; }
+    .form-group label { font-size: 0.7rem; color: #aaa; text-transform: uppercase; letter-spacing: 0.7px; font-weight: 600; }
     .form-group.flex1 { flex: 1; }
 
     input[type="text"],
@@ -44,10 +45,10 @@
     input[type="date"],
     select {
       width: 100%;
-      background: #1e1e1e;
-      border: 1px solid #2e2e2e;
+      background: #ffffff;
+      border: 1px solid #e0e0e0;
       border-radius: 8px;
-      color: #e8e8e8;
+      color: #1a1a1a;
       padding: 10px 12px;
       font-size: 0.95rem;
       outline: none;
@@ -56,14 +57,14 @@
     input[type="text"]:focus,
     input[type="number"]:focus,
     input[type="date"]:focus,
-    select:focus { border-color: #4f8ef7; }
+    select:focus { border-color: #3ddc97; }
     select { appearance: none; }
     input[type="number"] { width: 80px; }
 
     .btn-primary {
       width: 100%;
-      background: #4f8ef7;
-      color: #fff;
+      background: #3ddc97;
+      color: #ffffff;
       border: none;
       border-radius: 8px;
       padding: 11px;
@@ -72,19 +73,20 @@
       cursor: pointer;
       transition: background 0.15s;
     }
-    .btn-primary:hover { background: #3a7ef0; }
+    .btn-primary:hover { background: #2bc47e; }
 
     #lijst { display: flex; flex-direction: column; gap: 16px; }
 
     .kaart {
-      background: #161616;
-      border: 1px solid #242424;
+      background: #f5f5f5;
+      border: 1px solid #ebebeb;
       border-radius: 16px;
       padding: 18px;
-      transition: border-color 0.15s;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
-    .kaart:hover { border-color: #303030; }
-    .kaart.bewerkrij { border-color: #4f8ef7; }
+    .kaart:hover { border-color: #ddd; box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+    .kaart.bewerkrij { border-color: #3ddc97; box-shadow: 0 0 0 3px rgba(61,220,151,0.12); }
 
     .kaart-header {
       display: flex;
@@ -95,12 +97,12 @@
     }
     .kaart-titel { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0; }
     .vak-naam {
-      font-size: 1.15rem; font-weight: 800; letter-spacing: -0.2px;
+      font-size: 1.15rem; font-weight: 800; letter-spacing: -0.2px; color: #1a1a1a;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     .moeilijkheid-badge {
       font-size: 0.68rem; font-weight: 700;
-      color: #4f8ef7; background: #192840;
+      color: #2bc47e; background: #edf8f3;
       border-radius: 20px; padding: 3px 9px; flex-shrink: 0;
     }
 
@@ -108,17 +110,17 @@
     .acties button {
       background: none; border: none; cursor: pointer;
       border-radius: 7px; padding: 7px 9px;
-      font-size: 1rem; color: #444;
+      font-size: 1rem; color: #bbb;
       transition: color 0.15s, background 0.15s; line-height: 1;
     }
-    .acties .edit:hover      { color: #4f8ef7; background: #192840; }
-    .acties .add-toets       { color: #4f8ef7; font-size: 1.3rem; font-weight: 400; }
-    .acties .add-toets:hover { background: #192840; }
-    .acties .delete:hover    { color: #e05252; background: #2d1818; }
-    .acties .opslaan         { color: #3dcc7a; font-size: 1.1rem; }
-    .acties .opslaan:hover   { background: #182d20; }
-    .acties .annuleer        { color: #444; font-size: 1.1rem; }
-    .acties .annuleer:hover  { color: #888; }
+    .acties .edit:hover      { color: #4a7ef0; background: #eef3ff; }
+    .acties .add-toets       { color: #3ddc97; font-size: 1.3rem; font-weight: 400; }
+    .acties .add-toets:hover { background: #edf8f3; }
+    .acties .delete:hover    { color: #e05252; background: #fff5f5; }
+    .acties .opslaan         { color: #3ddc97; font-size: 1.1rem; }
+    .acties .opslaan:hover   { background: #edf8f3; }
+    .acties .annuleer        { color: #bbb; font-size: 1.1rem; }
+    .acties .annuleer:hover  { color: #888; background: #f5f5f5; }
 
     .kaart.bewerkrij .b-naam         { flex: 1; }
     .kaart.bewerkrij .b-moeilijkheid { width: 65px; }
@@ -127,112 +129,113 @@
 
     .toets-chip {
       display: flex; align-items: center; justify-content: space-between;
-      gap: 8px; background: #192840; border: 1px solid #1e3558;
+      gap: 8px; background: #eef3ff; border: 1px solid #c8d8ff;
       border-radius: 10px; padding: 8px 12px;
-      font-size: 0.88rem; color: #7fb3ff;
+      font-size: 0.88rem; color: #3a6edc;
     }
     .toets-chip-naam { flex: 1; }
     .toets-delete {
       background: none; border: none; cursor: pointer;
-      color: #2a4870; font-size: 0.75rem; padding: 0;
+      color: #c8d8ff; font-size: 0.75rem; padding: 0;
       line-height: 1; transition: color 0.15s; flex-shrink: 0;
     }
     .toets-delete:hover { color: #e05252; }
 
-    .leeradvies   { font-size: 0.78rem; color: #3dcc7a; margin-top: 3px; padding-left: 2px; }
-    .geen-toetsen { font-size: 0.85rem; color: #333; }
+    .leeradvies   { font-size: 0.78rem; color: #2bc47e; margin-top: 3px; padding-left: 2px; }
+    .geen-toetsen { font-size: 0.85rem; color: #bbb; }
 
     .toets-type-label {
-      font-size: 0.68rem; font-weight: 700; color: #888;
-      background: #1e1e1e; border-radius: 20px; padding: 2px 8px; flex-shrink: 0;
+      font-size: 0.68rem; font-weight: 700; color: #6b6b6b;
+      background: #f0f0f0; border-radius: 20px; padding: 2px 8px; flex-shrink: 0;
     }
 
     .toets-formrij {
       margin-top: 14px; padding-top: 14px;
-      border-top: 1px solid #1e1e1e;
+      border-top: 1px solid #ebebeb;
       display: flex; flex-direction: column; gap: 8px;
     }
     .toets-formrij-knoppen { display: flex; gap: 8px; }
     .toets-formrij .btn-save {
-      flex: 1; background: #4f8ef7; color: #fff; border: none;
+      flex: 1; background: #3ddc97; color: #ffffff; border: none;
       border-radius: 8px; padding: 9px; font-size: 0.9rem;
       font-weight: 600; cursor: pointer; transition: background 0.15s;
     }
-    .toets-formrij .btn-save:hover { background: #3a7ef0; }
+    .toets-formrij .btn-save:hover { background: #2bc47e; }
     .toets-formrij .btn-cancel {
-      background: #1e1e1e; border: 1px solid #2e2e2e; color: #666;
+      background: #f5f5f5; border: 1px solid #e0e0e0; color: #888;
       font-size: 0.9rem; cursor: pointer; padding: 9px 14px;
       border-radius: 8px; transition: color 0.15s;
     }
-    .toets-formrij .btn-cancel:hover { color: #aaa; }
+    .toets-formrij .btn-cancel:hover { color: #444; }
 
     /* ── Huiswerk ── */
     .huiswerk-sectie {
-      margin-top: 16px; padding-top: 14px; border-top: 1px solid #1e1e1e;
+      margin-top: 16px; padding-top: 14px; border-top: 1px solid #ebebeb;
     }
     .sectie-label {
-      font-size: 0.68rem; font-weight: 700; color: #555;
+      font-size: 0.68rem; font-weight: 700; color: #aaa;
       text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 8px;
     }
-    .geen-hw { font-size: 0.82rem; color: #333; margin-bottom: 8px; display: block; }
+    .geen-hw { font-size: 0.82rem; color: #bbb; margin-bottom: 8px; display: block; }
     .huiswerk-lijst { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
     .huiswerk-item {
       display: flex; align-items: center; gap: 10px;
-      background: #1a1a1a; border: 1px solid #242424;
+      background: #ffffff; border: 1px solid #e8e8e8;
       border-radius: 8px; padding: 8px 10px; transition: opacity 0.2s;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
     }
-    .huiswerk-item.gedaan { opacity: 0.4; }
-    .huiswerk-item.gedaan .hw-omschrijving { text-decoration: line-through; color: #555; }
+    .huiswerk-item.gedaan { opacity: 0.45; }
+    .huiswerk-item.gedaan .hw-omschrijving { text-decoration: line-through; color: #bbb; }
 
     .hw-vink {
       flex-shrink: 0; width: 26px; height: 26px;
-      border-radius: 50%; border: 2px solid #2e2e2e;
+      border-radius: 50%; border: 2px solid #e0e0e0;
       background: none; color: transparent;
       font-size: 0.8rem; font-weight: 700; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       transition: border-color 0.15s, background 0.15s, color 0.15s;
       line-height: 1; padding: 0;
     }
-    .hw-vink:hover   { border-color: #3dcc7a; color: #3dcc7a; }
-    .hw-vink.gevinkd { border-color: #3dcc7a; background: #0f2a1a; color: #3dcc7a; }
+    .hw-vink:hover   { border-color: #3ddc97; color: #3ddc97; }
+    .hw-vink.gevinkd { border-color: #3ddc97; background: #edf8f3; color: #3ddc97; }
 
     .hw-info { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
     .hw-omschrijving {
-      font-size: 0.88rem; font-weight: 600;
+      font-size: 0.88rem; font-weight: 600; color: #1a1a1a;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .hw-datum { font-size: 0.73rem; color: #555; }
+    .hw-datum { font-size: 0.73rem; color: #aaa; }
 
     .hw-delete {
       flex-shrink: 0; background: none; border: none; cursor: pointer;
-      color: #2a2a2a; font-size: 0.73rem; padding: 4px 6px;
+      color: #ddd; font-size: 0.73rem; padding: 4px 6px;
       line-height: 1; transition: color 0.15s;
     }
     .hw-delete:hover { color: #e05252; }
 
     .btn-add-hw {
-      width: 100%; background: none; border: 1px dashed #282828;
-      border-radius: 8px; color: #444; font-size: 0.82rem;
+      width: 100%; background: none; border: 1px dashed #d0d0d0;
+      border-radius: 8px; color: #bbb; font-size: 0.82rem;
       padding: 7px 12px; cursor: pointer; text-align: left;
       transition: border-color 0.15s, color 0.15s;
     }
-    .btn-add-hw:hover { border-color: #454545; color: #888; }
+    .btn-add-hw:hover { border-color: #3ddc97; color: #2bc47e; }
 
     .hw-formrij { margin-bottom: 8px; display: flex; flex-direction: column; gap: 8px; }
-    .hw-weekdag-info { font-size: 0.78rem; color: #3dcc7a; padding-left: 2px; }
+    .hw-weekdag-info { font-size: 0.78rem; color: #2bc47e; padding-left: 2px; }
     .hw-formrij-knoppen { display: flex; gap: 8px; }
     .hw-formrij .btn-save {
-      flex: 1; background: #2a7a45; color: #d4f5e4; border: none;
+      flex: 1; background: #3ddc97; color: #ffffff; border: none;
       border-radius: 8px; padding: 9px; font-size: 0.9rem;
       font-weight: 700; cursor: pointer; transition: background 0.15s;
     }
-    .hw-formrij .btn-save:hover { background: #236638; }
+    .hw-formrij .btn-save:hover { background: #2bc47e; }
     .hw-formrij .btn-cancel {
-      background: #1e1e1e; border: 1px solid #2e2e2e; color: #666;
+      background: #f5f5f5; border: 1px solid #e0e0e0; color: #888;
       font-size: 0.9rem; cursor: pointer; padding: 9px 14px;
       border-radius: 8px; transition: color 0.15s;
     }
-    .hw-formrij .btn-cancel:hover { color: #aaa; }
+    .hw-formrij .btn-cancel:hover { color: #444; }
 
     /* ── Navigatie ── */
     .hamburger-btn {
@@ -241,49 +244,48 @@
       display: flex; flex-direction: column; gap: 5px; align-items: center;
       transition: background 0.15s; -webkit-tap-highlight-color: transparent;
     }
-    .hamburger-btn:hover { background: #1a1a1a; }
-    .hamburger-streep { display: block; width: 20px; height: 2px; background: #666; border-radius: 2px; }
+    .hamburger-btn:hover { background: #f0f0f0; }
+    .hamburger-streep { display: block; width: 20px; height: 2px; background: #888; border-radius: 2px; }
 
     .menu-overlay { position: fixed; inset: 0; z-index: 200; display: none; }
     .menu-overlay.open { display: block; }
     .menu-achtergrond { position: absolute; inset: 0; }
     .menu-kaart {
       position: absolute; top: 52px; right: 20px;
-      background: #1c1c1c; border: 1px solid #2e2e2e;
+      background: #ffffff; border: 1px solid #e8e8e8;
       border-radius: 12px; min-width: 210px; overflow: hidden;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
     }
     .menu-item {
       display: flex; align-items: center; gap: 12px;
       padding: 14px 18px; text-decoration: none;
-      color: #e8e8e8; font-size: 0.95rem;
+      color: #1a1a1a; font-size: 0.95rem;
       border: none; background: none; width: 100%;
       text-align: left; cursor: pointer;
-      border-bottom: 1px solid #242424;
+      border-bottom: 1px solid #f0f0f0;
       transition: background 0.15s; font-family: inherit;
     }
     .menu-item:last-child { border-bottom: none; }
-    .menu-item:hover { background: #242424; }
+    .menu-item:hover { background: #f5f5f5; }
     .menu-item.rood { color: #e05252; }
 
     .tabbar {
       position: fixed; bottom: 0; left: 0; right: 0;
-      background: #0f0f0f; border-top: 1px solid #1e1e1e;
+      background: #ffffff; border-top: 1px solid #ebebeb;
       display: flex; z-index: 100;
       padding-bottom: env(safe-area-inset-bottom, 0px);
+      box-shadow: 0 -2px 12px rgba(0,0,0,0.06);
     }
     .tab {
       flex: 1; display: flex; flex-direction: column;
-      align-items: center; gap: 3px;
-      padding: 10px 4px 12px;
-      text-decoration: none; color: #3a3a3a;
+      align-items: center; gap: 3px; padding: 10px 4px 12px;
+      text-decoration: none; color: #bbb;
       font-size: 0.6rem; font-weight: 700;
       text-transform: uppercase; letter-spacing: 0.05em;
-      -webkit-tap-highlight-color: transparent;
-      transition: color 0.15s;
+      -webkit-tap-highlight-color: transparent; transition: color 0.15s;
     }
     .tab:active { opacity: 0.7; }
-    .tab.actief { color: #4f8ef7; }
+    .tab.actief { color: #3ddc97; }
     .tab-icoon { font-size: 1.35rem; line-height: 1; }
   </style>
 </head>
@@ -333,7 +335,6 @@
   </nav>
 
   <script>
-    // Navigatie
     document.getElementById('hamburger').addEventListener('click', () => {
       document.getElementById('menu-overlay').classList.toggle('open');
     });
@@ -345,7 +346,6 @@
       }
     }
 
-    // ── Vakken logica ──
     const sleutel = 'vakken';
     const dagNamen = ['Zondag','Maandag','Dinsdag','Woensdag','Donderdag','Vrijdag','Zaterdag'];
 
@@ -363,7 +363,6 @@
       const vandaag = new Date();
       vandaag.setHours(0, 0, 0, 0);
       let veranderd = false;
-
       const result = vakken.map(v => {
         if (!v.toetsen) {
           v.toetsen = v.toetsdatum ? [{ naam: 'Toets', datum: v.toetsdatum }] : [];
@@ -388,7 +387,6 @@
         });
         return v;
       });
-
       if (veranderd) localStorage.setItem(sleutel, JSON.stringify(result));
       return result;
     }
@@ -441,7 +439,7 @@
           const datumTekst = h.inleverdatum ? formatDatum(h.inleverdatum) : '—';
           const herhalTekst = h.weekdag != null ? ` · elke ${dagNamen[h.weekdag].toLowerCase()}` : '';
           html += `<div class="huiswerk-item${h.gedaan ? ' gedaan' : ''}">
-            <button class="hw-vink${h.gedaan ? ' gevinkd' : ''}" data-i="${i}" data-j="${j}" title="${h.gedaan ? 'Markeer als niet gedaan' : 'Markeer als gedaan'}">✓</button>
+            <button class="hw-vink${h.gedaan ? ' gevinkd' : ''}" data-i="${i}" data-j="${j}">✓</button>
             <div class="hw-info">
               <span class="hw-omschrijving">${h.omschrijving}</span>
               <span class="hw-datum">📅 ${datumTekst}${herhalTekst}</span>
@@ -470,9 +468,9 @@
               <span class="moeilijkheid-badge">${v.moeilijkheid} / 10</span>
             </div>
             <div class="acties">
-              <button class="edit"      data-i="${i}" title="Vak bewerken">&#x270F;</button>
+              <button class="edit"      data-i="${i}" title="Bewerken">&#x270F;</button>
               <button class="add-toets" data-i="${i}" title="Toets toevoegen">+</button>
-              <button class="delete"    data-i="${i}" title="Vak verwijderen">&#x2715;</button>
+              <button class="delete"    data-i="${i}" title="Verwijderen">&#x2715;</button>
             </div>
           </div>
           ${renderToetsen(v.toetsen, v.moeilijkheid, i)}
@@ -543,10 +541,9 @@
           <button class="hw-annuleer btn-cancel">✕</button>
         </div>`;
       sectie.insertBefore(formDiv, addBtn);
-
-      const select     = formDiv.querySelector('.hw-wdag');
+      const select = formDiv.querySelector('.hw-wdag');
       const datumInput = formDiv.querySelector('.hw-datum-input');
-      const info       = formDiv.querySelector('.hw-weekdag-info');
+      const info = formDiv.querySelector('.hw-weekdag-info');
       select.addEventListener('change', () => {
         if (select.value === '') {
           datumInput.style.display = ''; info.style.display = 'none';
@@ -561,7 +558,7 @@
     }
 
     function slaHuiswerkOp(i) {
-      const formDiv      = document.querySelector('.hw-formrij');
+      const formDiv = document.querySelector('.hw-formrij');
       const omschrijving = formDiv.querySelector('.hw-oms').value.trim();
       const weekdagVal   = formDiv.querySelector('.hw-wdag').value;
       const datumVal     = formDiv.querySelector('.hw-datum-input').value;
@@ -591,8 +588,8 @@
             <input type="number" class="b-moeilijkheid" value="${v.moeilijkheid}" min="1" max="10" required>
           </div>
           <div class="acties">
-            <button class="opslaan"  data-i="${i}" title="Opslaan">&#x2713;</button>
-            <button class="annuleer" data-i="${i}" title="Annuleren">&#x2715;</button>
+            <button class="opslaan"  data-i="${i}">&#x2713;</button>
+            <button class="annuleer" data-i="${i}">&#x2715;</button>
           </div>
         </div>
         ${renderToetsen(v.toetsen, v.moeilijkheid, i)}
@@ -626,7 +623,6 @@
       if (!btn) return;
       const i = btn.dataset.i !== undefined ? parseInt(btn.dataset.i) : NaN;
       const j = btn.dataset.j !== undefined ? parseInt(btn.dataset.j) : NaN;
-
       if (btn.classList.contains('toets-delete')) {
         const vakken = laad(); vakken[i].toetsen.splice(j, 1); sla(vakken); render();
       } else if (btn.classList.contains('delete')) {
