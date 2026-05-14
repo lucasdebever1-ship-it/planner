@@ -7,7 +7,7 @@
   <title>Struct</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500&display=swap" rel="stylesheet">
   <script>
     if (!localStorage.getItem('profiel')) location.replace('onboarding.html');
   </script>
@@ -30,7 +30,7 @@
     .splash-naam {
       font-family: 'Inter', sans-serif;
       font-size: 2.8rem;
-      font-weight: 300;
+      font-weight: 500;
       color: #3ddc97;
       letter-spacing: 0.3em;
       text-transform: uppercase;
@@ -48,6 +48,8 @@
       flex-direction: column;
       align-items: center;
     }
+
+    body.splash-actief > :not(#splash) { visibility: hidden; }
 
     .center {
       width: 100%;
@@ -239,6 +241,7 @@
     }
 
     // Splashscreen: 0.8s fade-in → 1s wachten → 0.5s fade-out
+    document.body.classList.add('splash-actief');
     const splash = document.getElementById('splash');
     splash.style.transition = 'opacity 0.8s ease';
     requestAnimationFrame(() => requestAnimationFrame(() => {
@@ -247,7 +250,10 @@
     setTimeout(() => {
       splash.style.transition = 'opacity 0.5s ease';
       splash.style.opacity = '0';
-      splash.addEventListener('transitionend', () => splash.remove(), { once: true });
+      splash.addEventListener('transitionend', () => {
+        splash.remove();
+        document.body.classList.remove('splash-actief');
+      }, { once: true });
     }, 1800); // 0.8s fade-in + 1s wachten
 
     const profiel = JSON.parse(localStorage.getItem('profiel') || '{}');
