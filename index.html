@@ -23,12 +23,14 @@
       background: #ffffff;
       display: flex; align-items: center; justify-content: center;
       opacity: 0; pointer-events: none;
+      will-change: opacity, transform;
     }
     .splash-naam {
       font-family: 'Inter', sans-serif;
       font-size: 2.8rem; font-weight: 500;
       color: #3ddc97; letter-spacing: 0.3em;
       text-transform: uppercase; user-select: none;
+      will-change: letter-spacing;
     }
 
     body {
@@ -302,15 +304,32 @@
       sessionStorage.setItem('struct_splash_shown', '1');
       document.body.classList.add('splash-actief');
       const splash = document.getElementById('splash');
-      splash.style.transition = 'opacity 0.8s ease';
-      requestAnimationFrame(() => requestAnimationFrame(() => { splash.style.opacity = '1'; }));
+      const tekst  = splash.querySelector('.splash-naam');
+
+      // Startpositie: iets ingezoomd en letters iets verder uit elkaar
+      splash.style.transform    = 'scale(0.97)';
+      tekst.style.letterSpacing = '0.46em';
+
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        // Fade in: soepel inzoomen + letters samentrekken
+        splash.style.transition = 'opacity 0.65s cubic-bezier(0.22,1,0.36,1), transform 0.65s cubic-bezier(0.22,1,0.36,1)';
+        splash.style.opacity    = '1';
+        splash.style.transform  = 'scale(1)';
+        tekst.style.transition  = 'letter-spacing 0.65s cubic-bezier(0.22,1,0.36,1)';
+        tekst.style.letterSpacing = '0.3em';
+      }));
+
       setTimeout(() => {
-        splash.style.transition = 'opacity 0.5s ease';
-        splash.style.opacity = '0';
-        splash.addEventListener('transitionend', () => {
+        // Fade out: versneld wegzoomen
+        splash.style.transition = 'opacity 0.4s cubic-bezier(0.4,0,1,1), transform 0.4s cubic-bezier(0.4,0,1,1)';
+        splash.style.opacity    = '0';
+        splash.style.transform  = 'scale(1.04)';
+        splash.addEventListener('transitionend', function handler(e) {
+          if (e.propertyName !== 'opacity') return;
+          splash.removeEventListener('transitionend', handler);
           splash.remove(); document.body.classList.remove('splash-actief'); naSplash();
-        }, { once: true });
-      }, 1800);
+        });
+      }, 1600); // 650ms fade-in + ~950ms vasthouden
     } else {
       document.getElementById('splash').remove();
       naSplash();
