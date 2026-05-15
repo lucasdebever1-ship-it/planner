@@ -219,6 +219,18 @@
     .dag-tijd-label { font-size: 0.78rem; font-weight: 700; color: #888; min-width: 24px; flex-shrink: 0; }
     .dag-tijd-scheider { color: #bbb; font-size: 0.85rem; flex-shrink: 0; }
     .dag-tijd-input { flex: 1; min-width: 0; margin-bottom: 0 !important; }
+    .dag-vaste-inputs { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; }
+    .dag-wisselend-check { display: none; }
+    .dag-wisselend-lbl {
+      font-size: 0.75rem; font-weight: 600; color: #ccc;
+      cursor: pointer; padding: 4px 9px; border-radius: 6px;
+      border: 1.5px solid #e8e8e8; flex-shrink: 0;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+      user-select: none;
+    }
+    .dag-wisselend-check:checked + .dag-wisselend-lbl {
+      color: #666; border-color: #aaa; background: #f5f5f5;
+    }
 
     /* ── Menu ── */
     .menu-overlay { position: fixed; inset: 0; z-index: 200; display: none; }
@@ -443,6 +455,7 @@
     }
 
     const DAG_NAMEN = ['zo','ma','di','wo','do','vr','za'];
+    const DAG_LANG  = ['Zondag','Maandag','Dinsdag','Woensdag','Donderdag','Vrijdag','Zaterdag'];
 
     function laadProfiel()    { return JSON.parse(localStorage.getItem('profiel')    || '{}'); }
     function laadTrainingen() { return JSON.parse(localStorage.getItem('trainingen') || '[]'); }
@@ -552,10 +565,18 @@
       container.innerHTML = geselecteerd.map(d => `
         <div class="dag-tijd-rij">
           <span class="dag-tijd-label">${DAG_NAMEN[d]}</span>
-          <input type="time" id="t-begin-${d}" class="form-input-mini dag-tijd-input">
-          <span class="dag-tijd-scheider">–</span>
-          <input type="time" id="t-eind-${d}" class="form-input-mini dag-tijd-input">
+          <div class="dag-vaste-inputs" id="dag-inputs-${d}">
+            <input type="time" id="t-begin-${d}" class="form-input-mini dag-tijd-input">
+            <span class="dag-tijd-scheider">–</span>
+            <input type="time" id="t-eind-${d}" class="form-input-mini dag-tijd-input">
+          </div>
+          <input type="checkbox" id="dag-wissel-${d}" class="dag-wisselend-check" onchange="toggleWisselend(${d})">
+          <label for="dag-wissel-${d}" class="dag-wisselend-lbl">Wisselend</label>
         </div>`).join('');
+    }
+    function toggleWisselend(d) {
+      const wisselend = document.getElementById(`dag-wissel-${d}`).checked;
+      document.getElementById(`dag-inputs-${d}`).style.display = wisselend ? 'none' : 'flex';
     }
     function slaTrainingOp() {
       const naam  = document.getElementById('t-naam').value.trim();
@@ -563,10 +584,13 @@
       if (!naam || !dagen.length) { if (!naam) document.getElementById('t-naam').focus(); return; }
       const tijden = {};
       dagen.forEach(d => {
-        tijden[d] = {
-          begin: (document.getElementById(`t-begin-${d}`) || {}).value || '',
-          eind:  (document.getElementById(`t-eind-${d}`)  || {}).value || ''
-        };
+        const wisselend = document.getElementById(`dag-wissel-${d}`)?.checked;
+        tijden[d] = wisselend
+          ? { wisselend: true }
+          : {
+              begin: document.getElementById(`t-begin-${d}`)?.value || '',
+              eind:  document.getElementById(`t-eind-${d}`)?.value  || ''
+            };
       });
       const lijst = laadTrainingen();
       lijst.push({ id: Date.now().toString(), naam, dagen, tijden });
@@ -588,12 +612,10 @@
       }
       container.innerHTML = lijst.map(t => {
         const dagRegels = (t.dagen || []).map(d => {
-          const dagNaam = DAG_NAMEN[d];
           const ti = t.tijden && t.tijden[d];
-          if (ti && ti.begin) {
-            return `${dagNaam} ${ti.begin}${ti.eind ? ` – ${ti.eind}` : ''}`;
-          }
-          return dagNaam;
+          if (!ti || ti.wisselend) return `${DAG_LANG[d]} — Wisselend`;
+          if (ti.begin) return `${DAG_LANG[d]} ${ti.begin}${ti.eind ? `–${ti.eind}` : ''}`;
+          return DAG_LANG[d];
         }).join(', ');
         return `<div class="schema-item">
           <div class="schema-item-info">
