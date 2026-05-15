@@ -92,6 +92,7 @@
     .kaart-huiswerk { background: #f0f5ff; border: 1px solid #c8d8ff; }
     .kaart-start    { background: #f0fbf5; border: 1px solid #b8efd3; }
     .kaart-bezig    { background: #f5f5f5; border: 1px solid #e8e8e8; }
+    .kaart-afspraak { background: #fafafa; border: 1px solid #ebebeb; border-left-width: 4px; }
 
     .kaart-vak  { font-size: 0.98rem; font-weight: 800; color: #1a1a1a; }
     .kaart-naam { font-size: 0.8rem; color: #888; margin-top: 1px; }
@@ -222,6 +223,11 @@
         <svg class="icoon-outline" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><rect x="9" y="2" width="6" height="3" rx="1"/><path d="M8.5 13L11 15.5L15.5 10"/></svg>
         <svg class="icoon-filled"  width="22" height="22" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2" fill="#3ddc97"/><rect x="9" y="2" width="6" height="3" rx="1" fill="#2bc47e"/><path d="M8.5 13L11 15.5L15.5 10" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
       </span>Toetsen</a>
+    <a href="afspraken.html" class="tab">
+      <span class="tab-icoon">
+        <svg class="icoon-outline" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 15.5"/></svg>
+        <svg class="icoon-filled"  width="22" height="22" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#3ddc97"/><polyline points="12 7 12 12 15.5 15.5" stroke="white" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+      </span>Afspraken</a>
   </nav>
 
   <script>
@@ -242,6 +248,8 @@
                           'augustus','september','oktober','november','december'];
     const STANDAARD_DAGEN = { Mondeling:7, Proefwerk:4, SO:1, Luistertoets:0,
                                Schrijfvaardigheid:2, PO:14, Anders:3 };
+    const CAT_KLEUREN = { sociaal:'#9b59b6', sport:'#3498db', werk:'#e67e22', gezondheid:'#e74c3c', overig:'#888' };
+    const CAT_LABELS  = { sociaal:'Sociaal', sport:'Sport/Hobby', werk:'Werk', gezondheid:'Gezondheid', overig:'Overig' };
 
     function normaliseer(d) { const r = new Date(d); r.setHours(0,0,0,0); return r; }
     function addDagen(d, n) { const r = new Date(d); r.setDate(r.getDate()+n); r.setHours(0,0,0,0); return r; }
@@ -307,7 +315,17 @@
         });
       });
 
-      return { toetsKaarten, hwKaarten, startKaarten, bezigKaarten };
+      const afspraken = JSON.parse(localStorage.getItem('afspraken') || '[]');
+      const dagStr = toDatumStr(dag);
+      const afspraakKaarten = afspraken.filter(a => {
+        if (a.afgerond) return false;
+        if (a.herhaling === 'wekelijks') {
+          return parseDatum(a.datum).getDay() === dag.getDay() && a.datum <= dagStr;
+        }
+        return a.datum === dagStr;
+      });
+
+      return { toetsKaarten, hwKaarten, startKaarten, bezigKaarten, afspraakKaarten };
     }
 
     // ── State ──
@@ -336,7 +354,7 @@
 
     function renderDagInhoud() {
       const isVandaagGeselecteerd = gekozenDag.getTime() === vandaag.getTime();
-      const { toetsKaarten, hwKaarten, startKaarten, bezigKaarten } = berekenKaarten(gekozenDag);
+      const { toetsKaarten, hwKaarten, startKaarten, bezigKaarten, afspraakKaarten } = berekenKaarten(gekozenDag);
       let html = '';
 
       toetsKaarten.forEach(k => {
@@ -378,6 +396,16 @@
           <div class="kaart-vak">${k.vak}</div>
           ${k.naam ? `<div class="kaart-naam">${k.naam}${k.type ? ` · ${k.type}` : ''}</div>` : ''}
           <div class="kaart-status">📚 Leren — nog ${nog} tot de toets</div>
+        </div>`;
+      });
+
+      afspraakKaarten.forEach(a => {
+        const kleur    = CAT_KLEUREN[a.categorie] || '#888';
+        const catLabel = CAT_LABELS[a.categorie]  || 'Overig';
+        const tijdStr  = a.tijd ? `${a.tijd} · ` : '';
+        html += `<div class="kaart kaart-afspraak" style="border-left-color:${kleur}">
+          <div class="kaart-vak">${a.titel}</div>
+          <div class="kaart-naam">${tijdStr}${catLabel}</div>
         </div>`;
       });
 

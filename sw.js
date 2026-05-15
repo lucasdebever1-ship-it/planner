@@ -1,4 +1,4 @@
-const CACHE = 'struct-v1';
+const CACHE = 'struct-v2';
 const ASSETS = [
   '/',
   '/index.html',
@@ -7,6 +7,7 @@ const ASSETS = [
   '/vakken.html',
   '/instellingen.html',
   '/onboarding.html',
+  '/afspraken.html',
   '/manifest.json',
   '/icon.svg'
 ];
