@@ -262,13 +262,13 @@
     }
 
     // ── Splashscreen ──
-    const splashGetoond = localStorage.getItem('struct_splash_shown');
+    const splashGetoond = sessionStorage.getItem('struct_splash_shown');
     const heeftProfiel  = !!localStorage.getItem('profiel');
 
     function naSplash() { if (!heeftProfiel) location.replace('onboarding.html'); }
 
     if (!splashGetoond) {
-      localStorage.setItem('struct_splash_shown', '1');
+      sessionStorage.setItem('struct_splash_shown', '1');
       document.body.classList.add('splash-actief');
       const splash = document.getElementById('splash');
       splash.style.transition = 'opacity 0.8s ease';
