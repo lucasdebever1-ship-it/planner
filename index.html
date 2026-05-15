@@ -127,6 +127,24 @@
     .tip-tekst { font-size: 0.88rem; color: #2a5a40; line-height: 1.55; }
     .tip-tekst strong { color: #1a4a30; }
 
+    /* ── Streak ── */
+    .streak-blok {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 20px;
+    }
+    .streak-vlam  { font-size: 1.3rem; line-height: 1; }
+    .streak-getal { font-size: 2rem; font-weight: 800; color: #3ddc97; line-height: 1; letter-spacing: -1px; }
+    .streak-label { font-size: 0.88rem; font-weight: 600; color: #3ddc97; }
+    .streak-start { font-size: 0.88rem; color: #bbb; font-weight: 500; }
+
+    @keyframes streak-pop {
+      0%   { transform: scale(1); }
+      35%  { transform: scale(1.2); }
+      65%  { transform: scale(0.96); }
+      100% { transform: scale(1); }
+    }
+    .streak-blok.record { animation: streak-pop 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97); }
+
     /* ── Hamburger + menu ── */
     .hamburger-btn {
       background: none; border: none; cursor: pointer;
@@ -201,6 +219,7 @@
       </button>
     </div>
 
+    <div id="streak-blok" class="streak-blok"></div>
     <div id="week-waarschuwing"></div>
     <p class="sectie-label">Vandaag</p>
     <div id="vandaag-lijst"></div>
@@ -493,6 +512,87 @@
       document.getElementById('week-waarschuwing').innerHTML = banners.join('');
     }
 
+    // ── Streak ──
+    const STREAK_LEER = { Mondeling:7, Proefwerk:4, SO:1, Luistertoets:0, Schrijfvaardigheid:2, PO:14, Anders:3 };
+
+    function getLeerDagenStreak(type, moeilijkheid) {
+      const inst = JSON.parse(localStorage.getItem('instellingen') || '{}');
+      const key  = type || 'Anders';
+      const basis = inst[key] !== undefined ? inst[key] : (STREAK_LEER[key] ?? STREAK_LEER.Anders);
+      if (basis === 0) return 0;
+      return Math.max(1, Math.round(basis * ((moeilijkheid || 5) / 5)));
+    }
+
+    function getVakAanpassingStreak(naam) {
+      return JSON.parse(localStorage.getItem('feedback') || '[]')
+        .filter(f => f.vak === naam)
+        .reduce((s, f) => s + (f.antwoord === 'te-weinig' ? 2 : f.antwoord === 'te-veel' ? -1 : 0), 0);
+    }
+
+    function heeftGemisteBegindatum() {
+      for (const v of vakken) {
+        const toetsen = v.toetsen || (v.toetsdatum ? [{ datum: v.toetsdatum }] : []);
+        for (const t of toetsen) {
+          if (!t.datum) continue;
+          const toetsDatum = parseDatum(t.datum);
+          const dagsTotToets = Math.round((toetsDatum - vandaag) / 86400000);
+          if (dagsTotToets < 0) continue;
+          const startDagen = getLeerDagenStreak(t.type, v.moeilijkheid) + getVakAanpassingStreak(v.naam);
+          if (startDagen > 0 && dagsTotToets < startDagen) return true;
+        }
+      }
+      return false;
+    }
+
+    function updateStreak() {
+      const str      = toDatumStr(vandaag);
+      const gisteren = toDatumStr(addDagen(vandaag, -1));
+      const huidig   = parseInt(localStorage.getItem('streak_huidig')         || '0');
+      const langste  = parseInt(localStorage.getItem('streak_langste')        || '0');
+      const last     = localStorage.getItem('streak_laatste_datum')           || '';
+      const gemist   = heeftGemisteBegindatum();
+
+      let nieuw;
+      if (gemist) {
+        nieuw = 0;
+      } else if (last === str) {
+        nieuw = huidig;
+      } else if (last === gisteren) {
+        nieuw = huidig + 1;
+      } else {
+        nieuw = 1; // eerste keer of na een gat
+      }
+
+      const nieuwRecord = nieuw > langste && nieuw > 1;
+      localStorage.setItem('streak_huidig', String(nieuw));
+      localStorage.setItem('streak_laatste_datum', str);
+      if (nieuw > langste) localStorage.setItem('streak_langste', String(nieuw));
+      return { huidig: nieuw, nieuwRecord };
+    }
+
+    function renderStreak(data) {
+      const { huidig, nieuwRecord } = data;
+      const blok = document.getElementById('streak-blok');
+      if (huidig === 0) {
+        blok.innerHTML = '<span class="streak-start">Start vandaag je streak</span>';
+      } else {
+        const mv = huidig === 1 ? 'dag' : 'dagen';
+        blok.innerHTML = `<span class="streak-vlam">🔥</span><span class="streak-getal">${huidig}</span><span class="streak-label" id="streak-label">${mv} op rij</span>`;
+        if (nieuwRecord) {
+          const key = 'streak_record_' + huidig;
+          if (!sessionStorage.getItem(key)) {
+            sessionStorage.setItem(key, '1');
+            const lbl = document.getElementById('streak-label');
+            lbl.textContent = 'Nieuw record! 🎉';
+            setTimeout(() => { const l = document.getElementById('streak-label'); if (l) l.textContent = `${mv} op rij`; }, 3000);
+            blok.classList.add('record');
+            setTimeout(() => blok.classList.remove('record'), 600);
+          }
+        }
+      }
+    }
+
+    renderStreak(updateStreak());
     renderWeekWaarschuwing();
     renderVandaag();
     renderWeekRij();
