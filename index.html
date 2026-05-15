@@ -464,36 +464,61 @@
     }
 
     function bepaalTip() {
-      // Toets morgen?
-      const morgenItems = getItemsOpDag(addDagen(vandaag, 1));
-      const toetsMorgen = morgenItems.find(x => x.type === 'toets');
-      if (toetsMorgen) {
-        return `Je hebt morgen een toets <strong>${toetsMorgen.titel}</strong> — ben je al goed voorbereid?`;
+      // ── 1. Toets binnen 3 dagen? (hoogste urgentie) ──
+      const spoedToetsen = [];
+      for (const v of vakken) {
+        const toetsen = v.toetsen || (v.toetsdatum ? [{ datum: v.toetsdatum }] : []);
+        for (const t of toetsen) {
+          if (!t.datum) continue;
+          const dagsTot = Math.round((parseDatum(t.datum) - vandaag) / 86400000);
+          if (dagsTot >= 1 && dagsTot <= 3) spoedToetsen.push({ vak: v.naam, dagsTot });
+        }
+      }
+      if (spoedToetsen.length) {
+        spoedToetsen.sort((a, b) => a.dagsTot - b.dagsTot);
+        const s = spoedToetsen[0];
+        const wanneer = s.dagsTot === 1 ? 'morgen' : `over ${s.dagsTot} dagen`;
+        return `Je hebt <strong>${s.vak}</strong> ${wanneer} — ben je al begonnen?`;
       }
 
-      // Toets overmorgen?
-      const overmorgenItems = getItemsOpDag(addDagen(vandaag, 2));
-      const toetsOvermorgen = overmorgenItems.find(x => x.type === 'toets');
-      if (toetsOvermorgen) {
-        return `Overmorgen toets <strong>${toetsOvermorgen.titel}</strong> — plan vanavond een studiesessie.`;
+      // ── 2. Werkdag morgen + toets deze week? ──
+      const morgenDag = addDagen(vandaag, 1);
+      const werkLijst = JSON.parse(localStorage.getItem('werk') || '[]');
+      const werkMorgen = werkLijst.some(w => Array.isArray(w.dagen) && w.dagen.includes(morgenDag.getDay()));
+      if (werkMorgen) {
+        let toetsVak = null;
+        for (let i = 1; i <= 7 && !toetsVak; i++) {
+          const dag = addDagen(vandaag, i);
+          for (const v of vakken) {
+            const toetsen = v.toetsen || (v.toetsdatum ? [{ datum: v.toetsdatum }] : []);
+            if (toetsen.some(t => t.datum && parseDatum(t.datum).getTime() === dag.getTime())) {
+              toetsVak = v.naam; break;
+            }
+          }
+        }
+        if (toetsVak) {
+          return `Je werkt morgen — plan vandaag alvast tijd in voor <strong>${toetsVak}</strong>.`;
+        }
       }
 
-      // Drukke of rustige week?
+      // ── 3. Drukke week? ──
       const maandag = getMaandag(vandaag);
       let weekTotaal = 0;
-      for (let i = 0; i < 5; i++) weekTotaal += getItemsOpDag(addDagen(maandag, i)).length;
-      if (weekTotaal >= 6) {
-        return 'Drukke week voor je — zorg ook voor rustmomenten tussen het leren.';
-      }
-      if (weekTotaal === 0) {
-        return 'Rustige week! Goed moment om alvast te kijken naar wat er volgende week aankomt.';
+      for (let i = 0; i < 7; i++) weekTotaal += getItemsOpDag(addDagen(maandag, i)).length;
+      if (weekTotaal >= 5) {
+        return `Deze week heb je <strong>${weekTotaal} verplichtingen</strong> — begin eerder met leren.`;
       }
 
-      // Generieke tips, roteren per dag
+      // ── 4. Niets gepland vandaag én morgen? ──
+      if (!getItemsOpDag(vandaag).length && !getItemsOpDag(addDagen(vandaag, 1)).length) {
+        return 'Rustige dag, gebruik het om vooruit te leren.';
+      }
+
+      // ── 5. Generieke tips, roteren per dag ──
       const generiek = [
         'Korte studiesessies van 25 minuten werken beter dan lang achter elkaar.',
         'Schrijf stof over in je eigen woorden — dat helpt met onthouden.',
-        'Begin moeilijke onderwerpen altijd als eerste, als je hoofd nog fris is.',
+        'Begin moeilijke onderwerpen als eerste, als je hoofd nog fris is.',
         'Na het leren even bewegen helpt de stof te verankeren.',
         'Plan je leermomenten in je agenda, net zoals afspraken.',
         'Herhaling na een dag, een week en een maand zorgt voor langdurig geheugen.',
