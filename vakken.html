@@ -112,6 +112,12 @@
       border-radius: 20px; padding: 3px 9px; flex-shrink: 0;
     }
 
+    .gepersonaliseerd-badge {
+      font-size: 0.65rem; font-weight: 700; color: #2bc47e;
+      background: #f0fbf5; border: 1px solid #b8efd3;
+      border-radius: 20px; padding: 2px 9px; flex-shrink: 0;
+    }
+
     .acties { display: flex; gap: 2px; flex-shrink: 0; }
     .acties button {
       background: none; border: none; cursor: pointer;
@@ -452,20 +458,31 @@
       return { datum, verschoven };
     }
 
-    function berekenBeginDatum(datum, type, moeilijkheid) {
+    function getVakAanpassing(vakNaam) {
+      return JSON.parse(localStorage.getItem('feedback') || '[]')
+        .filter(f => f.vak === vakNaam)
+        .reduce((acc, f) => acc + (f.antwoord === 'te-weinig' ? 2 : f.antwoord === 'te-veel' ? -1 : 0), 0);
+    }
+
+    function heeftFeedback(vakNaam) {
+      return JSON.parse(localStorage.getItem('feedback') || '[]').some(f => f.vak === vakNaam);
+    }
+
+    function berekenBeginDatum(datum, type, moeilijkheid, vakNaam) {
       if (!datum) return null;
-      const dagen = getLeerDagen(type, moeilijkheid);
-      if (dagen === 0) return null;
+      const aanpassing = getVakAanpassing(vakNaam || '');
+      const dagen = getLeerDagen(type, moeilijkheid) + aanpassing;
+      if (dagen <= 0) return null;
       const d = new Date(datum + 'T00:00:00');
       d.setDate(d.getDate() - dagen);
       const { datum: vrij, verschoven } = verschuifNaarVrijeDag(d);
       return { tekst: vrij.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' }), verschoven };
     }
 
-    function renderToetsen(toetsen, moeilijkheid, i) {
+    function renderToetsen(toetsen, moeilijkheid, i, vakNaam) {
       if (!toetsen.length) return '<span class="geen-toetsen">Nog geen toetsen — gebruik + om er een toe te voegen</span>';
       return '<div class="toetsen-grid">' + toetsen.map((t, j) => {
-        const begin = berekenBeginDatum(t.datum, t.type, moeilijkheid);
+        const begin = berekenBeginDatum(t.datum, t.type, moeilijkheid, vakNaam);
         return `<div class="toets-chip-group">
           <div class="toets-chip">
             <span class="toets-chip-naam">${t.naam} · ${formatDatum(t.datum)}</span>
@@ -512,6 +529,7 @@
             <div class="kaart-titel">
               <span class="vak-naam">${v.naam}</span>
               <span class="moeilijkheid-badge">${v.moeilijkheid} / 10</span>
+              ${heeftFeedback(v.naam) ? '<span class="gepersonaliseerd-badge">✦ Gepersonaliseerd</span>' : ''}
             </div>
             <div class="acties">
               <button class="edit"      data-i="${i}" title="Bewerken">&#x270F;</button>
@@ -519,7 +537,7 @@
               <button class="delete"    data-i="${i}" title="Verwijderen">&#x2715;</button>
             </div>
           </div>
-          ${renderToetsen(v.toetsen, v.moeilijkheid, i)}
+          ${renderToetsen(v.toetsen, v.moeilijkheid, i, v.naam)}
           ${renderHuiswerk(v.huiswerk, i)}
         </div>
       `).join('');

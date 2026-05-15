@@ -98,6 +98,26 @@
     .leeradvies   { color: #2bc47e; }
     .waarschuwing { color: #e05252; }
 
+    .feedback-kaart {
+      background: #fafafa; border: 1px solid #e8e8e8;
+      border-left: 3px solid #3ddc97; border-radius: 14px;
+      padding: 16px 18px; margin-bottom: 10px;
+    }
+    .feedback-vraag { font-size: 0.93rem; font-weight: 700; color: #1a1a1a; margin-bottom: 3px; }
+    .feedback-info  { font-size: 0.8rem; color: #bbb; margin-bottom: 14px; }
+    .feedback-knoppen { display: flex; gap: 7px; }
+    .feedback-btn {
+      flex: 1; padding: 9px 4px; border-radius: 10px;
+      font-size: 0.78rem; font-weight: 700; cursor: pointer;
+      font-family: inherit; border: 1.5px solid; text-align: center;
+      transition: opacity 0.15s;
+    }
+    .feedback-btn:hover  { opacity: 0.75; }
+    .feedback-btn:active { transform: scale(0.97); }
+    .feedback-btn.te-weinig { color: #e05252; border-color: #ffd0d0; background: #fff5f5; }
+    .feedback-btn.precies   { color: #2bc47e; border-color: #b8efd3; background: #f0fbf5; }
+    .feedback-btn.te-veel   { color: #3a6edc; border-color: #c8d8ff; background: #f0f5ff; }
+
     .geen { color: #aaa; font-size: 0.9rem; margin-top: 8px; }
 
     /* ── Navigatie ── */
@@ -273,6 +293,38 @@
       return d.getFullYear() + '-W' + String(1 + Math.round(((d - w1) / 86400000 - 3 + (w1.getDay() + 6) % 7) / 7)).padStart(2, '0');
     }
 
+    function getVakAanpassing(vakNaam) {
+      return JSON.parse(localStorage.getItem('feedback') || '[]')
+        .filter(f => f.vak === vakNaam)
+        .reduce((acc, f) => acc + (f.antwoord === 'te-weinig' ? 2 : f.antwoord === 'te-veel' ? -1 : 0), 0);
+    }
+
+    let _fbItems = [];
+
+    function geefFeedback(idx, antwoord) {
+      const r = _fbItems[idx];
+      if (!r) return;
+      const id = r.vak + '|' + r.toets.naam + '|' + r.toets.datum;
+      const lijst = JSON.parse(localStorage.getItem('feedback') || '[]');
+      if (!lijst.find(f => f.id === id)) {
+        lijst.push({ id, vak: r.vak, toets: r.toets.naam, datum: r.toets.datum, antwoord });
+        localStorage.setItem('feedback', JSON.stringify(lijst));
+      }
+      render();
+    }
+
+    function renderFeedbackKaart(r, idx) {
+      return `<div class="feedback-kaart">
+        <div class="feedback-vraag">Had je genoeg tijd om te leren voor <strong>${r.vak}</strong>?</div>
+        <div class="feedback-info">${r.toets.naam} · ${formatDatum(r.toets.datum)}</div>
+        <div class="feedback-knoppen">
+          <button class="feedback-btn te-weinig" onclick="geefFeedback(${idx},'te-weinig')">Te weinig</button>
+          <button class="feedback-btn precies"   onclick="geefFeedback(${idx},'precies')">Precies goed</button>
+          <button class="feedback-btn te-veel"   onclick="geefFeedback(${idx},'te-veel')">Te veel</button>
+        </div>
+      </div>`;
+    }
+
     function getMaandagVanIsoWeek(isoWeekStr) {
       const [jaarStr, weekStr] = isoWeekStr.split('-W');
       const jaar = parseInt(jaarStr), week = parseInt(weekStr);
@@ -309,7 +361,7 @@
       } else if (categorie !== 'verlopen' && dagsTotBegin !== null) {
         const extraDagen = r.drukkeWeek ? 2 : 0;
         const beginD = new Date(toets.datum + 'T00:00:00');
-        beginD.setDate(beginD.getDate() - getLeerDagen(toets.type, moeilijkheid) - extraDagen);
+        beginD.setDate(beginD.getDate() - getLeerDagen(toets.type, moeilijkheid) - extraDagen - (r.vakAanpassing || 0));
         const { datum: vrijBegin, verschoven } = verschuifNaarVrijeDag(beginD);
         advies = `<div class="kaart-advies leeradvies">📚 Begin op ${vrijBegin.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' })}${verschoven ? ' (werkdag overgeslagen)' : ''}</div>`;
       }
@@ -338,9 +390,10 @@
             d.setHours(0, 0, 0, 0);
             dagsTotToets = Math.round((d - vandaag) / 86400000);
           }
-          const startDagen = getLeerDagen(t.type, v.moeilijkheid);
+          const vakAanpassing = getVakAanpassing(v.naam);
+          const startDagen = getLeerDagen(t.type, v.moeilijkheid) + vakAanpassing;
           const dagsTotBegin = dagsTotToets !== null ? dagsTotToets - startDagen : null;
-          items.push({ vak: v.naam, moeilijkheid: v.moeilijkheid, toets: t, dagsTotToets, dagsTotBegin, categorie: categoriseer(dagsTotToets, dagsTotBegin) });
+          items.push({ vak: v.naam, moeilijkheid: v.moeilijkheid, toets: t, dagsTotToets, dagsTotBegin, categorie: categoriseer(dagsTotToets, dagsTotBegin), vakAanpassing });
         });
       });
 
@@ -386,8 +439,27 @@
         { id: 'volgende-week', label: 'Volgende week',    dot: '#c8b030' },
         { id: 'later',         label: 'Later',            dot: '#ccc'    },
       ];
+      // Feedback: verlopen toetsen van afgelopen 7 dagen zonder feedback
+      const feedbackLijst = JSON.parse(localStorage.getItem('feedback') || '[]');
+      const feedbackNodig = items.filter(r => {
+        if (!r.toets.datum || r.dagsTotToets === null) return false;
+        if (r.dagsTotToets >= 0 || r.dagsTotToets < -7) return false;
+        const id = r.vak + '|' + r.toets.naam + '|' + r.toets.datum;
+        return !feedbackLijst.find(f => f.id === id);
+      });
+      _fbItems = feedbackNodig;
+
       const verlopen = items.filter(r => r.categorie === 'verlopen');
-      let html = '';
+      let html = feedbackNodig.length
+        ? `<section class="groep">
+            <div class="groep-header">
+              <span class="groep-dot" style="background:#3ddc97"></span>
+              <span class="groep-label">Hoe ging het?</span>
+              <span class="groep-count">${feedbackNodig.length}</span>
+            </div>
+            <div class="groep-kaarten">${feedbackNodig.map((r, i) => renderFeedbackKaart(r, i)).join('')}</div>
+          </section>`
+        : '';
       secties.forEach(s => {
         const groep = items.filter(r => r.categorie === s.id);
         if (!groep.length) return;
