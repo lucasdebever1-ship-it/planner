@@ -332,9 +332,16 @@
       });
 
       const trainingen = JSON.parse(localStorage.getItem('trainingen') || '[]');
-      const trainingKaarten = trainingen.filter(t =>
-        Array.isArray(t.dagen) && t.dagen.includes(dag.getDay())
-      );
+      const trainingKaarten = trainingen
+        .filter(t => {
+          if (!Array.isArray(t.dagen) || !t.dagen.includes(dag.getDay())) return false;
+          const ti = t.tijden && t.tijden[dag.getDay()];
+          return ti && !ti.wisselend;
+        })
+        .map(t => {
+          const ti = t.tijden[dag.getDay()];
+          return { naam: t.naam, begin: ti.begin || '', eind: ti.eind || '' };
+        });
 
       const werk = JSON.parse(localStorage.getItem('werk') || '[]');
       const werkKaarten = werk.filter(w =>
@@ -433,9 +440,10 @@
       });
 
       trainingKaarten.forEach(t => {
+        const tijdStr = t.begin ? `${t.begin}${t.eind ? `–${t.eind}` : ''}` : '';
         html += `<div class="kaart kaart-training">
           <div class="kaart-vak">${t.naam}</div>
-          ${t.tijd ? `<div class="kaart-naam">${t.tijd}</div>` : ''}
+          ${tijdStr ? `<div class="kaart-naam">${tijdStr}</div>` : ''}
         </div>`;
       });
 
