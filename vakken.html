@@ -118,6 +118,20 @@
       border-radius: 20px; padding: 2px 9px; flex-shrink: 0;
     }
 
+    .vak-opmerking {
+      font-size: 0.78rem; color: #aaa; line-height: 1.45;
+      margin: -4px 0 12px; padding: 0 1px;
+    }
+
+    .b-opmerking {
+      width: 100%; background: #f5f5f5; border: 1.5px solid #e8e8e8;
+      border-radius: 8px; color: #1a1a1a; font-size: 0.82rem;
+      padding: 8px 12px; margin: 6px 0 10px; outline: none;
+      font-family: inherit; resize: none; min-height: 52px;
+      line-height: 1.5; transition: border-color 0.15s; display: block;
+    }
+    .b-opmerking:focus { border-color: #3ddc97; }
+
     .acties { display: flex; gap: 2px; flex-shrink: 0; }
     .acties button {
       background: none; border: none; cursor: pointer;
@@ -541,6 +555,7 @@
               <button class="delete"    data-i="${i}" title="Verwijderen">&#x2715;</button>
             </div>
           </div>
+          ${v.opmerking ? `<div class="vak-opmerking">${v.opmerking}</div>` : ''}
           ${renderToetsen(v.toetsen, v.moeilijkheid, i, v.naam)}
           ${renderHuiswerk(v.huiswerk, i)}
         </div>
@@ -660,6 +675,7 @@
             <button class="annuleer" data-i="${i}">&#x2715;</button>
           </div>
         </div>
+        <textarea class="b-opmerking" placeholder="Bijv: woordenboek meenemen, formuleblad toegestaan">${v.opmerking || ''}</textarea>
         ${renderToetsen(v.toetsen, v.moeilijkheid, i)}
         ${renderHuiswerk(v.huiswerk, i)}`;
       kaart.querySelector('.b-naam').focus();
@@ -670,8 +686,9 @@
       const naam = kaart.querySelector('.b-naam').value.trim();
       const moeilijkheid = parseInt(kaart.querySelector('.b-moeilijkheid').value);
       if (!naam || isNaN(moeilijkheid)) return;
+      const opmerking = (kaart.querySelector('.b-opmerking')?.value || '').trim();
       const vakken = laad();
-      vakken[i] = { ...vakken[i], naam, moeilijkheid };
+      vakken[i] = { ...vakken[i], naam, moeilijkheid, opmerking };
       sla(vakken); render();
     }
 
