@@ -438,13 +438,28 @@
       return Math.max(1, Math.round(basis * ((moeilijkheid || 5) / 5)));
     }
 
+    function verschuifNaarVrijeDag(d) {
+      const werk       = JSON.parse(localStorage.getItem('werk')       || '[]');
+      const trainingen = JSON.parse(localStorage.getItem('trainingen') || '[]');
+      function isBezet(dag) {
+        const w = dag.getDay();
+        return werk.some(e => Array.isArray(e.dagen) && e.dagen.includes(w)) ||
+               trainingen.some(e => Array.isArray(e.dagen) && e.dagen.includes(w));
+      }
+      const datum = new Date(d); datum.setHours(0,0,0,0);
+      let verschoven = false, max = 14;
+      while (isBezet(datum) && max-- > 0) { datum.setDate(datum.getDate() - 1); verschoven = true; }
+      return { datum, verschoven };
+    }
+
     function berekenBeginDatum(datum, type, moeilijkheid) {
       if (!datum) return null;
       const dagen = getLeerDagen(type, moeilijkheid);
       if (dagen === 0) return null;
-      const d = new Date(datum);
+      const d = new Date(datum + 'T00:00:00');
       d.setDate(d.getDate() - dagen);
-      return d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' });
+      const { datum: vrij, verschoven } = verschuifNaarVrijeDag(d);
+      return { tekst: vrij.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' }), verschoven };
     }
 
     function renderToetsen(toetsen, moeilijkheid, i) {
@@ -457,7 +472,7 @@
             ${t.type ? `<span class="toets-type-label">${t.type}</span>` : ''}
             <button class="toets-delete" data-i="${i}" data-j="${j}" title="Verwijder toets">✕</button>
           </div>
-          ${begin ? `<div class="leeradvies">📚 Begin op ${begin}</div>` : ''}
+          ${begin ? `<div class="leeradvies">📚 Begin op ${begin.tekst}${begin.verschoven ? ' (werkdag overgeslagen)' : ''}</div>` : ''}
         </div>`;
       }).join('') + '</div>';
     }

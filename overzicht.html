@@ -232,6 +232,20 @@
       return Math.max(1, Math.round(basis * ((moeilijkheid || 5) / 5)));
     }
 
+    function verschuifNaarVrijeDag(d) {
+      const werk       = JSON.parse(localStorage.getItem('werk')       || '[]');
+      const trainingen = JSON.parse(localStorage.getItem('trainingen') || '[]');
+      function isBezet(dag) {
+        const w = dag.getDay();
+        return werk.some(e => Array.isArray(e.dagen) && e.dagen.includes(w)) ||
+               trainingen.some(e => Array.isArray(e.dagen) && e.dagen.includes(w));
+      }
+      const datum = new Date(d); datum.setHours(0,0,0,0);
+      let verschoven = false, max = 14;
+      while (isBezet(datum) && max-- > 0) { datum.setDate(datum.getDate() - 1); verschoven = true; }
+      return { datum, verschoven };
+    }
+
     function formatDatum(d) {
       return d ? new Date(d).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' }) : '—';
     }
@@ -276,9 +290,10 @@
         advies = `<div class="kaart-advies waarschuwing">⚠️ Je bent te laat met beginnen!</div>`;
       } else if (categorie !== 'verlopen' && dagsTotBegin !== null) {
         const extraDagen = r.drukkeWeek ? 2 : 0;
-        const beginD = new Date(toets.datum);
+        const beginD = new Date(toets.datum + 'T00:00:00');
         beginD.setDate(beginD.getDate() - getLeerDagen(toets.type, moeilijkheid) - extraDagen);
-        advies = `<div class="kaart-advies leeradvies">📚 Begin op ${beginD.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' })}</div>`;
+        const { datum: vrijBegin, verschoven } = verschuifNaarVrijeDag(beginD);
+        advies = `<div class="kaart-advies leeradvies">📚 Begin op ${vrijBegin.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' })}${verschoven ? ' (werkdag overgeslagen)' : ''}</div>`;
       }
       return `<div class="toets-kaart ${categorie}">
         ${drukBadge}
