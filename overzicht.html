@@ -72,6 +72,13 @@
       letter-spacing: 0.03em;
     }
 
+    .week-waarschuwing {
+      background: #fffbeb; border: 1px solid #f5d060;
+      border-left: 3px solid #f0b020; border-radius: 10px;
+      padding: 11px 14px; font-size: 0.87rem; font-weight: 600;
+      color: #7a5810; margin-bottom: 14px; line-height: 1.4;
+    }
+
     .vak-naam { font-size: 1.3rem; font-weight: 800; line-height: 1.2; margin-bottom: 4px; letter-spacing: -0.2px; color: #1a1a1a; }
     .verlopen .vak-naam { text-decoration: line-through; color: #bbb; }
     .toets-type { font-size: 0.9rem; color: #6b6b6b; margin-bottom: 14px; }
@@ -159,6 +166,7 @@
     </button>
   </div>
 
+  <div id="week-waarschuwingen"></div>
   <div id="inhoud"></div>
   <p id="leeg" class="geen" style="display:none">
     Geen toetsen gevonden. Voeg vakken en toetsen toe via de vakken-pagina.
@@ -265,6 +273,16 @@
       return d.getFullYear() + '-W' + String(1 + Math.round(((d - w1) / 86400000 - 3 + (w1.getDay() + 6) % 7) / 7)).padStart(2, '0');
     }
 
+    function getMaandagVanIsoWeek(isoWeekStr) {
+      const [jaarStr, weekStr] = isoWeekStr.split('-W');
+      const jaar = parseInt(jaarStr), week = parseInt(weekStr);
+      const jan4 = new Date(jaar, 0, 4);
+      const jan4Dag = (jan4.getDay() + 6) % 7;
+      const maandag = new Date(jan4);
+      maandag.setDate(jan4.getDate() - jan4Dag + (week - 1) * 7);
+      return maandag;
+    }
+
     function categoriseer(dagsTotToets, dagsTotBegin) {
       if (dagsTotToets === null) return 'later';
       if (dagsTotToets < 0)     return 'verlopen';
@@ -326,6 +344,13 @@
         });
       });
 
+      // Weekdruk-scoring: toetsen + werkdagen + trainingsdagen
+      const werk       = JSON.parse(localStorage.getItem('werk')       || '[]');
+      const trainingen = JSON.parse(localStorage.getItem('trainingen') || '[]');
+      const werkDagen     = new Set(werk.flatMap(e => Array.isArray(e.dagen) ? e.dagen : []));
+      const trainingDagen = new Set(trainingen.flatMap(e => Array.isArray(e.dagen) ? e.dagen : []));
+      const basisScore    = werkDagen.size + trainingDagen.size;
+
       const weekTelling = {};
       items.forEach(r => {
         if (r.toets.datum && r.categorie !== 'verlopen') {
@@ -333,8 +358,18 @@
         }
       });
       items.forEach(r => {
-        r.drukkeWeek = !!(r.toets.datum && r.categorie !== 'verlopen' && weekTelling[isoWeek(r.toets.datum)] > 1);
+        const score = r.toets.datum && r.categorie !== 'verlopen'
+          ? (weekTelling[isoWeek(r.toets.datum)] || 0) + basisScore : 0;
+        r.drukkeWeek = score > 4;
       });
+
+      // Waarschuwingsbanner per drukke week
+      const drukkeWeken = [...new Set(items.filter(r => r.drukkeWeek && r.toets.datum).map(r => isoWeek(r.toets.datum)))];
+      document.getElementById('week-waarschuwingen').innerHTML = drukkeWeken.map(wk => {
+        const ma = getMaandagVanIsoWeek(wk);
+        const datumStr = ma.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' });
+        return `<div class="week-waarschuwing">⚠️ Drukke week van ${datumStr} — begin eerder met leren</div>`;
+      }).join('');
       items.sort((a, b) => {
         if (!a.toets.datum && !b.toets.datum) return 0;
         if (!a.toets.datum) return 1;

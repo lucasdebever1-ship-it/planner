@@ -87,6 +87,13 @@
       border-radius: 12px; border: 1px solid #ebebeb;
     }
 
+    .week-waarschuwing {
+      background: #fffbeb; border: 1px solid #f5d060;
+      border-left: 3px solid #f0b020; border-radius: 10px;
+      padding: 11px 14px; font-size: 0.87rem; font-weight: 600;
+      color: #7a5810; margin-bottom: 14px; line-height: 1.4;
+    }
+
     /* ── Week rij ── */
     .week-rij { display: flex; gap: 6px; margin-bottom: 28px; }
     .week-dag {
@@ -194,6 +201,7 @@
       </button>
     </div>
 
+    <div id="week-waarschuwing"></div>
     <p class="sectie-label">Vandaag</p>
     <div id="vandaag-lijst"></div>
 
@@ -453,6 +461,39 @@
       return generiek[dagVanJaar % generiek.length];
     }
 
+    // ── Weekdruk-waarschuwing ──
+    function berekenWeekScore(weekMaandag) {
+      const werk2       = JSON.parse(localStorage.getItem('werk')       || '[]');
+      const trainingen2 = JSON.parse(localStorage.getItem('trainingen') || '[]');
+      const werkDagen2     = new Set(werk2.flatMap(e => Array.isArray(e.dagen) ? e.dagen : []));
+      const trainingDagen2 = new Set(trainingen2.flatMap(e => Array.isArray(e.dagen) ? e.dagen : []));
+      let score = werkDagen2.size + trainingDagen2.size;
+      const weekEinde = addDagen(weekMaandag, 7);
+      vakken.forEach(v => {
+        const toetsen = v.toetsen || (v.toetsdatum ? [{ datum: v.toetsdatum }] : []);
+        toetsen.forEach(t => {
+          if (!t.datum) return;
+          const d = parseDatum(t.datum);
+          if (d >= weekMaandag && d < weekEinde) score++;
+        });
+      });
+      return score;
+    }
+
+    function renderWeekWaarschuwing() {
+      const maandag = getMaandag(vandaag);
+      const banners = [];
+      for (let w = 0; w < 2; w++) {
+        const wMaandag = addDagen(maandag, w * 7);
+        if (berekenWeekScore(wMaandag) > 4) {
+          const datumStr = wMaandag.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' });
+          banners.push(`<div class="week-waarschuwing">⚠️ Drukke week van ${datumStr} — begin eerder met leren</div>`);
+        }
+      }
+      document.getElementById('week-waarschuwing').innerHTML = banners.join('');
+    }
+
+    renderWeekWaarschuwing();
     renderVandaag();
     renderWeekRij();
     renderTip();
