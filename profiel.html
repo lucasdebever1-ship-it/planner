@@ -467,6 +467,8 @@
     function laadTrainingen() { return JSON.parse(localStorage.getItem('trainingen') || '[]'); }
     function slaProfielOp(p)  { localStorage.setItem('profiel', JSON.stringify(p)); }
 
+    let bewerkId = null;
+
     // ── Init hero + velden ──
     (function init() {
       const p = laadProfiel();
@@ -609,8 +611,6 @@
       localStorage.setItem('trainingen', JSON.stringify(laadTrainingen().filter(x => x.id !== id)));
       renderTrainingen();
     }
-
-    let bewerkId = null;
 
     function bewerkTraining(id) {
       annuleerSport();
