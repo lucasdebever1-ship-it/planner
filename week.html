@@ -93,6 +93,8 @@
     .kaart-start    { background: #f0fbf5; border: 1px solid #b8efd3; }
     .kaart-bezig    { background: #f5f5f5; border: 1px solid #e8e8e8; }
     .kaart-afspraak { background: #fafafa; border: 1px solid #ebebeb; border-left-width: 4px; }
+    .kaart-training { background: #f0fbf5; border: 1px solid #b8efd3; }
+    .kaart-werk     { background: #fff8f0; border: 1px solid #ffd8a8; }
 
     .kaart-vak  { font-size: 0.98rem; font-weight: 800; color: #1a1a1a; }
     .kaart-naam { font-size: 0.8rem; color: #888; margin-top: 1px; }
@@ -325,7 +327,17 @@
         return a.datum === dagStr;
       });
 
-      return { toetsKaarten, hwKaarten, startKaarten, bezigKaarten, afspraakKaarten };
+      const trainingen = JSON.parse(localStorage.getItem('trainingen') || '[]');
+      const trainingKaarten = trainingen.filter(t =>
+        Array.isArray(t.dagen) && t.dagen.includes(dag.getDay())
+      );
+
+      const werk = JSON.parse(localStorage.getItem('werk') || '[]');
+      const werkKaarten = werk.filter(w =>
+        Array.isArray(w.dagen) && w.dagen.includes(dag.getDay())
+      );
+
+      return { toetsKaarten, hwKaarten, startKaarten, bezigKaarten, afspraakKaarten, trainingKaarten, werkKaarten };
     }
 
     // ── State ──
@@ -361,7 +373,7 @@
 
     function renderDagInhoud() {
       const isVandaagGeselecteerd = gekozenDag.getTime() === vandaag.getTime();
-      const { toetsKaarten, hwKaarten, startKaarten, bezigKaarten, afspraakKaarten } = berekenKaarten(gekozenDag);
+      const { toetsKaarten, hwKaarten, startKaarten, bezigKaarten, afspraakKaarten, trainingKaarten, werkKaarten } = berekenKaarten(gekozenDag);
       let html = '';
 
       toetsKaarten.forEach(k => {
@@ -413,6 +425,23 @@
         html += `<div class="kaart kaart-afspraak" style="border-left-color:${kleur}">
           <div class="kaart-vak">${a.titel}</div>
           <div class="kaart-naam">${tijdStr}${catLabel}</div>
+        </div>`;
+      });
+
+      trainingKaarten.forEach(t => {
+        html += `<div class="kaart kaart-training">
+          <div class="kaart-vak">${t.naam}</div>
+          ${t.tijd ? `<div class="kaart-naam">${t.tijd}</div>` : ''}
+        </div>`;
+      });
+
+      werkKaarten.forEach(w => {
+        const tijdTekst = w.beginTijd
+          ? `${w.beginTijd}${w.eindTijd ? ` – ${w.eindTijd}` : ''}`
+          : '';
+        html += `<div class="kaart kaart-werk">
+          <div class="kaart-vak">Werkdienst</div>
+          ${tijdTekst ? `<div class="kaart-naam">${tijdTekst}</div>` : ''}
         </div>`;
       });
 

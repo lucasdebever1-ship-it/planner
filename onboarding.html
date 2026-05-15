@@ -16,32 +16,19 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #0f0f0f;
-      color: #e8e8e8;
-      margin: 0;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 40px 20px;
+      background: #0f0f0f; color: #e8e8e8;
+      margin: 0; min-height: 100vh;
+      display: flex; align-items: flex-start; justify-content: center;
+      padding: 40px 20px 60px;
     }
 
-    .kaart {
-      width: 100%;
-      max-width: 420px;
-    }
+    .kaart { width: 100%; max-width: 420px; }
 
-    .stappen {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 36px;
-    }
+    /* Voortgangsbalken */
+    .stappen { display: flex; gap: 8px; margin-bottom: 36px; }
     .stap-balk {
-      flex: 1;
-      height: 4px;
-      border-radius: 2px;
-      background: #1e1e1e;
-      transition: background 0.3s;
+      flex: 1; height: 4px; border-radius: 2px;
+      background: #1e1e1e; transition: background 0.3s;
     }
     .stap-balk.actief { background: #4f8ef7; }
     .stap-balk.gedaan { background: #2a5cbf; }
@@ -50,102 +37,146 @@
     .stap.zichtbaar { display: block; }
 
     .stap-label {
-      font-size: 0.78rem;
-      color: #555;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      margin: 0 0 10px;
+      font-size: 0.78rem; color: #555;
+      letter-spacing: 0.06em; text-transform: uppercase; margin: 0 0 10px;
     }
 
     h2 {
-      font-size: 1.55rem;
-      font-weight: 700;
-      margin: 0 0 8px;
-      line-height: 1.25;
-      letter-spacing: -0.3px;
+      font-size: 1.55rem; font-weight: 700;
+      margin: 0 0 8px; line-height: 1.25; letter-spacing: -0.3px;
     }
 
-    .hint {
-      font-size: 0.9rem;
-      color: #555;
-      margin: 0 0 28px;
-    }
+    .hint { font-size: 0.9rem; color: #555; margin: 0 0 28px; }
 
+    /* Standaard invoervelden */
     label {
-      display: block;
-      font-size: 0.85rem;
-      color: #888;
-      margin-bottom: 8px;
+      display: block; font-size: 0.85rem; color: #888; margin-bottom: 8px;
     }
+    input[type="text"], select {
+      width: 100%; background: #161616; border: 1px solid #262626;
+      border-radius: 10px; color: #e8e8e8; font-size: 1rem;
+      padding: 14px 16px; margin-bottom: 20px; appearance: none;
+      outline: none; transition: border-color 0.15s; font-family: inherit;
+    }
+    input[type="text"]:focus, select:focus { border-color: #4f8ef7; }
 
-    input[type="text"],
-    select {
-      width: 100%;
-      background: #161616;
-      border: 1px solid #262626;
-      border-radius: 10px;
-      color: #e8e8e8;
-      font-size: 1rem;
-      padding: 14px 16px;
-      margin-bottom: 20px;
-      appearance: none;
-      outline: none;
-      transition: border-color 0.15s;
+    input[type="time"] {
+      width: 100%; background: #161616; border: 1px solid #262626;
+      border-radius: 10px; color: #e8e8e8; font-size: 1rem;
+      padding: 14px 16px; margin-bottom: 14px; appearance: none;
+      outline: none; transition: border-color 0.15s; font-family: inherit;
     }
-    input[type="text"]:focus,
-    select:focus { border-color: #4f8ef7; }
+    input[type="time"]:focus { border-color: #4f8ef7; }
 
-    .select-wrap {
-      position: relative;
-    }
+    .select-wrap { position: relative; }
     .select-wrap::after {
-      content: '▾';
-      position: absolute;
-      right: 14px;
-      top: 50%;
-      transform: translateY(-60%);
-      color: #555;
-      pointer-events: none;
-      font-size: 0.85rem;
+      content: '▾'; position: absolute; right: 14px; top: 50%;
+      transform: translateY(-60%); color: #555; pointer-events: none; font-size: 0.85rem;
     }
 
-    .acties {
-      display: flex;
-      gap: 10px;
-      margin-top: 4px;
-    }
+    .acties { display: flex; gap: 10px; margin-top: 4px; }
 
     .btn {
-      flex: 1;
-      padding: 16px;
-      border-radius: 12px;
-      font-size: 1rem;
-      font-weight: 600;
-      border: none;
-      cursor: pointer;
-      transition: background 0.15s, transform 0.1s;
+      flex: 1; padding: 16px; border-radius: 12px;
+      font-size: 1rem; font-weight: 600; border: none;
+      cursor: pointer; transition: background 0.15s, transform 0.1s;
+      font-family: inherit;
     }
     .btn:active { transform: scale(0.98); }
 
     .btn-terug {
-      background: #161616;
-      color: #888;
-      border: 1px solid #262626;
-      flex: 0 0 auto;
-      padding: 16px 20px;
+      background: #161616; color: #888;
+      border: 1px solid #262626; flex: 0 0 auto; padding: 16px 20px;
     }
     .btn-terug:hover { background: #1c1c1c; color: #e8e8e8; }
 
-    .btn-verder {
-      background: #4f8ef7;
-      color: #fff;
-    }
+    .btn-verder { background: #4f8ef7; color: #fff; }
     .btn-verder:hover { background: #3a7ef0; }
-    .btn-verder:disabled {
-      background: #1e2a40;
-      color: #3a5080;
-      cursor: default;
+    .btn-verder:disabled { background: #1e2a40; color: #3a5080; cursor: default; }
+
+    /* ── Ja/Nee toggle ── */
+    .toggle-groep {
+      display: flex; background: #1a1a1a;
+      border-radius: 10px; padding: 3px; margin-bottom: 22px;
     }
+    .toggle-radio { display: none; }
+    .toggle-label {
+      flex: 1; text-align: center; padding: 10px;
+      border-radius: 8px; font-size: 0.95rem; font-weight: 600;
+      cursor: pointer; color: #555;
+      transition: background 0.2s, color 0.2s; user-select: none;
+    }
+    .toggle-radio:checked + .toggle-label {
+      background: #4f8ef7; color: #fff;
+      box-shadow: 0 1px 4px rgba(79,142,247,0.3);
+    }
+
+    /* ── Dag-pills ── */
+    .dag-keuze { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+    .dag-check { display: none; }
+    .dag-label {
+      display: inline-block; padding: 8px 12px;
+      border: 1px solid #262626; border-radius: 8px;
+      cursor: pointer; font-size: 0.82rem; color: #666; font-weight: 600;
+      transition: border-color 0.15s, background 0.15s, color 0.15s;
+      user-select: none; margin-bottom: 0;
+    }
+    .dag-check:checked + .dag-label {
+      border-color: #4f8ef7; background: #1a2030; color: #4f8ef7;
+    }
+
+    /* ── Sub-sectie container ── */
+    .sub-sectie {
+      background: #141414; border: 1px solid #222;
+      border-radius: 12px; padding: 16px; margin-bottom: 14px;
+    }
+    .sub-sectie-titel {
+      font-size: 0.75rem; font-weight: 700; color: #555;
+      text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 14px;
+    }
+    .invoer-label {
+      display: block; font-size: 0.75rem; font-weight: 700; color: #555;
+      text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 7px;
+    }
+    .optioneel-tekst { font-weight: 400; color: #3a3a3a; text-transform: none; letter-spacing: 0; }
+
+    /* Tijdrij naast elkaar */
+    .tijd-rij { display: flex; gap: 10px; align-items: flex-start; }
+    .tijd-rij > .tijd-kolom { flex: 1; }
+    .tijd-scheider {
+      flex: 0 0 auto; color: #444; font-size: 0.9rem;
+      padding-top: 16px; line-height: 1;
+    }
+
+    /* Toevoeg-knop */
+    .btn-toevoegen {
+      width: 100%; padding: 12px;
+      background: none; border: 1px solid #262626;
+      border-radius: 10px; color: #4f8ef7;
+      font-size: 0.9rem; font-weight: 600;
+      cursor: pointer; font-family: inherit;
+      transition: background 0.15s, border-color 0.15s;
+      margin-top: 2px;
+    }
+    .btn-toevoegen:hover { background: #1a2030; border-color: #4f8ef7; }
+    .btn-toevoegen:active { transform: scale(0.98); }
+
+    /* Item kaarten */
+    .item-lijst { display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px; }
+    .item-kaart {
+      background: #161616; border: 1px solid #262626;
+      border-radius: 10px; padding: 12px 14px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .item-naam { font-size: 0.9rem; font-weight: 600; color: #e8e8e8; }
+    .item-info { font-size: 0.78rem; color: #555; margin-top: 2px; }
+    .btn-verwijder {
+      background: none; border: none; cursor: pointer;
+      color: #444; padding: 4px 8px; border-radius: 6px;
+      transition: color 0.15s; font-family: inherit;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-verwijder:hover { color: #e05252; }
   </style>
 </head>
 <body>
@@ -154,11 +185,13 @@
   <div class="stappen">
     <div class="stap-balk" id="balk-0"></div>
     <div class="stap-balk" id="balk-1"></div>
+    <div class="stap-balk" id="balk-2"></div>
+    <div class="stap-balk" id="balk-3"></div>
   </div>
 
   <!-- Stap 1: Naam -->
   <div class="stap zichtbaar" id="stap-0">
-    <p class="stap-label">Stap 1 van 2</p>
+    <p class="stap-label">Stap 1 van 4</p>
     <h2>Hoe heet je?</h2>
     <p class="hint">Zo weten we hoe we je moeten aanspreken.</p>
     <label for="naam">Voornaam</label>
@@ -170,7 +203,7 @@
 
   <!-- Stap 2: Schoolniveau -->
   <div class="stap" id="stap-1">
-    <p class="stap-label">Stap 2 van 2</p>
+    <p class="stap-label">Stap 2 van 4</p>
     <h2>Welk niveau zit je op?</h2>
     <p class="hint">Kies je huidige schoolniveau en leerjaar.</p>
     <label for="niveau">Schoolniveau</label>
@@ -202,35 +235,131 @@
     </div>
     <div class="acties">
       <button class="btn btn-terug" onclick="naarStap(0)">←</button>
-      <button class="btn btn-verder" id="verder-1" onclick="afronden()" disabled>Klaar ✓</button>
+      <button class="btn btn-verder" id="verder-1" onclick="naarStap(2)" disabled>Verder →</button>
+    </div>
+  </div>
+
+  <!-- Stap 3: Sport/Hobby -->
+  <div class="stap" id="stap-2">
+    <p class="stap-label">Stap 3 van 4</p>
+    <h2>Heb je vaste trainingen of hobby's?</h2>
+    <p class="hint">We tonen ze in je weekkalender zodat je weet wanneer je tijd hebt.</p>
+
+    <div class="toggle-groep">
+      <input type="radio" name="heeft-sport" id="sport-nee" value="nee" class="toggle-radio" checked onchange="updateSportSectie()">
+      <label for="sport-nee" class="toggle-label">Nee</label>
+      <input type="radio" name="heeft-sport" id="sport-ja" value="ja" class="toggle-radio" onchange="updateSportSectie()">
+      <label for="sport-ja" class="toggle-label">Ja</label>
+    </div>
+
+    <div id="sport-sectie" style="display:none">
+      <div class="sub-sectie">
+        <p class="sub-sectie-titel">Training toevoegen</p>
+
+        <label class="invoer-label" for="t-naam">Naam</label>
+        <input type="text" id="t-naam" placeholder="bijv. Voetbal, Gitaar, Zwemmen" autocomplete="off">
+
+        <label class="invoer-label">Vaste dag(en)</label>
+        <div class="dag-keuze" id="t-dag-keuze">
+          <input type="checkbox" id="t-dag-1" value="1" class="dag-check"><label for="t-dag-1" class="dag-label">ma</label>
+          <input type="checkbox" id="t-dag-2" value="2" class="dag-check"><label for="t-dag-2" class="dag-label">di</label>
+          <input type="checkbox" id="t-dag-3" value="3" class="dag-check"><label for="t-dag-3" class="dag-label">wo</label>
+          <input type="checkbox" id="t-dag-4" value="4" class="dag-check"><label for="t-dag-4" class="dag-label">do</label>
+          <input type="checkbox" id="t-dag-5" value="5" class="dag-check"><label for="t-dag-5" class="dag-label">vr</label>
+          <input type="checkbox" id="t-dag-6" value="6" class="dag-check"><label for="t-dag-6" class="dag-label">za</label>
+          <input type="checkbox" id="t-dag-0" value="0" class="dag-check"><label for="t-dag-0" class="dag-label">zo</label>
+        </div>
+
+        <label class="invoer-label" for="t-tijd">Tijd <span class="optioneel-tekst">(optioneel)</span></label>
+        <input type="time" id="t-tijd">
+
+        <button class="btn-toevoegen" onclick="voegTrainingToe()">+ Training toevoegen</button>
+      </div>
+      <div class="item-lijst" id="training-lijst"></div>
+    </div>
+
+    <div class="acties">
+      <button class="btn btn-terug" onclick="naarStap(1)">←</button>
+      <button class="btn btn-verder" onclick="naarStap(3)">Verder →</button>
+    </div>
+  </div>
+
+  <!-- Stap 4: Werk -->
+  <div class="stap" id="stap-3">
+    <p class="stap-label">Stap 4 van 4</p>
+    <h2>Werk je?</h2>
+    <p class="hint">We tonen je werkdiensten in de weekkalender.</p>
+
+    <div class="toggle-groep">
+      <input type="radio" name="heeft-werk" id="werk-nee" value="nee" class="toggle-radio" checked onchange="updateWerkSectie()">
+      <label for="werk-nee" class="toggle-label">Nee</label>
+      <input type="radio" name="heeft-werk" id="werk-ja" value="ja" class="toggle-radio" onchange="updateWerkSectie()">
+      <label for="werk-ja" class="toggle-label">Ja</label>
+    </div>
+
+    <div id="werk-sectie" style="display:none">
+      <div class="sub-sectie">
+        <p class="sub-sectie-titel">Werkdienst toevoegen</p>
+
+        <label class="invoer-label">Vaste dag(en)</label>
+        <div class="dag-keuze" id="w-dag-keuze">
+          <input type="checkbox" id="w-dag-1" value="1" class="dag-check"><label for="w-dag-1" class="dag-label">ma</label>
+          <input type="checkbox" id="w-dag-2" value="2" class="dag-check"><label for="w-dag-2" class="dag-label">di</label>
+          <input type="checkbox" id="w-dag-3" value="3" class="dag-check"><label for="w-dag-3" class="dag-label">wo</label>
+          <input type="checkbox" id="w-dag-4" value="4" class="dag-check"><label for="w-dag-4" class="dag-label">do</label>
+          <input type="checkbox" id="w-dag-5" value="5" class="dag-check"><label for="w-dag-5" class="dag-label">vr</label>
+          <input type="checkbox" id="w-dag-6" value="6" class="dag-check"><label for="w-dag-6" class="dag-label">za</label>
+          <input type="checkbox" id="w-dag-0" value="0" class="dag-check"><label for="w-dag-0" class="dag-label">zo</label>
+        </div>
+
+        <label class="invoer-label">Tijdblok <span class="optioneel-tekst">(optioneel)</span></label>
+        <div class="tijd-rij">
+          <div class="tijd-kolom"><input type="time" id="w-begin"></div>
+          <div class="tijd-scheider">–</div>
+          <div class="tijd-kolom"><input type="time" id="w-eind"></div>
+        </div>
+
+        <button class="btn-toevoegen" onclick="voegWerkToe()">+ Dienst toevoegen</button>
+      </div>
+      <div class="item-lijst" id="werk-lijst"></div>
+    </div>
+
+    <div class="acties">
+      <button class="btn btn-terug" onclick="naarStap(2)">←</button>
+      <button class="btn btn-verder" onclick="afronden()">Klaar ✓</button>
     </div>
   </div>
 
 </div>
 
 <script>
-  if (localStorage.getItem('profiel')) {
-    location.replace('index.html');
-  }
+  if (localStorage.getItem('profiel')) location.replace('index.html');
 
-  let huidigeStap = 0;
+  const TOTAAL_STAPPEN = 4;
+  const DAG_NAMEN_KORT = ['zo','ma','di','wo','do','vr','za'];
+  let huidigeStap  = 0;
+  let trainingLijst = [];
+  let werkLijst     = [];
 
+  // ── Stap navigatie ──
   function naarStap(stap) {
     document.getElementById('stap-' + huidigeStap).classList.remove('zichtbaar');
     huidigeStap = stap;
     document.getElementById('stap-' + huidigeStap).classList.add('zichtbaar');
     updateBalken();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   function updateBalken() {
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < TOTAAL_STAPPEN; i++) {
       const b = document.getElementById('balk-' + i);
       b.className = 'stap-balk';
-      if (i < huidigeStap)  b.classList.add('gedaan');
+      if (i < huidigeStap)   b.classList.add('gedaan');
       if (i === huidigeStap) b.classList.add('actief');
     }
   }
 
+  // ── Stap 1: naam ──
   const naamInput = document.getElementById('naam');
   naamInput.addEventListener('input', () => {
     document.getElementById('verder-0').disabled = naamInput.value.trim() === '';
@@ -239,16 +368,112 @@
     if (e.key === 'Enter' && naamInput.value.trim()) naarStap(1);
   });
 
+  // ── Stap 2: niveau ──
   document.getElementById('niveau').addEventListener('change', () => {
     document.getElementById('verder-1').disabled = false;
   });
 
+  // ── Stap 3: sport/hobby ──
+  function updateSportSectie() {
+    const ja = document.getElementById('sport-ja').checked;
+    document.getElementById('sport-sectie').style.display = ja ? 'block' : 'none';
+  }
+
+  function voegTrainingToe() {
+    const naam  = document.getElementById('t-naam').value.trim();
+    const dagen = [...document.querySelectorAll('#t-dag-keuze .dag-check:checked')]
+                    .map(c => parseInt(c.value));
+    if (!naam || !dagen.length) return;
+
+    trainingLijst.push({
+      id:   Date.now().toString(),
+      naam,
+      dagen,
+      tijd: document.getElementById('t-tijd').value || ''
+    });
+    document.getElementById('t-naam').value = '';
+    document.querySelectorAll('#t-dag-keuze .dag-check').forEach(c => c.checked = false);
+    document.getElementById('t-tijd').value = '';
+    renderTrainingLijst();
+  }
+
+  function verwijderTraining(i) {
+    trainingLijst.splice(i, 1);
+    renderTrainingLijst();
+  }
+
+  function renderTrainingLijst() {
+    const el = document.getElementById('training-lijst');
+    el.innerHTML = trainingLijst.map((t, i) => {
+      const dagenTekst = t.dagen.map(d => DAG_NAMEN_KORT[d]).join(', ');
+      const tijdTekst  = t.tijd ? ` · ${t.tijd}` : '';
+      return `<div class="item-kaart">
+        <div>
+          <div class="item-naam">${t.naam}</div>
+          <div class="item-info">${dagenTekst}${tijdTekst}</div>
+        </div>
+        <button class="btn-verwijder" onclick="verwijderTraining(${i})">✕</button>
+      </div>`;
+    }).join('');
+  }
+
+  // ── Stap 4: werk ──
+  function updateWerkSectie() {
+    const ja = document.getElementById('werk-ja').checked;
+    document.getElementById('werk-sectie').style.display = ja ? 'block' : 'none';
+  }
+
+  function voegWerkToe() {
+    const dagen = [...document.querySelectorAll('#w-dag-keuze .dag-check:checked')]
+                    .map(c => parseInt(c.value));
+    if (!dagen.length) return;
+
+    werkLijst.push({
+      id:        Date.now().toString(),
+      dagen,
+      beginTijd: document.getElementById('w-begin').value || '',
+      eindTijd:  document.getElementById('w-eind').value  || ''
+    });
+    document.querySelectorAll('#w-dag-keuze .dag-check').forEach(c => c.checked = false);
+    document.getElementById('w-begin').value = '';
+    document.getElementById('w-eind').value  = '';
+    renderWerkLijst();
+  }
+
+  function verwijderWerk(i) {
+    werkLijst.splice(i, 1);
+    renderWerkLijst();
+  }
+
+  function renderWerkLijst() {
+    const el = document.getElementById('werk-lijst');
+    el.innerHTML = werkLijst.map((w, i) => {
+      const dagenTekst = w.dagen.map(d => DAG_NAMEN_KORT[d]).join(', ');
+      const tijdTekst  = w.beginTijd
+        ? ` · ${w.beginTijd}${w.eindTijd ? ` – ${w.eindTijd}` : ''}`
+        : '';
+      return `<div class="item-kaart">
+        <div>
+          <div class="item-naam">Werkdienst</div>
+          <div class="item-info">${dagenTekst}${tijdTekst}</div>
+        </div>
+        <button class="btn-verwijder" onclick="verwijderWerk(${i})">✕</button>
+      </div>`;
+    }).join('');
+  }
+
+  // ── Afronden ──
   function afronden() {
-    const profiel = {
+    localStorage.setItem('profiel', JSON.stringify({
       naam:   document.getElementById('naam').value.trim(),
       niveau: document.getElementById('niveau').value,
-    };
-    localStorage.setItem('profiel', JSON.stringify(profiel));
+    }));
+    localStorage.setItem('trainingen', JSON.stringify(
+      document.getElementById('sport-ja').checked ? trainingLijst : []
+    ));
+    localStorage.setItem('werk', JSON.stringify(
+      document.getElementById('werk-ja').checked ? werkLijst : []
+    ));
     location.replace('index.html');
   }
 
