@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Profiel – Struct</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#3ddc97">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Struct">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #ffffff; color: #1a1a1a;
+      max-width: 480px; margin: 0 auto;
+      padding: 40px 20px 90px;
+    }
+
+    .pagina-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 32px;
+    }
+    .pagina-header h1 { margin: 0; font-size: 1.4rem; font-weight: 700; letter-spacing: -0.3px; }
+
+    /* ── Sectie ── */
+    .sectie { margin-bottom: 32px; }
+    .sectie-rij {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 12px;
+    }
+    .sectie-label {
+      font-size: 0.72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.9px; color: #aaa;
+      margin: 0;
+    }
+    .btn-plus {
+      width: 30px; height: 30px; background: #3ddc97; border: none;
+      border-radius: 8px; color: #fff; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; line-height: 1; transition: background 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-plus:hover { background: #2bc47e; }
+
+    /* ── Persoonlijk kaart ── */
+    .profiel-kaart {
+      background: #f5f5f5; border: 1px solid #ebebeb;
+      border-radius: 14px; overflow: hidden; margin-bottom: 6px;
+    }
+    .profiel-rij {
+      display: flex; align-items: center; padding: 14px 16px;
+      border-bottom: 1px solid #ebebeb; gap: 12px;
+    }
+    .profiel-rij:last-child { border-bottom: none; }
+    .profiel-veld-naam {
+      font-size: 0.9rem; font-weight: 600; color: #1a1a1a;
+      flex-shrink: 0; min-width: 96px;
+    }
+    .profiel-input, .profiel-select {
+      flex: 1; background: transparent; border: none; outline: none;
+      font-size: 0.9rem; color: #555; font-family: inherit;
+      text-align: right; appearance: none; cursor: pointer;
+    }
+    .profiel-input::placeholder { color: #ccc; }
+
+    .opgeslagen {
+      font-size: 0.78rem; color: #2bc47e; font-weight: 600;
+      opacity: 0; transition: opacity 0.3s; min-height: 16px;
+      padding-left: 2px;
+    }
+    .opgeslagen.zichtbaar { opacity: 1; }
+
+    /* ── Item cards ── */
+    .item-kaart {
+      background: #fafafa; border: 1px solid #ebebeb;
+      border-radius: 12px; padding: 12px 12px 12px 14px;
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 9px;
+    }
+    .item-body { flex: 1; min-width: 0; }
+    .item-naam { font-size: 0.93rem; font-weight: 700; color: #1a1a1a; margin-bottom: 1px; }
+    .item-meta { font-size: 0.8rem; color: #999; }
+    .item-acties { display: flex; gap: 2px; flex-shrink: 0; }
+    .item-actie-btn {
+      background: none; border: none; cursor: pointer;
+      padding: 6px; border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      color: #aaa; transition: background 0.15s, color 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .item-actie-btn:hover { background: #f0f0f0; }
+    .item-actie-btn.bewerk:hover { color: #555; }
+    .item-actie-btn.verwijder:hover { color: #e05252; }
+
+    .leeg-hint { font-size: 0.85rem; color: #bbb; padding: 8px 2px; }
+
+    /* ── Formulier ── */
+    .sub-form {
+      background: #f8f8f8; border: 1px solid #e8e8e8;
+      border-radius: 14px; padding: 16px; margin-bottom: 12px;
+    }
+    .sub-form-titel {
+      font-size: 0.78rem; font-weight: 700; color: #aaa;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      margin: 0 0 14px;
+    }
+    .form-label-sub {
+      display: block; font-size: 0.72rem; font-weight: 700; color: #aaa;
+      text-transform: uppercase; letter-spacing: 0.06em; margin: 0 0 7px;
+    }
+    .optioneel-sub { font-weight: 400; color: #ccc; text-transform: none; letter-spacing: 0; }
+    .form-input-sub {
+      width: 100%; background: #fff; border: 1.5px solid #e8e8e8;
+      border-radius: 10px; color: #1a1a1a; font-size: 0.95rem;
+      padding: 11px 14px; margin-bottom: 14px; outline: none;
+      font-family: inherit; appearance: none;
+      transition: border-color 0.15s;
+    }
+    .form-input-sub:focus { border-color: #3ddc97; }
+
+    /* Dag pills – light theme */
+    .dag-keuze { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+    .dag-check { display: none; }
+    .dag-label {
+      display: inline-block; padding: 7px 11px;
+      border: 1.5px solid #e8e8e8; border-radius: 8px;
+      cursor: pointer; font-size: 0.82rem; color: #888; font-weight: 600;
+      transition: border-color 0.15s, background 0.15s, color 0.15s;
+      user-select: none;
+    }
+    .dag-check:checked + .dag-label {
+      border-color: #3ddc97; background: #f0fbf5; color: #1a1a1a; font-weight: 700;
+    }
+
+    /* Tijdrij */
+    .tijd-rij { display: flex; gap: 10px; align-items: flex-start; }
+    .tijd-rij > .tijd-kolom { flex: 1; }
+    .tijd-rij > .tijd-kolom .form-input-sub { margin-bottom: 14px; }
+    .tijd-scheider { flex: 0 0 auto; color: #bbb; font-size: 0.9rem; padding-top: 12px; }
+
+    /* Formulier knoppen */
+    .form-footer { display: flex; gap: 10px; }
+    .btn-annuleer-sub {
+      padding: 11px 16px; background: none; border: 1.5px solid #e0e0e0;
+      border-radius: 10px; color: #888; font-size: 0.88rem; cursor: pointer;
+      font-family: inherit; transition: background 0.15s;
+    }
+    .btn-annuleer-sub:hover { background: #f5f5f5; }
+    .btn-opslaan-sub {
+      flex: 1; padding: 11px; background: #3ddc97; border: none;
+      border-radius: 10px; color: #fff; font-size: 0.88rem; font-weight: 600;
+      cursor: pointer; font-family: inherit; transition: background 0.15s;
+    }
+    .btn-opslaan-sub:hover { background: #2bc47e; }
+
+    /* ── Navigatie ── */
+    .hamburger-btn {
+      background: none; border: none; cursor: pointer;
+      padding: 6px 8px; border-radius: 8px;
+      display: flex; flex-direction: column; gap: 5px; align-items: center;
+      transition: background 0.15s; -webkit-tap-highlight-color: transparent;
+    }
+    .hamburger-btn:hover { background: #f0f0f0; }
+    .hamburger-streep { display: block; width: 20px; height: 2px; background: #888; border-radius: 2px; }
+
+    .menu-overlay { position: fixed; inset: 0; z-index: 200; display: none; }
+    .menu-overlay.open { display: block; }
+    .menu-achtergrond { position: absolute; inset: 0; }
+    .menu-kaart {
+      position: absolute; top: 52px; right: 20px;
+      background: #ffffff; border: 1px solid #e8e8e8;
+      border-radius: 12px; min-width: 210px; overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    }
+    .menu-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 18px; text-decoration: none;
+      color: #1a1a1a; font-size: 0.95rem;
+      border: none; background: none; width: 100%;
+      text-align: left; cursor: pointer;
+      border-bottom: 1px solid #f0f0f0;
+      transition: background 0.15s; font-family: inherit;
+    }
+    .menu-item:last-child { border-bottom: none; }
+    .menu-item:hover { background: #f5f5f5; }
+    .menu-item.rood { color: #e05252; }
+
+    .tabbar {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #ffffff; border-top: 1px solid #ebebeb;
+      display: flex; z-index: 100;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      box-shadow: 0 -2px 12px rgba(0,0,0,0.06);
+    }
+    .tab {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; gap: 3px; padding: 10px 4px 12px;
+      text-decoration: none; color: #bbb;
+      font-size: 0.6rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      -webkit-tap-highlight-color: transparent; transition: color 0.15s;
+    }
+    .tab:active { opacity: 0.7; }
+    .tab.actief { color: #3ddc97; }
+    .tab-icoon { display: flex; align-items: center; justify-content: center; }
+    .tab .icoon-outline { display: block; }
+    .tab .icoon-filled  { display: none; }
+    .tab.actief .icoon-outline { display: none; }
+    .tab.actief .icoon-filled  { display: block; }
+  </style>
+</head>
+<body>
+
+  <div class="pagina-header">
+    <h1>Profiel</h1>
+    <button class="hamburger-btn" id="hamburger" aria-label="Menu">
+      <span class="hamburger-streep"></span>
+      <span class="hamburger-streep"></span>
+      <span class="hamburger-streep"></span>
+    </button>
+  </div>
+
+  <!-- ── Persoonlijk ── -->
+  <div class="sectie">
+    <p class="sectie-label" style="margin-bottom:12px">Persoonlijk</p>
+    <div class="profiel-kaart">
+      <div class="profiel-rij">
+        <span class="profiel-veld-naam">Naam</span>
+        <input type="text" id="naam" class="profiel-input" placeholder="Voornaam" autocomplete="given-name">
+      </div>
+      <div class="profiel-rij">
+        <span class="profiel-veld-naam">Schoolniveau</span>
+        <select id="niveau" class="profiel-select">
+          <option value="">Kies niveau</option>
+          <optgroup label="VWO">
+            <option value="VWO 1">VWO 1</option><option value="VWO 2">VWO 2</option>
+            <option value="VWO 3">VWO 3</option><option value="VWO 4">VWO 4</option>
+            <option value="VWO 5">VWO 5</option><option value="VWO 6">VWO 6</option>
+          </optgroup>
+          <optgroup label="HAVO">
+            <option value="HAVO 1">HAVO 1</option><option value="HAVO 2">HAVO 2</option>
+            <option value="HAVO 3">HAVO 3</option><option value="HAVO 4">HAVO 4</option>
+            <option value="HAVO 5">HAVO 5</option>
+          </optgroup>
+          <optgroup label="MBO">
+            <option value="MBO 1">MBO 1</option><option value="MBO 2">MBO 2</option>
+            <option value="MBO 3">MBO 3</option><option value="MBO 4">MBO 4</option>
+          </optgroup>
+        </select>
+      </div>
+    </div>
+    <div class="opgeslagen" id="profiel-feedback">Opgeslagen ✓</div>
+  </div>
+
+  <!-- ── Trainingen ── -->
+  <div class="sectie">
+    <div class="sectie-rij">
+      <p class="sectie-label">Trainingen &amp; hobby's</p>
+      <button class="btn-plus" id="btn-training" aria-label="Training toevoegen" onclick="toggleTrainingForm()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+    </div>
+
+    <div class="sub-form" id="training-form" style="display:none">
+      <p class="sub-form-titel" id="training-form-titel">Training toevoegen</p>
+      <label class="form-label-sub" for="t-naam">Naam</label>
+      <input type="text" id="t-naam" class="form-input-sub" placeholder="bijv. Voetbal, Gitaar…" autocomplete="off">
+      <label class="form-label-sub">Dag(en)</label>
+      <div class="dag-keuze" id="t-dag-keuze">
+        <input type="checkbox" id="t-dag-1" value="1" class="dag-check"><label for="t-dag-1" class="dag-label">ma</label>
+        <input type="checkbox" id="t-dag-2" value="2" class="dag-check"><label for="t-dag-2" class="dag-label">di</label>
+        <input type="checkbox" id="t-dag-3" value="3" class="dag-check"><label for="t-dag-3" class="dag-label">wo</label>
+        <input type="checkbox" id="t-dag-4" value="4" class="dag-check"><label for="t-dag-4" class="dag-label">do</label>
+        <input type="checkbox" id="t-dag-5" value="5" class="dag-check"><label for="t-dag-5" class="dag-label">vr</label>
+        <input type="checkbox" id="t-dag-6" value="6" class="dag-check"><label for="t-dag-6" class="dag-label">za</label>
+        <input type="checkbox" id="t-dag-0" value="0" class="dag-check"><label for="t-dag-0" class="dag-label">zo</label>
+      </div>
+      <label class="form-label-sub" for="t-tijd">Tijd <span class="optioneel-sub">(optioneel)</span></label>
+      <input type="time" id="t-tijd" class="form-input-sub">
+      <div class="form-footer">
+        <button class="btn-annuleer-sub" onclick="annuleerTraining()">Annuleren</button>
+        <button class="btn-opslaan-sub"  onclick="slaTrainingOp()">Opslaan</button>
+      </div>
+    </div>
+
+    <div id="training-lijst"></div>
+    <p class="leeg-hint" id="training-leeg" style="display:none">Nog geen trainingen</p>
+  </div>
+
+  <!-- ── Werk ── -->
+  <div class="sectie">
+    <div class="sectie-rij">
+      <p class="sectie-label">Werk</p>
+      <button class="btn-plus" id="btn-werk" aria-label="Werkdienst toevoegen" onclick="toggleWerkForm()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </button>
+    </div>
+
+    <div class="sub-form" id="werk-form" style="display:none">
+      <p class="sub-form-titel" id="werk-form-titel">Werkdienst toevoegen</p>
+      <label class="form-label-sub">Dag(en)</label>
+      <div class="dag-keuze" id="w-dag-keuze">
+        <input type="checkbox" id="w-dag-1" value="1" class="dag-check"><label for="w-dag-1" class="dag-label">ma</label>
+        <input type="checkbox" id="w-dag-2" value="2" class="dag-check"><label for="w-dag-2" class="dag-label">di</label>
+        <input type="checkbox" id="w-dag-3" value="3" class="dag-check"><label for="w-dag-3" class="dag-label">wo</label>
+        <input type="checkbox" id="w-dag-4" value="4" class="dag-check"><label for="w-dag-4" class="dag-label">do</label>
+        <input type="checkbox" id="w-dag-5" value="5" class="dag-check"><label for="w-dag-5" class="dag-label">vr</label>
+        <input type="checkbox" id="w-dag-6" value="6" class="dag-check"><label for="w-dag-6" class="dag-label">za</label>
+        <input type="checkbox" id="w-dag-0" value="0" class="dag-check"><label for="w-dag-0" class="dag-label">zo</label>
+      </div>
+      <label class="form-label-sub">Tijdblok <span class="optioneel-sub">(optioneel)</span></label>
+      <div class="tijd-rij">
+        <div class="tijd-kolom"><input type="time" id="w-begin" class="form-input-sub"></div>
+        <div class="tijd-scheider">–</div>
+        <div class="tijd-kolom"><input type="time" id="w-eind" class="form-input-sub"></div>
+      </div>
+      <div class="form-footer">
+        <button class="btn-annuleer-sub" onclick="annuleerWerk()">Annuleren</button>
+        <button class="btn-opslaan-sub"  onclick="slaWerkOp()">Opslaan</button>
+      </div>
+    </div>
+
+    <div id="werk-lijst"></div>
+    <p class="leeg-hint" id="werk-leeg" style="display:none">Nog geen werkdiensten</p>
+  </div>
+
+  <!-- Menu -->
+  <div class="menu-overlay" id="menu-overlay">
+    <div class="menu-achtergrond" onclick="sluitMenu()"></div>
+    <div class="menu-kaart">
+      <a href="profiel.html" class="menu-item" onclick="sluitMenu()">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        Profiel
+      </a>
+      <a href="instellingen.html" class="menu-item" onclick="sluitMenu()">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Instellingen
+      </a>
+      <button class="menu-item rood" onclick="resetProfiel()">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.75"/></svg>
+        Profiel resetten
+      </button>
+    </div>
+  </div>
+
+  <!-- Tabbar -->
+  <nav class="tabbar">
+    <a href="index.html" class="tab">
+      <span class="tab-icoon">
+        <svg class="icoon-outline" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11L12 3L21 11V21H15V16H9V21H3V11Z"/></svg>
+        <svg class="icoon-filled"  width="22" height="22" viewBox="0 0 24 24"><path d="M3 11L12 3L21 11V21H15V16H9V21H3V11Z" fill="#3ddc97"/></svg>
+      </span>Home</a>
+    <a href="vakken.html" class="tab">
+      <span class="tab-icoon">
+        <svg class="icoon-outline" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7V20"/><path d="M12 7C10.5 5.8 8 5.5 5 6.5V20C8 19 10.5 19.5 12 20"/><path d="M12 7C13.5 5.8 16 5.5 19 6.5V20C16 19 13.5 19.5 12 20"/></svg>
+        <svg class="icoon-filled"  width="22" height="22" viewBox="0 0 24 24"><path d="M11 7.5C9.5 6.3 7 5.8 4.5 6.8V20C7 19 9.5 19.5 11 20.5V7.5Z" fill="#3ddc97"/><path d="M13 7.5C14.5 6.3 17 5.8 19.5 6.8V20C17 19 14.5 19.5 13 20.5V7.5Z" fill="#3ddc97"/></svg>
+      </span>Vakken</a>
+    <a href="week.html" class="tab">
+      <span class="tab-icoon">
+        <svg class="icoon-outline" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="17" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/><line x1="7" y1="14" x2="10.5" y2="14"/><line x1="13.5" y1="14" x2="17" y2="14"/><line x1="7" y1="18" x2="10.5" y2="18"/></svg>
+        <svg class="icoon-filled"  width="22" height="22" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="17" rx="2" fill="#3ddc97"/><rect x="7" y="3" width="2" height="4" rx="1" fill="#3ddc97"/><rect x="15" y="3" width="2" height="4" rx="1" fill="#3ddc97"/><line x1="3" y1="10" x2="21" y2="10" stroke="white" stroke-width="1.5" stroke-opacity="0.5"/><line x1="7" y1="14" x2="10.5" y2="14" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-opacity="0.5"/><line x1="13.5" y1="14" x2="17" y2="14" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-opacity="0.5"/><line x1="7" y1="18" x2="10.5" y2="18" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-opacity="0.5"/></svg>
+      </span>Week</a>
+    <a href="overzicht.html" class="tab">
+      <span class="tab-icoon">
+        <svg class="icoon-outline" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><rect x="9" y="2" width="6" height="3" rx="1"/><path d="M8.5 13L11 15.5L15.5 10"/></svg>
+        <svg class="icoon-filled"  width="22" height="22" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2" fill="#3ddc97"/><rect x="9" y="2" width="6" height="3" rx="1" fill="#2bc47e"/><path d="M8.5 13L11 15.5L15.5 10" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+      </span>Toetsen</a>
+    <a href="afspraken.html" class="tab">
+      <span class="tab-icoon">
+        <svg class="icoon-outline" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 15.5"/></svg>
+        <svg class="icoon-filled"  width="22" height="22" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#3ddc97"/><polyline points="12 7 12 12 15.5 15.5" stroke="white" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+      </span>Afspraken</a>
+  </nav>
+
+  <script>
+    // ── Navigatie ──
+    document.getElementById('hamburger').addEventListener('click', () => {
+      document.getElementById('menu-overlay').classList.toggle('open');
+    });
+    function sluitMenu() { document.getElementById('menu-overlay').classList.remove('open'); }
+    function resetProfiel() {
+      sluitMenu();
+      if (confirm('Wil je het profiel resetten? Alle gegevens worden verwijderd.')) {
+        localStorage.clear(); location.replace('onboarding.html');
+      }
+    }
+
+    // ── Constanten ──
+    const DAG_NAMEN = ['zo','ma','di','wo','do','vr','za'];
+
+    // ── Data ──
+    function laadProfiel()    { return JSON.parse(localStorage.getItem('profiel')    || '{}'); }
+    function laadTrainingen() { return JSON.parse(localStorage.getItem('trainingen') || '[]'); }
+    function laadWerk()       { return JSON.parse(localStorage.getItem('werk')       || '[]'); }
+
+    // ── Feedback ──
+    function toonOpgeslagen(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.add('zichtbaar');
+      clearTimeout(el._timer);
+      el._timer = setTimeout(() => el.classList.remove('zichtbaar'), 2000);
+    }
+
+    // ── Persoonlijk ──
+    (function() {
+      const p = laadProfiel();
+      document.getElementById('naam').value   = p.naam   || '';
+      document.getElementById('niveau').value = p.niveau || '';
+    })();
+
+    function slaProfielOp() {
+      const p = laadProfiel();
+      p.naam   = document.getElementById('naam').value.trim();
+      p.niveau = document.getElementById('niveau').value;
+      localStorage.setItem('profiel', JSON.stringify(p));
+      toonOpgeslagen('profiel-feedback');
+    }
+    document.getElementById('naam').addEventListener('input', slaProfielOp);
+    document.getElementById('niveau').addEventListener('change', slaProfielOp);
+
+    // ── Trainingen ──
+    let trainingBewerkenId = null;
+
+    function toggleTrainingForm() {
+      const form = document.getElementById('training-form');
+      if (form.style.display !== 'none') {
+        annuleerTraining();
+      } else {
+        trainingBewerkenId = null;
+        resetTrainingForm();
+        document.getElementById('training-form-titel').textContent = 'Training toevoegen';
+        form.style.display = 'block';
+        document.getElementById('t-naam').focus();
+      }
+    }
+
+    function annuleerTraining() {
+      trainingBewerkenId = null;
+      document.getElementById('training-form').style.display = 'none';
+      resetTrainingForm();
+    }
+
+    function resetTrainingForm() {
+      document.getElementById('t-naam').value = '';
+      document.querySelectorAll('#t-dag-keuze .dag-check').forEach(c => c.checked = false);
+      document.getElementById('t-tijd').value = '';
+    }
+
+    function bewerkTraining(id) {
+      const t = laadTrainingen().find(x => x.id === id);
+      if (!t) return;
+      trainingBewerkenId = id;
+      document.getElementById('training-form-titel').textContent = 'Training bewerken';
+      document.getElementById('t-naam').value = t.naam || '';
+      document.querySelectorAll('#t-dag-keuze .dag-check').forEach(c => {
+        c.checked = (t.dagen || []).includes(parseInt(c.value));
+      });
+      document.getElementById('t-tijd').value = t.tijd || '';
+      document.getElementById('training-form').style.display = 'block';
+      document.getElementById('t-naam').focus();
+      window.scrollTo({ top: document.getElementById('training-form').offsetTop - 20, behavior: 'smooth' });
+    }
+
+    function slaTrainingOp() {
+      const naam  = document.getElementById('t-naam').value.trim();
+      const dagen = [...document.querySelectorAll('#t-dag-keuze .dag-check:checked')].map(c => parseInt(c.value));
+      if (!naam || !dagen.length) {
+        if (!naam) document.getElementById('t-naam').focus();
+        return;
+      }
+      const lijst = laadTrainingen();
+      const item = {
+        id:    trainingBewerkenId || Date.now().toString(),
+        naam,
+        dagen,
+        tijd:  document.getElementById('t-tijd').value || ''
+      };
+      if (trainingBewerkenId) {
+        const idx = lijst.findIndex(x => x.id === trainingBewerkenId);
+        if (idx >= 0) lijst[idx] = item;
+      } else {
+        lijst.push(item);
+      }
+      localStorage.setItem('trainingen', JSON.stringify(lijst));
+      annuleerTraining();
+      renderTrainingen();
+    }
+
+    function verwijderTraining(id) {
+      if (!confirm('Training verwijderen?')) return;
+      localStorage.setItem('trainingen', JSON.stringify(laadTrainingen().filter(x => x.id !== id)));
+      renderTrainingen();
+    }
+
+    function renderTrainingen() {
+      const lijst = laadTrainingen();
+      const container = document.getElementById('training-lijst');
+      const leeg = document.getElementById('training-leeg');
+      leeg.style.display = lijst.length ? 'none' : '';
+      container.innerHTML = lijst.map(t => {
+        const dagenTekst = (t.dagen || []).map(d => DAG_NAMEN[d]).join(', ');
+        const tijdTekst  = t.tijd ? ` · ${t.tijd}` : '';
+        return `<div class="item-kaart">
+          <div class="item-body">
+            <div class="item-naam">${t.naam}</div>
+            <div class="item-meta">${dagenTekst}${tijdTekst}</div>
+          </div>
+          <div class="item-acties">
+            <button class="item-actie-btn bewerk" onclick="bewerkTraining('${t.id}')" title="Bewerken">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="item-actie-btn verwijder" onclick="verwijderTraining('${t.id}')" title="Verwijderen">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+            </button>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    // ── Werk ──
+    let werkBewerkenId = null;
+
+    function toggleWerkForm() {
+      const form = document.getElementById('werk-form');
+      if (form.style.display !== 'none') {
+        annuleerWerk();
+      } else {
+        werkBewerkenId = null;
+        resetWerkForm();
+        document.getElementById('werk-form-titel').textContent = 'Werkdienst toevoegen';
+        form.style.display = 'block';
+      }
+    }
+
+    function annuleerWerk() {
+      werkBewerkenId = null;
+      document.getElementById('werk-form').style.display = 'none';
+      resetWerkForm();
+    }
+
+    function resetWerkForm() {
+      document.querySelectorAll('#w-dag-keuze .dag-check').forEach(c => c.checked = false);
+      document.getElementById('w-begin').value = '';
+      document.getElementById('w-eind').value  = '';
+    }
+
+    function bewerkWerk(id) {
+      const w = laadWerk().find(x => x.id === id);
+      if (!w) return;
+      werkBewerkenId = id;
+      document.getElementById('werk-form-titel').textContent = 'Werkdienst bewerken';
+      document.querySelectorAll('#w-dag-keuze .dag-check').forEach(c => {
+        c.checked = (w.dagen || []).includes(parseInt(c.value));
+      });
+      document.getElementById('w-begin').value = w.beginTijd || '';
+      document.getElementById('w-eind').value  = w.eindTijd  || '';
+      document.getElementById('werk-form').style.display = 'block';
+      window.scrollTo({ top: document.getElementById('werk-form').offsetTop - 20, behavior: 'smooth' });
+    }
+
+    function slaWerkOp() {
+      const dagen = [...document.querySelectorAll('#w-dag-keuze .dag-check:checked')].map(c => parseInt(c.value));
+      if (!dagen.length) return;
+      const lijst = laadWerk();
+      const item = {
+        id:        werkBewerkenId || Date.now().toString(),
+        dagen,
+        beginTijd: document.getElementById('w-begin').value || '',
+        eindTijd:  document.getElementById('w-eind').value  || ''
+      };
+      if (werkBewerkenId) {
+        const idx = lijst.findIndex(x => x.id === werkBewerkenId);
+        if (idx >= 0) lijst[idx] = item;
+      } else {
+        lijst.push(item);
+      }
+      localStorage.setItem('werk', JSON.stringify(lijst));
+      annuleerWerk();
+      renderWerk();
+    }
+
+    function verwijderWerk(id) {
+      if (!confirm('Werkdienst verwijderen?')) return;
+      localStorage.setItem('werk', JSON.stringify(laadWerk().filter(x => x.id !== id)));
+      renderWerk();
+    }
+
+    function renderWerk() {
+      const lijst = laadWerk();
+      const container = document.getElementById('werk-lijst');
+      const leeg = document.getElementById('werk-leeg');
+      leeg.style.display = lijst.length ? 'none' : '';
+      container.innerHTML = lijst.map(w => {
+        const dagenTekst = (w.dagen || []).map(d => DAG_NAMEN[d]).join(', ');
+        const tijdTekst  = w.beginTijd ? ` · ${w.beginTijd}${w.eindTijd ? ` – ${w.eindTijd}` : ''}` : '';
+        return `<div class="item-kaart">
+          <div class="item-body">
+            <div class="item-naam">Werkdienst</div>
+            <div class="item-meta">${dagenTekst}${tijdTekst}</div>
+          </div>
+          <div class="item-acties">
+            <button class="item-actie-btn bewerk" onclick="bewerkWerk('${w.id}')" title="Bewerken">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="item-actie-btn verwijder" onclick="verwijderWerk('${w.id}')" title="Verwijderen">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+            </button>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    // ── Init ──
+    renderTrainingen();
+    renderWerk();
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+  </script>
+</body>
+</html>
