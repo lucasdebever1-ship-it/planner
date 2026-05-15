@@ -216,8 +216,16 @@
     <label class="form-label" for="f-titel">Titel</label>
     <input type="text" id="f-titel" class="form-input" placeholder="bijv. Verjaardag Roos" autocomplete="off">
 
-    <label class="form-label" for="f-datum">Datum</label>
-    <input type="date" id="f-datum" class="form-input">
+    <div class="form-rij">
+      <div class="form-kolom">
+        <label class="form-label" for="f-datum">Datum</label>
+        <input type="date" id="f-datum" class="form-input">
+      </div>
+      <div class="form-kolom">
+        <label class="form-label" for="f-einddatum">Einddatum <span class="optioneel">(opt.)</span></label>
+        <input type="date" id="f-einddatum" class="form-input">
+      </div>
+    </div>
 
     <div class="form-rij">
       <div class="form-kolom">
@@ -321,10 +329,11 @@
     function toonForm(afspraak = null) {
       bewerkenId = afspraak ? afspraak.id : null;
       document.getElementById('form-h2').textContent = afspraak ? 'Afspraak bewerken' : 'Nieuwe afspraak';
-      document.getElementById('f-titel').value = afspraak?.titel || '';
-      document.getElementById('f-datum').value = afspraak?.datum || '';
-      document.getElementById('f-tijd').value     = afspraak?.tijd     || '';
-      document.getElementById('f-eindtijd').value = afspraak?.eindtijd || '';
+      document.getElementById('f-titel').value    = afspraak?.titel     || '';
+      document.getElementById('f-datum').value    = afspraak?.datum     || '';
+      document.getElementById('f-einddatum').value = afspraak?.einddatum || '';
+      document.getElementById('f-tijd').value     = afspraak?.tijd      || '';
+      document.getElementById('f-eindtijd').value = afspraak?.eindtijd  || '';
       const cat = afspraak?.categorie || 'overig';
       document.querySelector(`input[name="cat"][value="${cat}"]`).checked = true;
       const herh = afspraak?.herhaling || 'eenmalig';
@@ -349,8 +358,9 @@
         id:        bewerkenId || Date.now().toString(),
         titel,
         datum,
-        tijd:      document.getElementById('f-tijd').value     || '',
-        eindtijd:  document.getElementById('f-eindtijd').value || '',
+        einddatum: document.getElementById('f-einddatum').value || '',
+        tijd:      document.getElementById('f-tijd').value      || '',
+        eindtijd:  document.getElementById('f-eindtijd').value  || '',
         categorie: document.querySelector('input[name="cat"]:checked')?.value || 'overig',
         herhaling: document.querySelector('input[name="herhaling"]:checked')?.value || 'eenmalig',
         afgerond:  false,
@@ -426,7 +436,9 @@
     function kaartHtml(a, kleur) {
       const datumTekst = a.herhaling === 'wekelijks'
         ? `Elke ${DAG_NAMEN[new Date(a.datum + 'T00:00:00').getDay()]}`
-        : formatDatum(a.datum);
+        : a.einddatum
+          ? `${formatDatum(a.datum)} – ${formatDatum(a.einddatum)}`
+          : formatDatum(a.datum);
       const tijdTekst = a.tijd
         ? ` · ${a.tijd}${a.eindtijd ? ` – ${a.eindtijd}` : ''}`
         : '';

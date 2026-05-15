@@ -328,6 +328,7 @@
         if (a.herhaling === 'wekelijks') {
           return parseDatum(a.datum).getDay() === dag.getDay() && a.datum <= dagStr;
         }
+        if (a.einddatum) return a.datum <= dagStr && dagStr <= a.einddatum;
         return a.datum === dagStr;
       });
 
@@ -431,7 +432,7 @@
 
       afspraakKaarten.forEach(a => {
         const kleur    = CAT_KLEUREN[a.categorie] || '#888';
-        const catLabel = CAT_LABELS[a.categorie]  || 'Overig';
+        const catLabel = a.einddatum ? 'Meerdaagse afspraak' : (CAT_LABELS[a.categorie] || 'Overig');
         const tijdStr  = a.tijd ? `${a.tijd} · ` : '';
         html += `<div class="kaart kaart-afspraak" style="border-left-color:${kleur}">
           <div class="kaart-vak">${a.titel}</div>
