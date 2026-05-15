@@ -14,9 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500&display=swap" rel="stylesheet">
-  <script>
-    if (!localStorage.getItem('profiel')) location.replace('onboarding.html');
-  </script>
+
   <style>
     *, *::before, *::after { box-sizing: border-box; }
 
@@ -246,21 +244,35 @@
       }
     }
 
-    // Splashscreen: 0.8s fade-in → 1s wachten → 0.5s fade-out
-    document.body.classList.add('splash-actief');
-    const splash = document.getElementById('splash');
-    splash.style.transition = 'opacity 0.8s ease';
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      splash.style.opacity = '1';
-    }));
-    setTimeout(() => {
-      splash.style.transition = 'opacity 0.5s ease';
-      splash.style.opacity = '0';
-      splash.addEventListener('transitionend', () => {
-        splash.remove();
-        document.body.classList.remove('splash-actief');
-      }, { once: true });
-    }, 1800); // 0.8s fade-in + 1s wachten
+    // Splashscreen: alleen bij allereerste keer dat de app wordt geopend
+    const splashGetoond = localStorage.getItem('struct_splash_shown');
+    const heeftProfiel = !!localStorage.getItem('profiel');
+
+    function naSplash() {
+      if (!heeftProfiel) location.replace('onboarding.html');
+    }
+
+    if (!splashGetoond) {
+      localStorage.setItem('struct_splash_shown', '1');
+      document.body.classList.add('splash-actief');
+      const splash = document.getElementById('splash');
+      splash.style.transition = 'opacity 0.8s ease';
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        splash.style.opacity = '1';
+      }));
+      setTimeout(() => {
+        splash.style.transition = 'opacity 0.5s ease';
+        splash.style.opacity = '0';
+        splash.addEventListener('transitionend', () => {
+          splash.remove();
+          document.body.classList.remove('splash-actief');
+          naSplash();
+        }, { once: true });
+      }, 1800);
+    } else {
+      document.getElementById('splash').remove();
+      naSplash();
+    }
 
     const profiel = JSON.parse(localStorage.getItem('profiel') || '{}');
     document.getElementById('begroeting').textContent =
