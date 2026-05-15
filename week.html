@@ -333,6 +333,13 @@
     let weekMaandag = getMaandag(vandaag);
     let gekozenDag  = new Date(vandaag);
 
+    const _dagParam = sessionStorage.getItem('week_dag');
+    if (_dagParam) {
+      gekozenDag  = parseDatum(_dagParam);
+      weekMaandag = getMaandag(gekozenDag);
+      sessionStorage.removeItem('week_dag');
+    }
+
     function renderWeekNav() {
       document.getElementById('week-bereik').textContent = weekBereikTekst(weekMaandag);
     }

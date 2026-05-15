@@ -14,122 +14,119 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500&display=swap" rel="stylesheet">
-
   <style>
     *, *::before, *::after { box-sizing: border-box; }
 
     /* ── Splashscreen ── */
     #splash {
-      position: fixed;
-      inset: 0;
-      z-index: 999;
+      position: fixed; inset: 0; z-index: 999;
       background: #ffffff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      pointer-events: none;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
     }
-
     .splash-naam {
       font-family: 'Inter', sans-serif;
-      font-size: 2.8rem;
-      font-weight: 500;
-      color: #3ddc97;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      user-select: none;
+      font-size: 2.8rem; font-weight: 500;
+      color: #3ddc97; letter-spacing: 0.3em;
+      text-transform: uppercase; user-select: none;
     }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #ffffff;
-      color: #1a1a1a;
-      margin: 0;
-      min-height: 100vh;
+      background: #ffffff; color: #1a1a1a;
+      margin: 0; min-height: 100vh;
       padding: 0 0 90px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      display: flex; flex-direction: column; align-items: center;
     }
-
     body.splash-actief > :not(#splash) { visibility: hidden; }
 
-    .center {
-      width: 100%;
-      max-width: 480px;
-      padding: 0 20px;
-    }
+    .center { width: 100%; max-width: 480px; padding: 0 20px; }
 
-    .top-bar {
-      display: flex;
-      justify-content: flex-end;
-      padding: 16px 0 8px;
+    /* ── Header ── */
+    .header-rij {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      padding: 24px 0 0;
     }
-
-    .tagline {
-      font-size: 1.9rem;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-      margin: 0 0 6px;
-      line-height: 1.2;
-      color: #1a1a1a;
+    .begroeting {
+      font-size: 1.7rem; font-weight: 800; letter-spacing: -0.5px;
+      margin: 0 0 3px; line-height: 1.2; color: #1a1a1a;
     }
+    .datum-lijn { font-size: 0.88rem; color: #bbb; margin: 0 0 28px; font-weight: 500; }
 
-    .sub {
-      font-size: 0.95rem;
-      color: #6b6b6b;
-      margin: 0 0 32px;
-    }
-
+    /* ── Sectie labels ── */
     .sectie-label {
-      font-size: 0.72rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.9px;
-      color: #aaa;
-      margin: 0 0 12px;
+      font-size: 0.72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.9px;
+      color: #aaa; margin: 0 0 12px;
     }
+    .sectie-label-mt { margin-top: 28px; }
 
-    #vandaag-lijst {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
+    /* ── Vandaag kaartjes ── */
+    .dag-kaart {
+      border-radius: 12px; padding: 12px 14px;
+      margin-bottom: 9px; border-left: 4px solid;
     }
+    .dag-kaart-toets    { background: #fff5f5; border: 1px solid #ffd0d0; border-left: 4px solid #e05252; }
+    .dag-kaart-huiswerk { background: #f0f5ff; border: 1px solid #c8d8ff; border-left: 4px solid #3a6edc; }
+    .dag-kaart-afspraak { background: #f7f0fc; border: 1px solid #dcc8f0; border-left: 4px solid #9b59b6; }
 
-    .vandaag-kaart {
-      background: #f5f5f5;
-      border: 1px solid #ebebeb;
-      border-radius: 14px;
-      padding: 16px 18px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    .dag-kaart-type {
+      font-size: 0.68rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 2px;
     }
-    .vandaag-kaart.te-laat {
-      background: #fff5f5;
-      border-color: #ffd0d0;
-    }
+    .dag-kaart-toets    .dag-kaart-type { color: #e05252; }
+    .dag-kaart-huiswerk .dag-kaart-type { color: #3a6edc; }
+    .dag-kaart-afspraak .dag-kaart-type { color: #9b59b6; }
 
-    .vandaag-vak    { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.2px; margin-bottom: 2px; color: #1a1a1a; }
-    .vandaag-toets  { font-size: 0.88rem; color: #6b6b6b; margin-bottom: 10px; }
-    .vandaag-datum  { font-size: 0.95rem; color: #888; margin-bottom: 8px; }
-    .vandaag-status-begin { font-size: 0.95rem; font-weight: 600; color: #2bc47e; }
-    .vandaag-status-laat  { font-size: 0.95rem; font-weight: 600; color: #e05252; }
+    .dag-kaart-titel { font-size: 0.93rem; font-weight: 700; color: #1a1a1a; }
+    .dag-kaart-sub   { font-size: 0.8rem; color: #888; margin-top: 1px; }
 
     .vandaag-leeg {
-      font-size: 0.95rem;
-      color: #aaa;
-      padding: 16px 18px;
-      background: #f5f5f5;
-      border-radius: 14px;
-      border: 1px solid #ebebeb;
+      font-size: 0.9rem; color: #aaa; text-align: center;
+      padding: 24px; background: #fafafa;
+      border-radius: 12px; border: 1px solid #ebebeb;
     }
 
-    /* ── Navigatie ── */
+    /* ── Week rij ── */
+    .week-rij { display: flex; gap: 6px; margin-bottom: 28px; }
+    .week-dag {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; gap: 5px; padding: 10px 2px;
+      background: #fafafa; border: 1px solid #ebebeb;
+      border-radius: 12px; text-decoration: none; color: inherit;
+      transition: background 0.15s, border-color 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .week-dag:active { background: #efefef; }
+    .week-dag.vandaag { border-color: #3ddc97; background: #f0fbf5; }
+
+    .wdag-letter {
+      font-size: 0.55rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.08em; color: #bbb;
+    }
+    .week-dag.vandaag .wdag-letter { color: #3ddc97; }
+    .wdag-getal { font-size: 0.88rem; font-weight: 700; color: #1a1a1a; line-height: 1; }
+    .wdag-stippen { display: flex; gap: 3px; align-items: center; min-height: 6px; }
+    .wdag-stip { width: 5px; height: 5px; border-radius: 50%; }
+
+    /* ── Tip ── */
+    .tip-kaart {
+      background: linear-gradient(135deg, #f0fbf5, #e8f8ef);
+      border: 1px solid #b8efd3; border-radius: 14px;
+      padding: 15px 16px; display: flex; gap: 12px;
+      align-items: flex-start; margin-top: 4px;
+    }
+    .tip-icoon { flex-shrink: 0; color: #3ddc97; margin-top: 1px; }
+    .tip-tekst { font-size: 0.88rem; color: #2a5a40; line-height: 1.55; }
+    .tip-tekst strong { color: #1a4a30; }
+
+    /* ── Hamburger + menu ── */
     .hamburger-btn {
       background: none; border: none; cursor: pointer;
       padding: 6px 8px; border-radius: 8px;
       display: flex; flex-direction: column; gap: 5px; align-items: center;
       transition: background 0.15s; -webkit-tap-highlight-color: transparent;
+      flex-shrink: 0; margin-top: 4px;
     }
     .hamburger-btn:hover { background: #f0f0f0; }
     .hamburger-streep { display: block; width: 20px; height: 2px; background: #888; border-radius: 2px; }
@@ -156,6 +153,7 @@
     .menu-item:hover { background: #f5f5f5; }
     .menu-item.rood { color: #e05252; }
 
+    /* ── Tabbar ── */
     .tabbar {
       position: fixed; bottom: 0; left: 0; right: 0;
       background: #ffffff; border-top: 1px solid #ebebeb;
@@ -184,7 +182,11 @@
   <div id="splash"><span class="splash-naam">Struct</span></div>
 
   <div class="center">
-    <div class="top-bar">
+    <div class="header-rij">
+      <div>
+        <h1 class="begroeting" id="begroeting"></h1>
+        <p class="datum-lijn" id="datum-lijn"></p>
+      </div>
       <button class="hamburger-btn" id="hamburger" aria-label="Menu">
         <span class="hamburger-streep"></span>
         <span class="hamburger-streep"></span>
@@ -192,19 +194,28 @@
       </button>
     </div>
 
-    <h1 class="tagline" id="begroeting"></h1>
-    <p class="sub">Weet wat je moet leren. En wanneer.</p>
-
     <p class="sectie-label">Vandaag</p>
     <div id="vandaag-lijst"></div>
+
+    <p class="sectie-label sectie-label-mt">Komende week</p>
+    <div class="week-rij" id="week-rij"></div>
+
+    <p class="sectie-label">Tip van Struct</p>
+    <div class="tip-kaart" id="tip-kaart"></div>
   </div>
 
   <!-- Menu -->
   <div class="menu-overlay" id="menu-overlay">
     <div class="menu-achtergrond" onclick="sluitMenu()"></div>
     <div class="menu-kaart">
-      <a href="instellingen.html" class="menu-item" onclick="sluitMenu()">⚙️&nbsp; Instellingen</a>
-      <button class="menu-item rood" onclick="resetProfiel()">🔄&nbsp; Profiel resetten</button>
+      <a href="instellingen.html" class="menu-item" onclick="sluitMenu()">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Instellingen
+      </a>
+      <button class="menu-item rood" onclick="resetProfiel()">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.75"/></svg>
+        Profiel resetten
+      </button>
     </div>
   </div>
 
@@ -238,6 +249,7 @@
   </nav>
 
   <script>
+    // ── Navigatie ──
     document.getElementById('hamburger').addEventListener('click', () => {
       document.getElementById('menu-overlay').classList.toggle('open');
     });
@@ -249,29 +261,23 @@
       }
     }
 
-    // Splashscreen: alleen bij allereerste keer dat de app wordt geopend
+    // ── Splashscreen ──
     const splashGetoond = localStorage.getItem('struct_splash_shown');
-    const heeftProfiel = !!localStorage.getItem('profiel');
+    const heeftProfiel  = !!localStorage.getItem('profiel');
 
-    function naSplash() {
-      if (!heeftProfiel) location.replace('onboarding.html');
-    }
+    function naSplash() { if (!heeftProfiel) location.replace('onboarding.html'); }
 
     if (!splashGetoond) {
       localStorage.setItem('struct_splash_shown', '1');
       document.body.classList.add('splash-actief');
       const splash = document.getElementById('splash');
       splash.style.transition = 'opacity 0.8s ease';
-      requestAnimationFrame(() => requestAnimationFrame(() => {
-        splash.style.opacity = '1';
-      }));
+      requestAnimationFrame(() => requestAnimationFrame(() => { splash.style.opacity = '1'; }));
       setTimeout(() => {
         splash.style.transition = 'opacity 0.5s ease';
         splash.style.opacity = '0';
         splash.addEventListener('transitionend', () => {
-          splash.remove();
-          document.body.classList.remove('splash-actief');
-          naSplash();
+          splash.remove(); document.body.classList.remove('splash-actief'); naSplash();
         }, { once: true });
       }, 1800);
     } else {
@@ -279,54 +285,178 @@
       naSplash();
     }
 
-    const profiel = JSON.parse(localStorage.getItem('profiel') || '{}');
-    document.getElementById('begroeting').textContent =
-      (profiel.naam ? 'Hé ' + profiel.naam + ',' : 'Hé,') + ' klaar voor vandaag?';
+    // ── Hulpfuncties ──
+    function normaliseer(d) { const r = new Date(d); r.setHours(0,0,0,0); return r; }
+    function addDagen(d, n) { const r = new Date(d); r.setDate(r.getDate()+n); r.setHours(0,0,0,0); return r; }
+    function parseDatum(s) { return normaliseer(new Date(s + 'T00:00:00')); }
+    function toDatumStr(d) {
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+    function getMaandag(d) {
+      const r = normaliseer(d);
+      const diff = r.getDay() === 0 ? -6 : 1 - r.getDay();
+      r.setDate(r.getDate() + diff); return r;
+    }
 
-    (function() {
-      function leerMultiplier() {
-        return ['VWO 5','VWO 6','HAVO 4','HAVO 5'].includes(profiel.niveau) ? 1.5 : 1;
-      }
-      const vakken = JSON.parse(localStorage.getItem('vakken') || '[]');
-      const vandaag = new Date();
-      vandaag.setHours(0, 0, 0, 0);
+    const MAANDEN = ['januari','februari','maart','april','mei','juni',
+                     'juli','augustus','september','oktober','november','december'];
+    const DAGEN_LANG  = ['zondag','maandag','dinsdag','woensdag','donderdag','vrijdag','zaterdag'];
+    const DAGEN_KORT  = ['ma','di','wo','do','vr'];
+    const STANDAARD_DAGEN_LEREN = { Mondeling:7, Proefwerk:4, SO:1, Luistertoets:0,
+                                     Schrijfvaardigheid:2, PO:14, Anders:3 };
+
+    const vandaag    = normaliseer(new Date());
+    const vandaagStr = toDatumStr(vandaag);
+    const profiel    = JSON.parse(localStorage.getItem('profiel') || '{}');
+    const vakken     = JSON.parse(localStorage.getItem('vakken')  || '[]');
+    const afspraken  = JSON.parse(localStorage.getItem('afspraken') || '[]');
+
+    // ── Begroeting ──
+    const uur      = new Date().getHours();
+    const dagdeel  = uur < 12 ? 'Goedemorgen' : uur < 18 ? 'Goedemiddag' : 'Goedenavond';
+    const naamDeel = profiel.naam ? `, ${profiel.naam}` : '';
+    document.getElementById('begroeting').textContent = dagdeel + naamDeel;
+    document.getElementById('datum-lijn').textContent =
+      `${DAGEN_LANG[vandaag.getDay()]} ${vandaag.getDate()} ${MAANDEN[vandaag.getMonth()]}`;
+
+    // ── Data ophalen voor een dag ──
+    function getItemsOpDag(dag) {
+      const str = toDatumStr(dag);
       const items = [];
+
       vakken.forEach(v => {
+        // Toetsen die deze dag plaatsvinden
         const toetsen = v.toetsen || (v.toetsdatum ? [{ naam: 'Toets', datum: v.toetsdatum }] : []);
         toetsen.forEach(t => {
-          if (!t.datum) return;
-          const toetsDatum = new Date(t.datum);
-          toetsDatum.setHours(0, 0, 0, 0);
-          const dagsTotToets = Math.round((toetsDatum - vandaag) / 86400000);
-          if (dagsTotToets < 0) return;
-          const startDagen = Math.round((v.moeilijkheid / 2 + 1) * leerMultiplier());
-          const dagsTotBegin = dagsTotToets - startDagen;
-          if (dagsTotBegin > 0) return;
-          items.push({ vak: v.naam, toets: t, dagsTotBegin, toetsDatum });
+          if (t.datum && parseDatum(t.datum).getTime() === dag.getTime()) {
+            items.push({ type: 'toets', titel: v.naam, sub: t.naam || '' });
+          }
+        });
+
+        // Huiswerk met inleverdatum vandaag
+        (v.huiswerk || []).forEach(h => {
+          if (!h.inleverdatum || h.gedaan) return;
+          if (h.inleverdatum.slice(0,10) === str) {
+            items.push({ type: 'huiswerk', titel: v.naam, sub: h.omschrijving || '' });
+          }
         });
       });
-      const lijst = document.getElementById('vandaag-lijst');
+
+      // Afspraken
+      afspraken.forEach(a => {
+        if (a.afgerond) return;
+        const match = a.herhaling === 'wekelijks'
+          ? parseDatum(a.datum).getDay() === dag.getDay() && a.datum <= str
+          : a.datum === str;
+        if (match) {
+          const tijd = a.tijd ? (a.eindtijd ? `${a.tijd} – ${a.eindtijd}` : a.tijd) : '';
+          items.push({ type: 'afspraak', titel: a.titel, sub: tijd });
+        }
+      });
+
+      // Sortering: toets → huiswerk → afspraak
+      const volgorde = { toets: 0, huiswerk: 1, afspraak: 2 };
+      return items.sort((a, b) => volgorde[a.type] - volgorde[b.type]);
+    }
+
+    // ── Sectie Vandaag ──
+    function renderVandaag() {
+      const items = getItemsOpDag(vandaag);
+      const container = document.getElementById('vandaag-lijst');
       if (!items.length) {
-        lijst.innerHTML = '<div class="vandaag-leeg">Geen toetsen voor vandaag — geniet ervan 🎉</div>';
+        container.innerHTML = '<div class="vandaag-leeg">Geen verplichtingen vandaag 🎉</div>';
         return;
       }
-      items.sort((a, b) => a.toetsDatum - b.toetsDatum);
-      lijst.innerHTML = items.map(r => {
-        const teLaat = r.dagsTotBegin < 0;
-        const datumStr = r.toetsDatum.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' });
-        const status = teLaat
-          ? '<div class="vandaag-status-laat">⚠️ Je bent te laat met beginnen!</div>'
-          : '<div class="vandaag-status-begin">📚 Begin vandaag</div>';
-        return `<div class="vandaag-kaart${teLaat ? ' te-laat' : ''}">
-          <div class="vandaag-vak">${r.vak}</div>
-          <div class="vandaag-toets">${r.toets.naam}</div>
-          <div class="vandaag-datum">Toets op ${datumStr}</div>
-          ${status}
-        </div>`;
-      }).join('');
-    })();
-  </script>
-  <script>
+      const labels = { toets: 'Toets', huiswerk: 'Huiswerk', afspraak: 'Afspraak' };
+      container.innerHTML = items.map(item => `
+        <div class="dag-kaart dag-kaart-${item.type}">
+          <div class="dag-kaart-type">${labels[item.type]}</div>
+          <div class="dag-kaart-titel">${item.titel}</div>
+          ${item.sub ? `<div class="dag-kaart-sub">${item.sub}</div>` : ''}
+        </div>`).join('');
+    }
+
+    // ── Sectie Komende week ──
+    function renderWeekRij() {
+      const maandag = getMaandag(vandaag);
+      const stipKleur = { toets: '#e05252', huiswerk: '#3a6edc', afspraak: '#9b59b6' };
+      let html = '';
+      for (let i = 0; i < 5; i++) {
+        const dag = addDagen(maandag, i);
+        const dagStr = toDatumStr(dag);
+        const isVandaag = dag.getTime() === vandaag.getTime();
+        const types = [...new Set(getItemsOpDag(dag).map(x => x.type))];
+        const stippen = types.map(t =>
+          `<span class="wdag-stip" style="background:${stipKleur[t]}"></span>`
+        ).join('');
+        html += `<a href="week.html" class="week-dag${isVandaag ? ' vandaag' : ''}"
+          onclick="sessionStorage.setItem('week_dag','${dagStr}')">
+          <span class="wdag-letter">${DAGEN_KORT[i]}</span>
+          <span class="wdag-getal">${dag.getDate()}</span>
+          <div class="wdag-stippen">${stippen}</div>
+        </a>`;
+      }
+      document.getElementById('week-rij').innerHTML = html;
+    }
+
+    // ── Tip van Struct ──
+    function renderTip() {
+      const tip = bepaalTip();
+      document.getElementById('tip-kaart').innerHTML = `
+        <div class="tip-icoon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+        </div>
+        <div class="tip-tekst">${tip}</div>`;
+    }
+
+    function bepaalTip() {
+      // Toets morgen?
+      const morgenItems = getItemsOpDag(addDagen(vandaag, 1));
+      const toetsMorgen = morgenItems.find(x => x.type === 'toets');
+      if (toetsMorgen) {
+        return `Je hebt morgen een toets <strong>${toetsMorgen.titel}</strong> — ben je al goed voorbereid?`;
+      }
+
+      // Toets overmorgen?
+      const overmorgenItems = getItemsOpDag(addDagen(vandaag, 2));
+      const toetsOvermorgen = overmorgenItems.find(x => x.type === 'toets');
+      if (toetsOvermorgen) {
+        return `Overmorgen toets <strong>${toetsOvermorgen.titel}</strong> — plan vanavond een studiesessie.`;
+      }
+
+      // Drukke of rustige week?
+      const maandag = getMaandag(vandaag);
+      let weekTotaal = 0;
+      for (let i = 0; i < 5; i++) weekTotaal += getItemsOpDag(addDagen(maandag, i)).length;
+      if (weekTotaal >= 6) {
+        return 'Drukke week voor je — zorg ook voor rustmomenten tussen het leren.';
+      }
+      if (weekTotaal === 0) {
+        return 'Rustige week! Goed moment om alvast te kijken naar wat er volgende week aankomt.';
+      }
+
+      // Generieke tips, roteren per dag
+      const generiek = [
+        'Korte studiesessies van 25 minuten werken beter dan lang achter elkaar.',
+        'Schrijf stof over in je eigen woorden — dat helpt met onthouden.',
+        'Begin moeilijke onderwerpen altijd als eerste, als je hoofd nog fris is.',
+        'Na het leren even bewegen helpt de stof te verankeren.',
+        'Plan je leermomenten in je agenda, net zoals afspraken.',
+        'Herhaling na een dag, een week en een maand zorgt voor langdurig geheugen.',
+        'Zorg voor voldoende slaap — je brein verwerkt geleerde stof tijdens het slapen.',
+      ];
+      const dagVanJaar = Math.floor((vandaag - new Date(vandaag.getFullYear(), 0, 0)) / 86400000);
+      return generiek[dagVanJaar % generiek.length];
+    }
+
+    renderVandaag();
+    renderWeekRij();
+    renderTip();
+
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
   </script>
 </body>
