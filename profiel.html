@@ -213,6 +213,13 @@
 
     .schema-leeg { font-size: 0.82rem; color: #bbb; padding: 2px 0 6px; }
 
+    /* Per-dag tijden */
+    .dag-tijden-container { margin: 0 0 8px; }
+    .dag-tijd-rij { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+    .dag-tijd-label { font-size: 0.78rem; font-weight: 700; color: #888; min-width: 24px; flex-shrink: 0; }
+    .dag-tijd-scheider { color: #bbb; font-size: 0.85rem; flex-shrink: 0; }
+    .dag-tijd-input { flex: 1; min-width: 0; margin-bottom: 0 !important; }
+
     /* ── Menu ── */
     .menu-overlay { position: fixed; inset: 0; z-index: 200; display: none; }
     .menu-overlay.open { display: block; }
@@ -354,58 +361,21 @@
         <div class="schema-form" id="sport-form" style="display:none">
           <input type="text" id="t-naam" class="form-input-mini" placeholder="Naam (bijv. Voetbal)" autocomplete="off">
           <div class="dag-pills-mini">
-            <input type="checkbox" id="t-dag-1" value="1" class="dag-check-mini"><label for="t-dag-1" class="dag-label-mini">ma</label>
-            <input type="checkbox" id="t-dag-2" value="2" class="dag-check-mini"><label for="t-dag-2" class="dag-label-mini">di</label>
-            <input type="checkbox" id="t-dag-3" value="3" class="dag-check-mini"><label for="t-dag-3" class="dag-label-mini">wo</label>
-            <input type="checkbox" id="t-dag-4" value="4" class="dag-check-mini"><label for="t-dag-4" class="dag-label-mini">do</label>
-            <input type="checkbox" id="t-dag-5" value="5" class="dag-check-mini"><label for="t-dag-5" class="dag-label-mini">vr</label>
-            <input type="checkbox" id="t-dag-6" value="6" class="dag-check-mini"><label for="t-dag-6" class="dag-label-mini">za</label>
-            <input type="checkbox" id="t-dag-0" value="0" class="dag-check-mini"><label for="t-dag-0" class="dag-label-mini">zo</label>
+            <input type="checkbox" id="t-dag-1" value="1" class="dag-check-mini" onchange="updateDagTijden()"><label for="t-dag-1" class="dag-label-mini">ma</label>
+            <input type="checkbox" id="t-dag-2" value="2" class="dag-check-mini" onchange="updateDagTijden()"><label for="t-dag-2" class="dag-label-mini">di</label>
+            <input type="checkbox" id="t-dag-3" value="3" class="dag-check-mini" onchange="updateDagTijden()"><label for="t-dag-3" class="dag-label-mini">wo</label>
+            <input type="checkbox" id="t-dag-4" value="4" class="dag-check-mini" onchange="updateDagTijden()"><label for="t-dag-4" class="dag-label-mini">do</label>
+            <input type="checkbox" id="t-dag-5" value="5" class="dag-check-mini" onchange="updateDagTijden()"><label for="t-dag-5" class="dag-label-mini">vr</label>
+            <input type="checkbox" id="t-dag-6" value="6" class="dag-check-mini" onchange="updateDagTijden()"><label for="t-dag-6" class="dag-label-mini">za</label>
+            <input type="checkbox" id="t-dag-0" value="0" class="dag-check-mini" onchange="updateDagTijden()"><label for="t-dag-0" class="dag-label-mini">zo</label>
           </div>
-          <input type="time" id="t-tijd" class="form-input-mini" placeholder="Tijd (opt.)">
+          <div id="dag-tijden-container"></div>
           <div class="form-footer-mini">
             <button class="btn-ann-mini" onclick="annuleerSport()">Annuleren</button>
             <button class="btn-opl-mini" onclick="slaTrainingOp()">Toevoegen</button>
           </div>
         </div>
         <div id="sport-items"></div>
-      </div>
-
-      <!-- Werk -->
-      <div class="toggle-rij">
-        <span class="toggle-label">Ik werk</span>
-        <div class="toggle-rechts">
-          <button class="schema-plus" id="werk-plus" onclick="toggleWerkForm()" style="display:none" title="Werkdienst toevoegen">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          </button>
-          <label class="schakelaar">
-            <input type="checkbox" id="werk-toggle" onchange="updateWerk()">
-            <span class="schakelaar-knop"></span>
-          </label>
-        </div>
-      </div>
-      <div id="werk-sectie" style="display:none" class="schema-sectie">
-        <div class="schema-form" id="werk-form" style="display:none">
-          <div class="dag-pills-mini">
-            <input type="checkbox" id="w-dag-1" value="1" class="dag-check-mini"><label for="w-dag-1" class="dag-label-mini">ma</label>
-            <input type="checkbox" id="w-dag-2" value="2" class="dag-check-mini"><label for="w-dag-2" class="dag-label-mini">di</label>
-            <input type="checkbox" id="w-dag-3" value="3" class="dag-check-mini"><label for="w-dag-3" class="dag-label-mini">wo</label>
-            <input type="checkbox" id="w-dag-4" value="4" class="dag-check-mini"><label for="w-dag-4" class="dag-label-mini">do</label>
-            <input type="checkbox" id="w-dag-5" value="5" class="dag-check-mini"><label for="w-dag-5" class="dag-label-mini">vr</label>
-            <input type="checkbox" id="w-dag-6" value="6" class="dag-check-mini"><label for="w-dag-6" class="dag-label-mini">za</label>
-            <input type="checkbox" id="w-dag-0" value="0" class="dag-check-mini"><label for="w-dag-0" class="dag-label-mini">zo</label>
-          </div>
-          <div class="tijd-rij-mini">
-            <input type="time" id="w-begin" class="form-input-mini">
-            <div class="tijd-scheider-mini">–</div>
-            <input type="time" id="w-eind" class="form-input-mini">
-          </div>
-          <div class="form-footer-mini">
-            <button class="btn-ann-mini" onclick="annuleerWerk()">Annuleren</button>
-            <button class="btn-opl-mini" onclick="slaWerkOp()">Toevoegen</button>
-          </div>
-        </div>
-        <div id="werk-items"></div>
       </div>
 
     </div>
@@ -476,7 +446,6 @@
 
     function laadProfiel()    { return JSON.parse(localStorage.getItem('profiel')    || '{}'); }
     function laadTrainingen() { return JSON.parse(localStorage.getItem('trainingen') || '[]'); }
-    function laadWerk()       { return JSON.parse(localStorage.getItem('werk')       || '[]'); }
     function slaProfielOp(p)  { localStorage.setItem('profiel', JSON.stringify(p)); }
 
     // ── Init hero + velden ──
@@ -509,14 +478,7 @@
         document.getElementById('sport-sectie').style.display = 'block';
         document.getElementById('sport-plus').style.display   = 'flex';
       }
-      if (p.werkAan) {
-        document.getElementById('werk-toggle').checked = true;
-        document.getElementById('werk-sectie').style.display = 'block';
-        document.getElementById('werk-plus').style.display   = 'flex';
-      }
-
       renderTrainingen();
-      renderWerk();
     })();
 
     // ── Foto upload ──
@@ -565,13 +527,6 @@
       document.getElementById('sport-plus').style.display   = aan ? 'flex'  : 'none';
       if (!aan) { annuleerSport(); }
     }
-    function updateWerk() {
-      const aan = document.getElementById('werk-toggle').checked;
-      const p = laadProfiel(); p.werkAan = aan; slaProfielOp(p);
-      document.getElementById('werk-sectie').style.display = aan ? 'block' : 'none';
-      document.getElementById('werk-plus').style.display   = aan ? 'flex'  : 'none';
-      if (!aan) { annuleerWerk(); }
-    }
 
     // ── Trainingen ──
     function toggleSportForm() {
@@ -588,14 +543,33 @@
     function resetSportForm() {
       document.getElementById('t-naam').value = '';
       document.querySelectorAll('#sport-form .dag-check-mini').forEach(c => c.checked = false);
-      document.getElementById('t-tijd').value = '';
+      document.getElementById('dag-tijden-container').innerHTML = '';
+    }
+    function updateDagTijden() {
+      const geselecteerd = [...document.querySelectorAll('#sport-form .dag-check-mini:checked')].map(c => parseInt(c.value));
+      const container = document.getElementById('dag-tijden-container');
+      if (!geselecteerd.length) { container.innerHTML = ''; return; }
+      container.innerHTML = geselecteerd.map(d => `
+        <div class="dag-tijd-rij">
+          <span class="dag-tijd-label">${DAG_NAMEN[d]}</span>
+          <input type="time" id="t-begin-${d}" class="form-input-mini dag-tijd-input">
+          <span class="dag-tijd-scheider">–</span>
+          <input type="time" id="t-eind-${d}" class="form-input-mini dag-tijd-input">
+        </div>`).join('');
     }
     function slaTrainingOp() {
       const naam  = document.getElementById('t-naam').value.trim();
       const dagen = [...document.querySelectorAll('#sport-form .dag-check-mini:checked')].map(c => parseInt(c.value));
       if (!naam || !dagen.length) { if (!naam) document.getElementById('t-naam').focus(); return; }
+      const tijden = {};
+      dagen.forEach(d => {
+        tijden[d] = {
+          begin: (document.getElementById(`t-begin-${d}`) || {}).value || '',
+          eind:  (document.getElementById(`t-eind-${d}`)  || {}).value || ''
+        };
+      });
       const lijst = laadTrainingen();
-      lijst.push({ id: Date.now().toString(), naam, dagen, tijd: document.getElementById('t-tijd').value || '' });
+      lijst.push({ id: Date.now().toString(), naam, dagen, tijden });
       localStorage.setItem('trainingen', JSON.stringify(lijst));
       annuleerSport();
       renderTrainingen();
@@ -613,67 +587,24 @@
         return;
       }
       container.innerHTML = lijst.map(t => {
-        const dagenTekst = (t.dagen || []).map(d => DAG_NAMEN[d]).join(', ');
-        const tijdTekst  = t.tijd ? ` · ${t.tijd}` : '';
+        const dagRegels = (t.dagen || []).map(d => {
+          const dagNaam = DAG_NAMEN[d];
+          const ti = t.tijden && t.tijden[d];
+          if (ti && ti.begin) {
+            return `${dagNaam} ${ti.begin}${ti.eind ? ` – ${ti.eind}` : ''}`;
+          }
+          return dagNaam;
+        }).join(', ');
         return `<div class="schema-item">
           <div class="schema-item-info">
             <div class="schema-item-naam">${t.naam}</div>
-            <div class="schema-item-meta">${dagenTekst}${tijdTekst}</div>
+            <div class="schema-item-meta">${dagRegels}</div>
           </div>
           <button class="schema-del" onclick="verwijderTraining('${t.id}')">×</button>
         </div>`;
       }).join('');
     }
 
-    // ── Werk ──
-    function toggleWerkForm() {
-      const f = document.getElementById('werk-form');
-      if (f.style.display !== 'none') { annuleerWerk(); return; }
-      resetWerkForm();
-      f.style.display = 'block';
-    }
-    function annuleerWerk() {
-      document.getElementById('werk-form').style.display = 'none';
-      resetWerkForm();
-    }
-    function resetWerkForm() {
-      document.querySelectorAll('#werk-form .dag-check-mini').forEach(c => c.checked = false);
-      document.getElementById('w-begin').value = '';
-      document.getElementById('w-eind').value  = '';
-    }
-    function slaWerkOp() {
-      const dagen = [...document.querySelectorAll('#werk-form .dag-check-mini:checked')].map(c => parseInt(c.value));
-      if (!dagen.length) return;
-      const lijst = laadWerk();
-      lijst.push({ id: Date.now().toString(), dagen, beginTijd: document.getElementById('w-begin').value || '', eindTijd: document.getElementById('w-eind').value || '' });
-      localStorage.setItem('werk', JSON.stringify(lijst));
-      annuleerWerk();
-      renderWerk();
-    }
-    function verwijderWerk(id) {
-      if (!confirm('Werkdienst verwijderen?')) return;
-      localStorage.setItem('werk', JSON.stringify(laadWerk().filter(x => x.id !== id)));
-      renderWerk();
-    }
-    function renderWerk() {
-      const lijst = laadWerk();
-      const container = document.getElementById('werk-items');
-      if (!lijst.length) {
-        container.innerHTML = '<p class="schema-leeg">Nog geen werkdiensten</p>';
-        return;
-      }
-      container.innerHTML = lijst.map(w => {
-        const dagenTekst = (w.dagen || []).map(d => DAG_NAMEN[d]).join(', ');
-        const tijdTekst  = w.beginTijd ? ` · ${w.beginTijd}${w.eindTijd ? ` – ${w.eindTijd}` : ''}` : '';
-        return `<div class="schema-item">
-          <div class="schema-item-info">
-            <div class="schema-item-naam">Werkdienst</div>
-            <div class="schema-item-meta">${dagenTekst}${tijdTekst}</div>
-          </div>
-          <button class="schema-del" onclick="verwijderWerk('${w.id}')">×</button>
-        </div>`;
-      }).join('');
-    }
 
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
   </script>
