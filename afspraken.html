@@ -153,7 +153,7 @@
     .afspraak-kaart.afgerond { opacity: 0.4; }
     .afspraak-kaart.afgerond .a-titel { text-decoration: line-through; color: #aaa; }
 
-    .a-body { flex: 1; min-width: 0; }
+    .a-body { flex: 1; min-width: 0; cursor: pointer; }
     .a-titel {
       font-size: 0.95rem; font-weight: 700; color: #1a1a1a;
       margin-bottom: 2px;
@@ -170,9 +170,8 @@
       -webkit-tap-highlight-color: transparent;
     }
     .actie-btn:hover { background: #f0f0f0; }
-    .actie-vink    { color: #2bc47e; }
-    .actie-potlood { color: #888; }
-    .actie-kruis   { color: #e05252; }
+    .actie-vink  { color: #2bc47e; }
+    .actie-kruis { color: #e05252; }
 
     .leeg { text-align: center; color: #bbb; padding: 60px 0 40px; font-size: 0.95rem; }
 
@@ -217,14 +216,17 @@
     <label class="form-label" for="f-titel">Titel</label>
     <input type="text" id="f-titel" class="form-input" placeholder="bijv. Verjaardag Roos" autocomplete="off">
 
+    <label class="form-label" for="f-datum">Datum</label>
+    <input type="date" id="f-datum" class="form-input">
+
     <div class="form-rij">
       <div class="form-kolom">
-        <label class="form-label" for="f-datum">Datum</label>
-        <input type="date" id="f-datum" class="form-input">
+        <label class="form-label" for="f-tijd">Begintijd <span class="optioneel">(opt.)</span></label>
+        <input type="time" id="f-tijd" class="form-input">
       </div>
       <div class="form-kolom">
-        <label class="form-label" for="f-tijd">Tijd <span class="optioneel">(opt.)</span></label>
-        <input type="time" id="f-tijd" class="form-input">
+        <label class="form-label" for="f-eindtijd">Eindtijd <span class="optioneel">(opt.)</span></label>
+        <input type="time" id="f-eindtijd" class="form-input">
       </div>
     </div>
 
@@ -321,7 +323,8 @@
       document.getElementById('form-h2').textContent = afspraak ? 'Afspraak bewerken' : 'Nieuwe afspraak';
       document.getElementById('f-titel').value = afspraak?.titel || '';
       document.getElementById('f-datum').value = afspraak?.datum || '';
-      document.getElementById('f-tijd').value  = afspraak?.tijd  || '';
+      document.getElementById('f-tijd').value     = afspraak?.tijd     || '';
+      document.getElementById('f-eindtijd').value = afspraak?.eindtijd || '';
       const cat = afspraak?.categorie || 'overig';
       document.querySelector(`input[name="cat"][value="${cat}"]`).checked = true;
       const herh = afspraak?.herhaling || 'eenmalig';
@@ -346,7 +349,8 @@
         id:        bewerkenId || Date.now().toString(),
         titel,
         datum,
-        tijd:      document.getElementById('f-tijd').value || '',
+        tijd:      document.getElementById('f-tijd').value     || '',
+        eindtijd:  document.getElementById('f-eindtijd').value || '',
         categorie: document.querySelector('input[name="cat"]:checked')?.value || 'overig',
         herhaling: document.querySelector('input[name="herhaling"]:checked')?.value || 'eenmalig',
         afgerond:  false,
@@ -394,7 +398,10 @@
 
       const container = document.getElementById('afspraken-lijst');
       if (!lijst.length) {
-        container.innerHTML = '<div class="leeg">Nog geen afspraken —<br>tik + om er een toe te voegen</div>';
+        container.innerHTML = `<div class="leeg">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#3ddc97" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto 14px"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Nog geen afspraken —<br>tik + om er een toe te voegen
+        </div>`;
         return;
       }
 
@@ -420,25 +427,24 @@
       const datumTekst = a.herhaling === 'wekelijks'
         ? `Elke ${DAG_NAMEN[new Date(a.datum + 'T00:00:00').getDay()]}`
         : formatDatum(a.datum);
-      const tijdTekst = a.tijd ? ` · ${a.tijd}` : '';
+      const tijdTekst = a.tijd
+        ? ` · ${a.tijd}${a.eindtijd ? ` – ${a.eindtijd}` : ''}`
+        : '';
       const afgerondKlas = a.afgerond ? ' afgerond' : '';
       const vinkBtn = !a.afgerond
-        ? `<button class="actie-btn actie-vink" onclick="rondsAf('${a.id}')" title="Afronden">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        ? `<button class="actie-btn actie-vink" onclick="rondsAf('${a.id}')" title="Markeer als gedaan">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/></svg>
            </button>`
         : '';
       return `<div class="afspraak-kaart${afgerondKlas}" style="border-left-color:${kleur}">
-        <div class="a-body">
+        <div class="a-body" onclick="bewerk('${a.id}')">
           <div class="a-titel">${a.titel}</div>
           <div class="a-meta">${datumTekst}${tijdTekst}</div>
         </div>
         <div class="a-acties">
           ${vinkBtn}
-          <button class="actie-btn actie-potlood" onclick="bewerk('${a.id}')" title="Bewerken">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          </button>
           <button class="actie-btn actie-kruis" onclick="verwijder('${a.id}')" title="Verwijderen">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
           </button>
         </div>
       </div>`;
