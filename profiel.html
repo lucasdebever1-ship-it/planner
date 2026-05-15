@@ -168,6 +168,12 @@
       transition: color 0.15s; -webkit-tap-highlight-color: transparent;
     }
     .schema-del:hover { color: #e05252; }
+    .schema-edit {
+      background: none; border: none; cursor: pointer;
+      color: #d0d0d0; padding: 4px 6px; display: flex; align-items: center;
+      transition: color 0.15s; -webkit-tap-highlight-color: transparent;
+    }
+    .schema-edit:hover { color: #3ddc97; }
 
     /* Schema formulier */
     .schema-form {
@@ -603,6 +609,106 @@
       localStorage.setItem('trainingen', JSON.stringify(laadTrainingen().filter(x => x.id !== id)));
       renderTrainingen();
     }
+
+    let bewerkId = null;
+
+    function bewerkTraining(id) {
+      annuleerSport();
+      bewerkId = id;
+      renderTrainingen();
+    }
+    function annuleerBewerken() {
+      bewerkId = null;
+      renderTrainingen();
+    }
+    function updateBewerkDagTijden() {
+      const geselecteerd = [...document.querySelectorAll('.bew-dag-check:checked')].map(c => parseInt(c.value));
+      const container = document.getElementById('bew-tijden-container');
+      const bestaand = {};
+      container.querySelectorAll('.dag-tijd-rij').forEach(rij => {
+        const inp = rij.querySelector('[id^="bew-begin-"]');
+        if (!inp) return;
+        const d = parseInt(inp.id.replace('bew-begin-', ''));
+        bestaand[d] = {
+          begin: inp.value,
+          eind: document.getElementById(`bew-eind-${d}`)?.value || '',
+          wisselend: document.getElementById(`bew-wissel-${d}`)?.checked || false
+        };
+      });
+      if (!geselecteerd.length) { container.innerHTML = ''; return; }
+      container.innerHTML = geselecteerd.map(d => {
+        const prev = bestaand[d] || {};
+        const wissel = prev.wisselend || false;
+        return `<div class="dag-tijd-rij">
+          <span class="dag-tijd-label">${DAG_NAMEN[d]}</span>
+          <div class="dag-vaste-inputs" id="bew-inputs-${d}" style="${wissel ? 'display:none' : ''}">
+            <input type="time" id="bew-begin-${d}" class="form-input-mini dag-tijd-input" value="${prev.begin || ''}">
+            <span class="dag-tijd-scheider">–</span>
+            <input type="time" id="bew-eind-${d}" class="form-input-mini dag-tijd-input" value="${prev.eind || ''}">
+          </div>
+          <input type="checkbox" id="bew-wissel-${d}" class="dag-wisselend-check" ${wissel ? 'checked' : ''} onchange="toggleBewerkWisselend(${d})">
+          <label for="bew-wissel-${d}" class="dag-wisselend-lbl">Wisselend</label>
+        </div>`;
+      }).join('');
+    }
+    function toggleBewerkWisselend(d) {
+      const wissel = document.getElementById(`bew-wissel-${d}`).checked;
+      document.getElementById(`bew-inputs-${d}`).style.display = wissel ? 'none' : 'flex';
+    }
+    function slaBewerkingenOp() {
+      const naam = document.getElementById('bew-naam').value.trim();
+      const dagen = [...document.querySelectorAll('.bew-dag-check:checked')].map(c => parseInt(c.value));
+      if (!naam || !dagen.length) { if (!naam) document.getElementById('bew-naam').focus(); return; }
+      const tijden = {};
+      dagen.forEach(d => {
+        const wissel = document.getElementById(`bew-wissel-${d}`)?.checked;
+        tijden[d] = wissel
+          ? { wisselend: true }
+          : { begin: document.getElementById(`bew-begin-${d}`)?.value || '',
+              eind:  document.getElementById(`bew-eind-${d}`)?.value  || '' };
+      });
+      const lijst = laadTrainingen().map(t => t.id === bewerkId ? { ...t, naam, dagen, tijden } : t);
+      localStorage.setItem('trainingen', JSON.stringify(lijst));
+      bewerkId = null;
+      renderTrainingen();
+    }
+
+    function renderBewerkForm(t) {
+      const dagPills = [1,2,3,4,5,6,0].map(d => {
+        const checked = (t.dagen || []).includes(d) ? 'checked' : '';
+        return `<input type="checkbox" id="bew-dag-${d}" value="${d}" class="bew-dag-check dag-check-mini" ${checked} onchange="updateBewerkDagTijden()"><label for="bew-dag-${d}" class="dag-label-mini">${DAG_NAMEN[d]}</label>`;
+      }).join('');
+      const tijdRijen = (t.dagen || []).map(d => {
+        const ti = t.tijden && t.tijden[d];
+        const wissel = ti && ti.wisselend;
+        const begin  = ti && !wissel ? (ti.begin || '') : '';
+        const eind   = ti && !wissel ? (ti.eind  || '') : '';
+        return `<div class="dag-tijd-rij">
+          <span class="dag-tijd-label">${DAG_NAMEN[d]}</span>
+          <div class="dag-vaste-inputs" id="bew-inputs-${d}" style="${wissel ? 'display:none' : ''}">
+            <input type="time" id="bew-begin-${d}" class="form-input-mini dag-tijd-input" value="${begin}">
+            <span class="dag-tijd-scheider">–</span>
+            <input type="time" id="bew-eind-${d}" class="form-input-mini dag-tijd-input" value="${eind}">
+          </div>
+          <input type="checkbox" id="bew-wissel-${d}" class="dag-wisselend-check" ${wissel ? 'checked' : ''} onchange="toggleBewerkWisselend(${d})">
+          <label for="bew-wissel-${d}" class="dag-wisselend-lbl">Wisselend</label>
+        </div>`;
+      }).join('');
+      return `<div class="schema-form" style="margin-bottom:6px">
+        <input type="text" id="bew-naam" class="form-input-mini" value="${t.naam}" autocomplete="off">
+        <div class="dag-pills-mini">${dagPills}</div>
+        <div id="bew-tijden-container">${tijdRijen}</div>
+        <div class="form-footer-mini">
+          <button class="btn-ann-mini" onclick="annuleerBewerken()" title="Annuleren" style="display:flex;align-items:center;justify-content:center">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+          <button class="btn-opl-mini" onclick="slaBewerkingenOp()" title="Opslaan" style="display:flex;align-items:center;justify-content:center">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </button>
+        </div>
+      </div>`;
+    }
+
     function renderTrainingen() {
       const lijst = laadTrainingen();
       const container = document.getElementById('sport-items');
@@ -611,6 +717,7 @@
         return;
       }
       container.innerHTML = lijst.map(t => {
+        if (t.id === bewerkId) return renderBewerkForm(t);
         const dagRegels = (t.dagen || []).map(d => {
           const ti = t.tijden && t.tijden[d];
           if (!ti || ti.wisselend) return `${DAG_LANG[d]} — Wisselend`;
@@ -622,7 +729,10 @@
             <div class="schema-item-naam">${t.naam}</div>
             <div class="schema-item-meta">${dagRegels}</div>
           </div>
-          <button class="schema-del" onclick="verwijderTraining('${t.id}')">×</button>
+          <button class="schema-edit" onclick="bewerkTraining('${t.id}')" title="Bewerken">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="schema-del" onclick="verwijderTraining('${t.id}')" title="Verwijderen">×</button>
         </div>`;
       }).join('');
     }
