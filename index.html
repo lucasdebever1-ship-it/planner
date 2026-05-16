@@ -752,7 +752,7 @@
       }
 
       // 1. Dagoverzicht — eenmalig per dag na 08:00
-      if (s.dagoverzicht !== false && nu.getHours() >= 8) {
+      if (s.dagoverzicht !== false && nu.getHours() >= 7) {
         const key = 'dag_' + dagStr;
         if (!alVandaag(key)) {
           markeerV(key);
@@ -793,7 +793,7 @@
       }
 
       // 3. Afspraken vandaag — eenmalig per dag na 08:00
-      if (s.afspraken !== false && nu.getHours() >= 8) {
+      if (s.afspraken !== false && nu.getHours() >= 7) {
         for (const a of afspraken2) {
           if (a.afgerond) continue;
           const match = a.herhaling === 'wekelijks'
