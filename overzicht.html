@@ -420,8 +420,15 @@
         r.drukkeWeek = score > 4;
       });
 
-      // Waarschuwingsbanner per drukke week
-      const drukkeWeken = [...new Set(items.filter(r => r.drukkeWeek && r.toets.datum).map(r => isoWeek(r.toets.datum)))];
+      // Waarschuwingsbanner: alleen eerstvolgende drukke week die nog niet voorbij is
+      const drukkeWeken = [...new Set(items.filter(r => r.drukkeWeek && r.toets.datum).map(r => isoWeek(r.toets.datum)))]
+        .filter(wk => {
+          const ma = getMaandagVanIsoWeek(wk);
+          const zo = new Date(ma); zo.setDate(ma.getDate() + 6); zo.setHours(0,0,0,0);
+          return zo.getTime() >= vandaag.getTime();
+        })
+        .sort()
+        .slice(0, 1);
       document.getElementById('week-waarschuwingen').innerHTML = drukkeWeken.map(wk => {
         const ma = getMaandagVanIsoWeek(wk);
         const datumStr = ma.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' });
