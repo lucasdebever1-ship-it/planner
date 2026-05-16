@@ -511,6 +511,12 @@
     }
 
     function bepaalTip() {
+      const vm = JSON.parse(localStorage.getItem('vrijeMomenten') || '{}');
+      function vrijTipDeel(dag) {
+        const tijd = vm[dag.getDay()];
+        return tijd ? `, je bent vrij vanaf ${tijd}` : '';
+      }
+
       // ── 1. Toets morgen? ──
       const morgen = addDagen(vandaag, 1);
       const morgenStr = toDatumStr(morgen);
@@ -536,7 +542,21 @@
       if (trainingVandaag.length) {
         const t = trainingVandaag[0];
         const wanneer = t.sortTijd ? `om ${t.sortTijd}` : 'vandaag';
-        return `${t.titel} ${wanneer} — zorg dat je op tijd klaar bent.`;
+        const vrijHier = vrijTipDeel(vandaag);
+        return `${t.titel} ${wanneer}${vrijHier} — zorg dat je op tijd klaar bent.`;
+      }
+
+      // ── 3b. Toets over 2-7 dagen + vrij moment? ──
+      for (const v of vakken) {
+        const toetsen = v.toetsen || (v.toetsdatum ? [{ datum: v.toetsdatum }] : []);
+        for (const t of toetsen) {
+          if (!t.datum) continue;
+          const dagsTot = Math.round((parseDatum(t.datum) - vandaag) / 86400000);
+          if (dagsTot >= 2 && dagsTot <= 7 && vm[vandaag.getDay()]) {
+            const vrijH = vm[vandaag.getDay()];
+            return `Toets <strong>${v.naam}</strong> over ${dagsTot} dagen — je bent vandaag vrij vanaf ${vrijH}.`;
+          }
+        }
       }
 
       // ── 4. Generieke tips, roteren per dag ──

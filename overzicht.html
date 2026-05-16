@@ -367,7 +367,10 @@
         const beginD = new Date(toets.datum + 'T00:00:00');
         beginD.setDate(beginD.getDate() - getLeerDagen(toets.type, moeilijkheid) - extraDagen - (r.vakAanpassing || 0));
         const { datum: vrijBegin, verschoven } = verschuifNaarVrijeDag(beginD);
-        advies = `<div class="kaart-advies leeradvies">📚 Begin op ${vrijBegin.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' })}${verschoven ? ' (werkdag overgeslagen)' : ''}</div>`;
+        const vm = JSON.parse(localStorage.getItem('vrijeMomenten') || '{}');
+        const vrijTijd = vm[vrijBegin.getDay()];
+        const tijdDeel = vrijTijd ? ` — vrij vanaf ${vrijTijd}` : '';
+        advies = `<div class="kaart-advies leeradvies">📚 Begin op ${vrijBegin.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' })}${tijdDeel}${verschoven ? ' (werkdag overgeslagen)' : ''}</div>`;
       }
       return `<div class="toets-kaart ${categorie}">
         ${drukBadge}
