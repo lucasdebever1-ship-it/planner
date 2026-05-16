@@ -394,6 +394,7 @@
             d.setHours(0, 0, 0, 0);
             dagsTotToets = Math.round((d - vandaag) / 86400000);
           }
+          if (dagsTotToets !== null && dagsTotToets < -7) return; // meer dan 7 dagen voorbij
           const vakAanpassing = getVakAanpassing(v.naam);
           const startDagen = getLeerDagen(t.type, v.moeilijkheid) + vakAanpassing;
           const dagsTotBegin = dagsTotToets !== null ? dagsTotToets - startDagen : null;
@@ -445,7 +446,7 @@
       if (!items.length) { document.getElementById('leeg').style.display = ''; inhoud.innerHTML = ''; return; }
 
       const secties = [
-        { id: 'urgent',        label: 'Op tijd beginnen', dot: '#e05252' },
+        { id: 'urgent',        label: 'Actie vereist', dot: '#e05252' },
         { id: 'deze-week',     label: 'Deze week',        dot: '#f0a050' },
         { id: 'volgende-week', label: 'Volgende week',    dot: '#c8b030' },
         { id: 'later',         label: 'Later',            dot: '#ccc'    },

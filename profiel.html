@@ -485,7 +485,7 @@
       }
 
       // Hero tekst
-      document.getElementById('hero-naam').textContent   = p.naam   || '—';
+      document.getElementById('hero-naam').textContent   = p.naam ? p.naam.charAt(0).toUpperCase() + p.naam.slice(1) : '—';
       document.getElementById('hero-niveau').textContent = p.niveau || '';
 
       // Velden
@@ -524,7 +524,7 @@
     function updateHero() {
       const naam = document.getElementById('naam').value.trim();
       const niveau = document.getElementById('niveau').value;
-      document.getElementById('hero-naam').textContent   = naam   || '—';
+      document.getElementById('hero-naam').textContent   = naam ? naam.charAt(0).toUpperCase() + naam.slice(1) : '—';
       document.getElementById('hero-niveau').textContent = niveau || '';
       const initial = document.getElementById('avatar-initial');
       if (initial.style.display !== 'none') initial.textContent = (naam || 'S').charAt(0).toUpperCase();

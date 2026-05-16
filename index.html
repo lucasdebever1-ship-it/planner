@@ -617,7 +617,10 @@
       const { huidig, nieuwRecord } = data;
       const blok = document.getElementById('streak-blok');
       if (huidig === 0) {
-        blok.innerHTML = '<span class="streak-vlam">🔥</span><span class="streak-start">Start vandaag je streak</span>';
+        blok.style.background = 'none';
+        blok.style.border = 'none';
+        blok.style.padding = '0 0 8px';
+        blok.innerHTML = '<span class="streak-start">Begin vandaag je streak</span>';
       } else {
         const mv = huidig === 1 ? 'dag' : 'dagen';
         blok.innerHTML = `

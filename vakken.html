@@ -552,7 +552,6 @@
             <div class="acties">
               <button class="edit"      data-i="${i}" title="Bewerken">&#x270F;</button>
               <button class="add-toets" data-i="${i}" title="Toets toevoegen">+</button>
-              <button class="delete"    data-i="${i}" title="Verwijderen">&#x2715;</button>
             </div>
           </div>
           ${v.opmerking ? `<div class="vak-opmerking">${v.opmerking}</div>` : ''}
@@ -673,6 +672,7 @@
           <div class="acties">
             <button class="opslaan"  data-i="${i}">&#x2713;</button>
             <button class="annuleer" data-i="${i}">&#x2715;</button>
+            <button class="delete"   data-i="${i}" title="Verwijder vak" style="color:#e05252;font-size:0.8rem;padding:4px 8px">&#x1F5D1;</button>
           </div>
         </div>
         <textarea class="b-opmerking" placeholder="Bijv: woordenboek meenemen, formuleblad toegestaan">${v.opmerking || ''}</textarea>
