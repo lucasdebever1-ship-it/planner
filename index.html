@@ -151,6 +151,28 @@
     }
     .streak-blok.record { animation: streak-pop 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97); }
 
+    /* ── Notificatie banner ── */
+    .notif-banner {
+      background: #f0fbf5; border: 1px solid #b8efd3;
+      border-radius: 13px; padding: 13px 15px;
+      margin-bottom: 20px;
+    }
+    .notif-banner-info {
+      display: flex; align-items: center; gap: 9px;
+      font-size: 0.88rem; color: #2a5a40; margin-bottom: 10px; line-height: 1.4;
+    }
+    .notif-banner-acties { display: flex; gap: 8px; }
+    .notif-btn-ja {
+      flex: 1; padding: 9px; background: #3ddc97; border: none;
+      border-radius: 8px; color: #fff; font-size: 0.85rem; font-weight: 600;
+      cursor: pointer; font-family: inherit;
+    }
+    .notif-btn-nee {
+      padding: 9px 14px; background: none; border: 1.5px solid #c8ead8;
+      border-radius: 8px; color: #3ddc97; font-size: 0.85rem;
+      cursor: pointer; font-family: inherit;
+    }
+
     /* ── Hamburger + menu ── */
     .hamburger-btn {
       background: none; border: none; cursor: pointer;
@@ -226,6 +248,16 @@
     </div>
 
     <div id="streak-blok" class="streak-blok"></div>
+    <div id="notif-banner" class="notif-banner" style="display:none">
+      <div class="notif-banner-info">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3ddc97" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        Wil je meldingen voor toetsen en afspraken?
+      </div>
+      <div class="notif-banner-acties">
+        <button class="notif-btn-ja" onclick="vraagNotifToestemming()">Inschakelen</button>
+        <button class="notif-btn-nee" onclick="verbergNotifBanner()">Niet nu</button>
+      </div>
+    </div>
     <div id="week-waarschuwing"></div>
     <p class="sectie-label">Vandaag</p>
     <div id="vandaag-lijst"></div>
@@ -648,6 +680,144 @@
     renderTip();
 
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+
+    // ── Notificaties ──
+    function notifInst() { return JSON.parse(localStorage.getItem('notificaties') || '{}'); }
+    function slaNotifOp(s) { localStorage.setItem('notificaties', JSON.stringify(s)); }
+
+    function initNotifBanner() {
+      if (!('Notification' in window)) return;
+      if (Notification.permission !== 'default') return;
+      if (notifInst().banner_verborgen) return;
+      document.getElementById('notif-banner').style.display = 'block';
+    }
+
+    async function vraagNotifToestemming() {
+      document.getElementById('notif-banner').style.display = 'none';
+      const result = await Notification.requestPermission();
+      const s = notifInst();
+      s.banner_verborgen = true;
+      if (result === 'granted') {
+        s.dagoverzicht = true; s.toets_start = true; s.toets_morgen = true; s.afspraken = true;
+        slaNotifOp(s);
+        await checkNotificaties();
+        await registreerPeriodicSync();
+      } else {
+        slaNotifOp(s);
+      }
+    }
+
+    function verbergNotifBanner() {
+      document.getElementById('notif-banner').style.display = 'none';
+      const s = notifInst(); s.banner_verborgen = true; slaNotifOp(s);
+    }
+
+    async function registreerPeriodicSync() {
+      if (!('serviceWorker' in navigator)) return;
+      try {
+        const reg = await navigator.serviceWorker.ready;
+        if ('periodicSync' in reg) {
+          await reg.periodicSync.register('struct-notificaties', { minInterval: 60 * 60 * 1000 });
+        }
+      } catch (_) {}
+    }
+
+    async function schrijfNotifQueue(queue) {
+      if (!('caches' in window)) return;
+      try {
+        const cache = await caches.open('struct-notif-v1');
+        await cache.put('/notif-queue', new Response(JSON.stringify(queue), {
+          headers: { 'Content-Type': 'application/json' }
+        }));
+      } catch (_) {}
+    }
+
+    async function checkNotificaties() {
+      if (!('Notification' in window) || Notification.permission !== 'granted') return;
+      const s = notifInst();
+      const nu = new Date();
+      const dagStr = toDatumStr(vandaag);
+      const profiel2   = JSON.parse(localStorage.getItem('profiel')    || '{}');
+      const vakken2    = JSON.parse(localStorage.getItem('vakken')     || '[]');
+      const afspraken2 = JSON.parse(localStorage.getItem('afspraken')  || '[]');
+      const inst2      = JSON.parse(localStorage.getItem('instellingen') || '{}');
+      const STAND2 = { Mondeling:7, Proefwerk:4, SO:1, Luistertoets:0, Schrijfvaardigheid:2, PO:14, Anders:3 };
+
+      function al(key)          { return !!localStorage.getItem('notif_' + key); }
+      function markeer(key)     { localStorage.setItem('notif_' + key, '1'); }
+      function alVandaag(key)   { return localStorage.getItem('notif_' + key) === dagStr; }
+      function markeerV(key)    { localStorage.setItem('notif_' + key, dagStr); }
+      function toon(titel, body, tag) {
+        new Notification(titel, { body, icon: 'icon.svg', tag, badge: 'icon.svg' });
+      }
+
+      // 1. Dagoverzicht — eenmalig per dag na 08:00
+      if (s.dagoverzicht !== false && nu.getHours() >= 8) {
+        const key = 'dag_' + dagStr;
+        if (!alVandaag(key)) {
+          markeerV(key);
+          const n = getItemsOpDag(vandaag).length;
+          const naam = profiel2.naam ? ` ${profiel2.naam}` : '';
+          const body = n > 0
+            ? `Je hebt vandaag ${n} ding${n === 1 ? '' : 'en'} gepland.`
+            : 'Een rustige dag vandaag — geniet ervan!';
+          toon(`Goedemorgen${naam} —`, body, 'dagoverzicht');
+        }
+      }
+
+      // 2. Toets begindatum + dag-voor-toets
+      function getLeerDagenN(type, moeilijkheid) {
+        const basis = inst2[type] !== undefined ? inst2[type] : (STAND2[type] ?? STAND2.Anders);
+        return basis > 0 ? Math.max(1, Math.round(basis * ((moeilijkheid || 5) / 5))) : 0;
+      }
+      for (const v of vakken2) {
+        const toetsen = v.toetsen || (v.toetsdatum ? [{ datum: v.toetsdatum, naam: 'Toets', type: 'Anders' }] : []);
+        for (const t of toetsen) {
+          if (!t.datum) continue;
+          const dagsTot = Math.round((parseDatum(t.datum) - vandaag) / 86400000);
+          if (dagsTot < 0) continue;
+
+          if (s.toets_start !== false) {
+            const startDagen = getLeerDagenN(t.type || 'Anders', v.moeilijkheid);
+            if (startDagen > 0 && dagsTot === startDagen) {
+              const key = `toets_start_${t.datum}_${v.naam}`;
+              if (!al(key)) { markeer(key); toon(`${v.naam} —`, 'Begin vandaag met leren.', key); }
+            }
+          }
+
+          if (dagsTot === 1 && s.toets_morgen !== false) {
+            const key = `toets_morgen_${t.datum}_${v.naam}`;
+            if (!al(key)) { markeer(key); toon(`Morgen toets ${v.naam} —`, 'Ben je er klaar voor?', key); }
+          }
+        }
+      }
+
+      // 3. Afspraken vandaag — eenmalig per dag na 08:00
+      if (s.afspraken !== false && nu.getHours() >= 8) {
+        for (const a of afspraken2) {
+          if (a.afgerond) continue;
+          const match = a.herhaling === 'wekelijks'
+            ? parseDatum(a.datum).getDay() === vandaag.getDay() && a.datum <= dagStr
+            : a.einddatum ? a.datum <= dagStr && dagStr <= a.einddatum : a.datum === dagStr;
+          if (!match) continue;
+          const key = `afspraak_${a.id}_${dagStr}`;
+          if (!alVandaag(key)) {
+            markeerV(key);
+            const tijdStr = a.tijd ? ` om ${a.tijd}` : '';
+            toon(`Vandaag: ${a.titel}${tijdStr}`, '', key);
+          }
+        }
+      }
+
+      await schrijfNotifQueue([]); // queue voor achtergrond-sync (toekomstig gebruik)
+    }
+
+    // Init notificaties
+    initNotifBanner();
+    if ('Notification' in window && Notification.permission === 'granted') {
+      checkNotificaties();
+      registreerPeriodicSync();
+    }
   </script>
 </body>
 </html>

@@ -42,3 +42,35 @@ self.addEventListener('fetch', e => {
     })
   );
 });
+
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(lijst => {
+      const match = lijst.find(c => new URL(c.url).pathname.match(/\/(index\.html)?$/));
+      return match ? match.focus() : clients.openWindow('/index.html');
+    })
+  );
+});
+
+self.addEventListener('periodicsync', event => {
+  if (event.tag === 'struct-notificaties') {
+    event.waitUntil(toonAchtergrondNotificaties());
+  }
+});
+
+async function toonAchtergrondNotificaties() {
+  try {
+    const cache = await caches.open('struct-notif-v1');
+    const res = await cache.match('/notif-queue');
+    if (!res) return;
+    const queue = await res.json();
+    if (!Array.isArray(queue) || !queue.length) return;
+    for (const n of queue) {
+      await self.registration.showNotification(n.titel, {
+        body: n.body || '', icon: '/icon.svg', tag: n.tag, badge: '/icon.svg'
+      });
+    }
+    await cache.put('/notif-queue', new Response('[]', { headers: { 'Content-Type': 'application/json' } }));
+  } catch (_) {}
+}

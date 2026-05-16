@@ -48,6 +48,41 @@
       color: #aaa;
       margin: 0 0 14px;
     }
+    .sectie-label-mt { margin-top: 32px; }
+
+    .instelling-sub { font-size: 0.78rem; color: #aaa; margin-top: 1px; font-weight: 400; }
+
+    /* iOS schakelaar */
+    .schakelaar { position: relative; display: inline-block; width: 44px; height: 26px; flex-shrink: 0; }
+    .schakelaar input { display: none; }
+    .schakelaar-knop {
+      position: absolute; inset: 0; border-radius: 13px;
+      background: #d8d8d8; transition: background 0.2s; cursor: pointer;
+    }
+    .schakelaar-knop::before {
+      content: ''; position: absolute;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: #fff; top: 2px; left: 2px;
+      transition: transform 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    }
+    .schakelaar input:checked + .schakelaar-knop { background: #3ddc97; }
+    .schakelaar input:checked + .schakelaar-knop::before { transform: translateX(18px); }
+
+    /* Notificatie status */
+    .notif-status {
+      font-size: 0.83rem; border-radius: 10px;
+      padding: 10px 14px; margin-bottom: 14px; font-weight: 500;
+    }
+    .notif-toegestaan { background: #f0fbf5; color: #2bc47e; border: 1px solid #b8efd3; }
+    .notif-geblokkeerd { background: #fff5f5; color: #e05252; border: 1px solid #ffd0d0; }
+
+    .btn-notif-inschakelen {
+      width: 100%; padding: 13px; background: #3ddc97; border: none;
+      border-radius: 10px; color: #fff; font-size: 0.95rem; font-weight: 600;
+      cursor: pointer; font-family: inherit; margin-top: 4px;
+      transition: background 0.15s;
+    }
+    .btn-notif-inschakelen:hover { background: #2bc47e; }
 
     .kaart {
       background: #f5f5f5;
@@ -210,6 +245,42 @@
   </div>
   <div class="feedback" id="feedback">Instellingen opgeslagen ✓</div>
 
+  <p class="sectie-label sectie-label-mt">Notificaties</p>
+  <div id="notif-status-banner"></div>
+  <div class="kaart">
+    <div class="instelling-rij">
+      <div>
+        <div class="instelling-naam">Dagelijks overzicht</div>
+        <div class="instelling-sub">Elke ochtend om 08:00</div>
+      </div>
+      <label class="schakelaar"><input type="checkbox" id="n-dagoverzicht"><span class="schakelaar-knop"></span></label>
+    </div>
+    <div class="instelling-rij">
+      <div>
+        <div class="instelling-naam">Begin met leren</div>
+        <div class="instelling-sub">Op de startdatum van een toets</div>
+      </div>
+      <label class="schakelaar"><input type="checkbox" id="n-toets-start"><span class="schakelaar-knop"></span></label>
+    </div>
+    <div class="instelling-rij">
+      <div>
+        <div class="instelling-naam">Toets morgen</div>
+        <div class="instelling-sub">De dag voor een toets</div>
+      </div>
+      <label class="schakelaar"><input type="checkbox" id="n-toets-morgen"><span class="schakelaar-knop"></span></label>
+    </div>
+    <div class="instelling-rij">
+      <div>
+        <div class="instelling-naam">Afspraken</div>
+        <div class="instelling-sub">Op de dag van een afspraak</div>
+      </div>
+      <label class="schakelaar"><input type="checkbox" id="n-afspraken"><span class="schakelaar-knop"></span></label>
+    </div>
+  </div>
+  <button class="btn-notif-inschakelen" id="btn-notif" onclick="beheerNotifToestemming()" style="display:none">
+    Notificaties inschakelen
+  </button>
+
   <!-- Menu -->
   <div class="menu-overlay" id="menu-overlay">
     <div class="menu-achtergrond" onclick="sluitMenu()"></div>
@@ -307,6 +378,62 @@
     }
 
     renderKaart(laadInstellingen());
+
+    // ── Notificatie-instellingen ──
+    function laadNotif() { return JSON.parse(localStorage.getItem('notificaties') || '{}'); }
+    function slaNotifOp(s) { localStorage.setItem('notificaties', JSON.stringify(s)); }
+
+    function updateNotifStatus() {
+      const banner = document.getElementById('notif-status-banner');
+      const btn    = document.getElementById('btn-notif');
+      if (!('Notification' in window)) {
+        banner.innerHTML = '<div class="notif-status notif-geblokkeerd">Notificaties worden niet ondersteund door jouw browser.</div>';
+        btn.style.display = 'none'; return;
+      }
+      if (Notification.permission === 'granted') {
+        banner.innerHTML = '<div class="notif-status notif-toegestaan">Notificaties zijn ingeschakeld ✓</div>';
+        btn.style.display = 'none';
+      } else if (Notification.permission === 'denied') {
+        banner.innerHTML = '<div class="notif-status notif-geblokkeerd">Notificaties zijn geblokkeerd — pas dit aan in je browserinstellingen.</div>';
+        btn.style.display = 'none';
+      } else {
+        banner.innerHTML = '';
+        btn.style.display = 'block';
+      }
+    }
+
+    function initNotifInstellingen() {
+      const s = laadNotif();
+      document.getElementById('n-dagoverzicht').checked  = s.dagoverzicht !== false;
+      document.getElementById('n-toets-start').checked   = s.toets_start  !== false;
+      document.getElementById('n-toets-morgen').checked  = s.toets_morgen !== false;
+      document.getElementById('n-afspraken').checked     = s.afspraken    !== false;
+      updateNotifStatus();
+      ['n-dagoverzicht','n-toets-start','n-toets-morgen','n-afspraken'].forEach(id => {
+        document.getElementById(id).addEventListener('change', () => {
+          const s = laadNotif();
+          s.dagoverzicht = document.getElementById('n-dagoverzicht').checked;
+          s.toets_start  = document.getElementById('n-toets-start').checked;
+          s.toets_morgen = document.getElementById('n-toets-morgen').checked;
+          s.afspraken    = document.getElementById('n-afspraken').checked;
+          slaNotifOp(s);
+        });
+      });
+    }
+
+    async function beheerNotifToestemming() {
+      const result = await Notification.requestPermission();
+      if (result === 'granted') {
+        const s = laadNotif();
+        s.dagoverzicht = true; s.toets_start = true; s.toets_morgen = true; s.afspraken = true;
+        s.banner_verborgen = true;
+        slaNotifOp(s);
+        initNotifInstellingen();
+      }
+      updateNotifStatus();
+    }
+
+    initNotifInstellingen();
   </script>
   <script>
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
