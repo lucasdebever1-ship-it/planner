@@ -71,6 +71,7 @@
     .dag-kaart-toets    { background: #fff5f5; border: 1px solid #ffd0d0; border-left: 4px solid #e05252; }
     .dag-kaart-huiswerk { background: #f0f5ff; border: 1px solid #c8d8ff; border-left: 4px solid #3a6edc; }
     .dag-kaart-afspraak { background: #f7f0fc; border: 1px solid #dcc8f0; border-left: 4px solid #9b59b6; }
+    .dag-kaart-training { background: #f0fbf5; border: 1px solid #b8efd3; border-left: 4px solid #3ddc97; }
 
     .dag-kaart-type {
       font-size: 0.68rem; font-weight: 700;
@@ -79,6 +80,7 @@
     .dag-kaart-toets    .dag-kaart-type { color: #e05252; }
     .dag-kaart-huiswerk .dag-kaart-type { color: #3a6edc; }
     .dag-kaart-afspraak .dag-kaart-type { color: #9b59b6; }
+    .dag-kaart-training .dag-kaart-type { color: #2bc47e; }
 
     .dag-kaart-titel { font-size: 0.93rem; font-weight: 700; color: #1a1a1a; }
     .dag-kaart-sub   { font-size: 0.8rem; color: #888; margin-top: 1px; }
@@ -131,13 +133,15 @@
 
     /* ── Streak ── */
     .streak-blok {
-      display: flex; align-items: center; gap: 8px;
-      margin-bottom: 20px;
+      background: linear-gradient(135deg, #f0fbf5, #e8f8ef);
+      border: 1px solid #b8efd3; border-radius: 14px;
+      padding: 14px 16px; display: flex; align-items: center; gap: 12px;
+      margin-bottom: 24px;
     }
-    .streak-vlam  { font-size: 1.3rem; line-height: 1; }
-    .streak-getal { font-size: 2rem; font-weight: 800; color: #3ddc97; line-height: 1; letter-spacing: -1px; }
-    .streak-label { font-size: 0.88rem; font-weight: 600; color: #3ddc97; }
-    .streak-start { font-size: 0.88rem; color: #bbb; font-weight: 500; }
+    .streak-vlam  { font-size: 1.8rem; line-height: 1; flex-shrink: 0; }
+    .streak-getal { font-size: 2.6rem; font-weight: 800; color: #1a1a1a; line-height: 1; letter-spacing: -2px; }
+    .streak-label { font-size: 0.88rem; font-weight: 700; color: #2bc47e; }
+    .streak-start { font-size: 0.88rem; color: #aaa; font-weight: 500; }
 
     @keyframes streak-pop {
       0%   { transform: scale(1); }
@@ -375,38 +379,49 @@
       const items = [];
 
       vakken.forEach(v => {
-        // Toetsen die deze dag plaatsvinden
         const toetsen = v.toetsen || (v.toetsdatum ? [{ naam: 'Toets', datum: v.toetsdatum }] : []);
         toetsen.forEach(t => {
           if (t.datum && parseDatum(t.datum).getTime() === dag.getTime()) {
-            items.push({ type: 'toets', titel: v.naam, sub: t.naam || '' });
+            items.push({ type: 'toets', titel: v.naam, sub: t.naam || '', sortTijd: null });
           }
         });
-
-        // Huiswerk met inleverdatum vandaag
         (v.huiswerk || []).forEach(h => {
           if (!h.inleverdatum || h.gedaan) return;
           if (h.inleverdatum.slice(0,10) === str) {
-            items.push({ type: 'huiswerk', titel: v.naam, sub: h.omschrijving || '' });
+            items.push({ type: 'huiswerk', titel: v.naam, sub: h.omschrijving || '', sortTijd: null });
           }
         });
       });
 
-      // Afspraken
       afspraken.forEach(a => {
         if (a.afgerond) return;
         const match = a.herhaling === 'wekelijks'
           ? parseDatum(a.datum).getDay() === dag.getDay() && a.datum <= str
-          : a.datum === str;
+          : a.einddatum ? a.datum <= str && str <= a.einddatum : a.datum === str;
         if (match) {
-          const tijd = a.tijd ? (a.eindtijd ? `${a.tijd} – ${a.eindtijd}` : a.tijd) : '';
-          items.push({ type: 'afspraak', titel: a.titel, sub: tijd });
+          const tijdStr = a.tijd ? (a.eindtijd ? `${a.tijd} – ${a.eindtijd}` : a.tijd) : '';
+          items.push({ type: 'afspraak', titel: a.titel, sub: tijdStr, sortTijd: a.tijd || null });
         }
       });
 
-      // Sortering: toets → huiswerk → afspraak
-      const volgorde = { toets: 0, huiswerk: 1, afspraak: 2 };
-      return items.sort((a, b) => volgorde[a.type] - volgorde[b.type]);
+      const trainingen = JSON.parse(localStorage.getItem('trainingen') || '[]');
+      trainingen.forEach(t => {
+        if (!Array.isArray(t.dagen) || !t.dagen.includes(dag.getDay())) return;
+        const ti = t.tijden && t.tijden[dag.getDay()];
+        if (!ti || ti.wisselend) return;
+        const tijdStr = ti.begin ? `${ti.begin}${ti.eind ? `–${ti.eind}` : ''}` : '';
+        items.push({ type: 'training', titel: t.naam, sub: tijdStr, sortTijd: ti.begin || null });
+      });
+
+      // Items met tijd sorteren op tijd, daarna op type
+      const typePrio = { toets: 0, huiswerk: 1, afspraak: 2, training: 3 };
+      items.sort((a, b) => {
+        if (a.sortTijd && b.sortTijd) return a.sortTijd.localeCompare(b.sortTijd);
+        if (a.sortTijd && !b.sortTijd) return -1;
+        if (!a.sortTijd && b.sortTijd) return 1;
+        return typePrio[a.type] - typePrio[b.type];
+      });
+      return items;
     }
 
     // ── Sectie Vandaag ──
@@ -414,10 +429,10 @@
       const items = getItemsOpDag(vandaag);
       const container = document.getElementById('vandaag-lijst');
       if (!items.length) {
-        container.innerHTML = '<div class="vandaag-leeg">Geen verplichtingen vandaag 🎉</div>';
+        container.innerHTML = '<div class="vandaag-leeg">Rustige dag — geniet ervan 🎉</div>';
         return;
       }
-      const labels = { toets: 'Toets', huiswerk: 'Huiswerk', afspraak: 'Afspraak' };
+      const labels = { toets: 'Toets', huiswerk: 'Huiswerk', afspraak: 'Afspraak', training: 'Training' };
       container.innerHTML = items.map(item => `
         <div class="dag-kaart dag-kaart-${item.type}">
           <div class="dag-kaart-type">${labels[item.type]}</div>
@@ -427,21 +442,21 @@
     }
 
     // ── Sectie Komende week ──
+    const DAG_LETTERS_ALLE = ['zo','ma','di','wo','do','vr','za'];
     function renderWeekRij() {
-      const maandag = getMaandag(vandaag);
-      const stipKleur = { toets: '#e05252', huiswerk: '#3a6edc', afspraak: '#9b59b6' };
+      const stipKleur = { toets: '#e05252', huiswerk: '#3a6edc', afspraak: '#9b59b6', training: '#3ddc97' };
       let html = '';
       for (let i = 0; i < 5; i++) {
-        const dag = addDagen(maandag, i);
+        const dag = addDagen(vandaag, i);
         const dagStr = toDatumStr(dag);
-        const isVandaag = dag.getTime() === vandaag.getTime();
+        const isVandaag = i === 0;
         const types = [...new Set(getItemsOpDag(dag).map(x => x.type))];
-        const stippen = types.map(t =>
+        const stippen = types.slice(0, 3).map(t =>
           `<span class="wdag-stip" style="background:${stipKleur[t]}"></span>`
         ).join('');
         html += `<a href="week.html" class="week-dag${isVandaag ? ' vandaag' : ''}"
           onclick="sessionStorage.setItem('week_dag','${dagStr}')">
-          <span class="wdag-letter">${DAGEN_KORT[i]}</span>
+          <span class="wdag-letter">${DAG_LETTERS_ALLE[dag.getDay()]}</span>
           <span class="wdag-getal">${dag.getDate()}</span>
           <div class="wdag-stippen">${stippen}</div>
         </a>`;
@@ -464,44 +479,19 @@
     }
 
     function bepaalTip() {
-      // ── 1. Toets binnen 3 dagen? (hoogste urgentie) ──
-      const spoedToetsen = [];
+      // ── 1. Toets morgen? ──
+      const morgen = addDagen(vandaag, 1);
+      const morgenStr = toDatumStr(morgen);
       for (const v of vakken) {
         const toetsen = v.toetsen || (v.toetsdatum ? [{ datum: v.toetsdatum }] : []);
         for (const t of toetsen) {
-          if (!t.datum) continue;
-          const dagsTot = Math.round((parseDatum(t.datum) - vandaag) / 86400000);
-          if (dagsTot >= 1 && dagsTot <= 3) spoedToetsen.push({ vak: v.naam, dagsTot });
-        }
-      }
-      if (spoedToetsen.length) {
-        spoedToetsen.sort((a, b) => a.dagsTot - b.dagsTot);
-        const s = spoedToetsen[0];
-        const wanneer = s.dagsTot === 1 ? 'morgen' : `over ${s.dagsTot} dagen`;
-        return `Je hebt <strong>${s.vak}</strong> ${wanneer} — ben je al begonnen?`;
-      }
-
-      // ── 2. Werkdag morgen + toets deze week? ──
-      const morgenDag = addDagen(vandaag, 1);
-      const werkLijst = JSON.parse(localStorage.getItem('werk') || '[]');
-      const werkMorgen = werkLijst.some(w => Array.isArray(w.dagen) && w.dagen.includes(morgenDag.getDay()));
-      if (werkMorgen) {
-        let toetsVak = null;
-        for (let i = 1; i <= 7 && !toetsVak; i++) {
-          const dag = addDagen(vandaag, i);
-          for (const v of vakken) {
-            const toetsen = v.toetsen || (v.toetsdatum ? [{ datum: v.toetsdatum }] : []);
-            if (toetsen.some(t => t.datum && parseDatum(t.datum).getTime() === dag.getTime())) {
-              toetsVak = v.naam; break;
-            }
+          if (t.datum === morgenStr) {
+            return `Je hebt morgen <strong>${v.naam}</strong> — klaar voor de toets?`;
           }
         }
-        if (toetsVak) {
-          return `Je werkt morgen — plan vandaag alvast tijd in voor <strong>${toetsVak}</strong>.`;
-        }
       }
 
-      // ── 3. Drukke week? ──
+      // ── 2. Drukke week? ──
       const maandag = getMaandag(vandaag);
       let weekTotaal = 0;
       for (let i = 0; i < 7; i++) weekTotaal += getItemsOpDag(addDagen(maandag, i)).length;
@@ -509,12 +499,15 @@
         return `Deze week heb je <strong>${weekTotaal} verplichtingen</strong> — begin eerder met leren.`;
       }
 
-      // ── 4. Niets gepland vandaag én morgen? ──
-      if (!getItemsOpDag(vandaag).length && !getItemsOpDag(addDagen(vandaag, 1)).length) {
-        return 'Rustige dag, gebruik het om vooruit te leren.';
+      // ── 3. Training vanavond? ──
+      const trainingVandaag = getItemsOpDag(vandaag).filter(x => x.type === 'training');
+      if (trainingVandaag.length) {
+        const t = trainingVandaag[0];
+        const wanneer = t.sortTijd ? `om ${t.sortTijd}` : 'vandaag';
+        return `${t.titel} ${wanneer} — zorg dat je op tijd klaar bent.`;
       }
 
-      // ── 5. Generieke tips, roteren per dag ──
+      // ── 4. Generieke tips, roteren per dag ──
       const generiek = [
         'Korte studiesessies van 25 minuten werken beter dan lang achter elkaar.',
         'Schrijf stof over in je eigen woorden — dat helpt met onthouden.',
@@ -622,10 +615,13 @@
       const { huidig, nieuwRecord } = data;
       const blok = document.getElementById('streak-blok');
       if (huidig === 0) {
-        blok.innerHTML = '<span class="streak-start">Start vandaag je streak</span>';
+        blok.innerHTML = '<span class="streak-vlam">🔥</span><span class="streak-start">Start vandaag je streak</span>';
       } else {
         const mv = huidig === 1 ? 'dag' : 'dagen';
-        blok.innerHTML = `<span class="streak-vlam">🔥</span><span class="streak-getal">${huidig}</span><span class="streak-label" id="streak-label">${mv} op rij</span>`;
+        blok.innerHTML = `
+          <span class="streak-vlam">🔥</span>
+          <span class="streak-getal">${huidig}</span>
+          <span class="streak-label" id="streak-label">${mv} op rij</span>`;
         if (nieuwRecord) {
           const key = 'streak_record_' + huidig;
           if (!sessionStorage.getItem(key)) {
