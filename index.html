@@ -151,6 +151,35 @@
     }
     .streak-blok.record { animation: streak-pop 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97); }
 
+    /* ── Check-in ── */
+    .checkin-kaart {
+      background: #f8f8f8; border: 1px solid #ebebeb;
+      border-radius: 16px; padding: 18px 16px; margin-bottom: 20px;
+    }
+    .checkin-titel {
+      font-size: 0.93rem; font-weight: 700; color: #1a1a1a;
+      margin-bottom: 14px; text-align: center;
+    }
+    .checkin-opties { display: flex; gap: 8px; }
+    .checkin-optie {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      gap: 7px; padding: 14px 6px; background: #fff;
+      border: 1.5px solid #e8e8e8; border-radius: 12px;
+      cursor: pointer; transition: border-color 0.15s, background 0.15s;
+      -webkit-tap-highlight-color: transparent; font-family: inherit;
+    }
+    .checkin-optie:active { opacity: 0.75; }
+    .checkin-optie:hover { border-color: #3ddc97; background: #f0fbf5; }
+    .checkin-emoji { font-size: 1.6rem; line-height: 1; }
+    .checkin-label { font-size: 0.72rem; font-weight: 700; color: #666; text-align: center; line-height: 1.3; }
+
+    .checkin-modus-banner {
+      border-radius: 10px; padding: 10px 14px;
+      font-size: 0.87rem; margin-bottom: 10px; line-height: 1.5;
+    }
+    .checkin-gaat-wel    { background: #fff8f0; border: 1px solid #ffe0a8; color: #7a5020; }
+    .checkin-geen-energie { background: #f5f0ff; border: 1px solid #dcc8ff; color: #4a3080; }
+
     /* ── Notificatie banner ── */
     .notif-banner {
       background: #f0fbf5; border: 1px solid #b8efd3;
@@ -248,6 +277,25 @@
     </div>
 
     <div id="streak-blok" class="streak-blok"></div>
+    <div id="checkin-wrap" style="display:none">
+      <div class="checkin-kaart">
+        <div class="checkin-titel">Hoe zit je erin vandaag?</div>
+        <div class="checkin-opties">
+          <button class="checkin-optie" onclick="kiesCheckin('klaar')">
+            <span class="checkin-emoji">💪</span>
+            <span class="checkin-label">Klaar voor de dag</span>
+          </button>
+          <button class="checkin-optie" onclick="kiesCheckin('gaat-wel')">
+            <span class="checkin-emoji">😐</span>
+            <span class="checkin-label">Gaat wel</span>
+          </button>
+          <button class="checkin-optie" onclick="kiesCheckin('geen-energie')">
+            <span class="checkin-emoji">😴</span>
+            <span class="checkin-label">Geen energie</span>
+          </button>
+        </div>
+      </div>
+    </div>
     <div id="notif-banner" class="notif-banner" style="display:none">
       <div class="notif-banner-info">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3ddc97" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
@@ -456,21 +504,61 @@
       return items;
     }
 
+    // ── Check-in ──
+    function getCheckin() { return localStorage.getItem('checkin_' + vandaagStr); }
+
+    function initCheckin() {
+      if (!getCheckin()) document.getElementById('checkin-wrap').style.display = 'block';
+    }
+
+    function kiesCheckin(stemming) {
+      localStorage.setItem('checkin_' + vandaagStr, stemming);
+      document.getElementById('checkin-wrap').style.display = 'none';
+      renderVandaag();
+      renderTip();
+    }
+
     // ── Sectie Vandaag ──
     function renderVandaag() {
       const items = getItemsOpDag(vandaag);
       const container = document.getElementById('vandaag-lijst');
+      const stemming = getCheckin();
+      const labels = { toets: 'Toets', huiswerk: 'Huiswerk', afspraak: 'Afspraak', training: 'Training' };
+
+      function kaartHtml(item) {
+        return `<div class="dag-kaart dag-kaart-${item.type}">
+          <div class="dag-kaart-type">${labels[item.type]}</div>
+          <div class="dag-kaart-titel">${item.titel}</div>
+          ${item.sub ? `<div class="dag-kaart-sub">${item.sub}</div>` : ''}
+        </div>`;
+      }
+
       if (!items.length) {
         container.innerHTML = '<div class="vandaag-leeg">Rustige dag — geniet ervan 🎉</div>';
         return;
       }
-      const labels = { toets: 'Toets', huiswerk: 'Huiswerk', afspraak: 'Afspraak', training: 'Training' };
-      container.innerHTML = items.map(item => `
-        <div class="dag-kaart dag-kaart-${item.type}">
-          <div class="dag-kaart-type">${labels[item.type]}</div>
-          <div class="dag-kaart-titel">${item.titel}</div>
-          ${item.sub ? `<div class="dag-kaart-sub">${item.sub}</div>` : ''}
-        </div>`).join('');
+
+      if (stemming === 'gaat-wel') {
+        const top = items[0];
+        container.innerHTML =
+          `<div class="checkin-modus-banner checkin-gaat-wel">😐 Focus op één ding: <strong>${top.titel}</strong></div>` +
+          kaartHtml(top);
+        return;
+      }
+
+      if (stemming === 'geen-energie') {
+        const vast = items.filter(i => i.type === 'toets' || i.type === 'afspraak');
+        if (!vast.length) {
+          container.innerHTML = `<div class="checkin-modus-banner checkin-geen-energie">😴 Neem het rustig — niets staat er echt vast vandaag.</div>`;
+        } else {
+          container.innerHTML =
+            `<div class="checkin-modus-banner checkin-geen-energie">😴 Neem het rustig — alleen <strong>${vast[0].titel}</strong> staat vast.</div>` +
+            vast.map(kaartHtml).join('');
+        }
+        return;
+      }
+
+      container.innerHTML = items.map(kaartHtml).join('');
     }
 
     // ── Sectie Komende week ──
@@ -511,10 +599,27 @@
     }
 
     function bepaalTip() {
+      const stemming = getCheckin();
       const vm = JSON.parse(localStorage.getItem('vrijeMomenten') || '{}');
       function vrijTipDeel(dag) {
         const tijd = vm[dag.getDay()];
         return tijd ? `, je bent vrij vanaf ${tijd}` : '';
+      }
+
+      // ── 0. Stemming-override ──
+      if (stemming === 'gaat-wel') {
+        const items = getItemsOpDag(vandaag);
+        if (items.length) {
+          return `Doe het rustig aan vandaag — focus alleen op <strong>${items[0].titel}</strong>. De rest kan wachten.`;
+        }
+        return 'Gaat wel vandaag? Gebruik de rustige dag om alvast iets voor te bereiden.';
+      }
+      if (stemming === 'geen-energie') {
+        const vast = getItemsOpDag(vandaag).filter(i => i.type === 'toets' || i.type === 'afspraak');
+        if (vast.length) {
+          return `Geen energie? Prima — doe alleen wat echt niet kan wachten: <strong>${vast[0].titel}</strong>.`;
+        }
+        return 'Geen energie? Dat is oké. Er staat vandaag niets dat echt vast staat — neem rust.';
       }
 
       // ── 1. Toets morgen? ──
@@ -694,6 +799,7 @@
     }
 
     renderStreak(updateStreak());
+    initCheckin();
     renderWeekWaarschuwing();
     renderVandaag();
     renderWeekRij();
