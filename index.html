@@ -151,6 +151,22 @@
     }
     .streak-blok.record { animation: streak-pop 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97); }
 
+    /* ── Terugblik kaart ── */
+    .terugblik-kaart {
+      background: #fff; border: 1.5px solid #3ddc97;
+      border-radius: 14px; padding: 14px 16px;
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 20px; text-decoration: none; color: inherit;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.15s;
+    }
+    .terugblik-kaart:active { background: #f0fbf5; }
+    .terugblik-icoon { color: #3ddc97; flex-shrink: 0; }
+    .terugblik-tekst-blok { flex: 1; }
+    .terugblik-titel { font-size: 0.92rem; font-weight: 700; color: #1a1a1a; }
+    .terugblik-sub   { font-size: 0.78rem; color: #3ddc97; font-weight: 600; margin-top: 1px; }
+    .terugblik-pijl  { color: #3ddc97; flex-shrink: 0; }
+
     /* ── Check-in ── */
     .checkin-kaart {
       background: #f8f8f8; border: 1px solid #ebebeb;
@@ -306,6 +322,7 @@
         <button class="notif-btn-nee" onclick="verbergNotifBanner()">Niet nu</button>
       </div>
     </div>
+    <div id="terugblik-kaart-wrap"></div>
     <div id="week-waarschuwing"></div>
     <p class="sectie-label">Vandaag</p>
     <div id="vandaag-lijst"></div>
@@ -328,6 +345,10 @@
       <a href="instellingen.html" class="menu-item" onclick="sluitMenu()">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         Instellingen
+      </a>
+      <a href="terugblik.html" class="menu-item" onclick="sluitMenu()">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        Terugblik
       </a>
       <button class="menu-item rood" onclick="resetProfiel()">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.75"/></svg>
@@ -430,6 +451,14 @@
       const r = normaliseer(d);
       const diff = r.getDay() === 0 ? -6 : 1 - r.getDay();
       r.setDate(r.getDate() + diff); return r;
+    }
+
+    function isoWeek(datumStr) {
+      const d = new Date(datumStr + 'T00:00:00');
+      d.setDate(d.getDate() + 3 - (d.getDay() + 6) % 7);
+      const w1 = new Date(d.getFullYear(), 0, 4);
+      return d.getFullYear() + '-W' +
+        String(1 + Math.round(((d - w1) / 86400000 - 3 + (w1.getDay() + 6) % 7) / 7)).padStart(2, '0');
     }
 
     const MAANDEN = ['januari','februari','maart','april','mei','juni',
@@ -798,7 +827,25 @@
       }
     }
 
+    function renderTerugblikKaart() {
+      if (vandaag.getDay() !== 0) return; // alleen op zondag
+      const wk = isoWeek(vandaagStr);
+      const tb = JSON.parse(localStorage.getItem('terugblik_' + wk) || '{}');
+      if (tb.ingevuld) return;
+      document.getElementById('terugblik-kaart-wrap').innerHTML = `
+        <a href="terugblik.html" class="terugblik-kaart"
+           onclick="sessionStorage.setItem('terugblik_week','${wk}')">
+          <svg class="terugblik-icoon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          <div class="terugblik-tekst-blok">
+            <div class="terugblik-titel">Terugblik invullen</div>
+            <div class="terugblik-sub">Week ${wk.split('-W')[1]} — hoe ging het?</div>
+          </div>
+          <svg class="terugblik-pijl" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+        </a>`;
+    }
+
     renderStreak(updateStreak());
+    renderTerugblikKaart();
     initCheckin();
     renderWeekWaarschuwing();
     renderVandaag();

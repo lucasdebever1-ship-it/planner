@@ -10,7 +10,8 @@ const ASSETS = [
   '/afspraken.html',
   '/profiel.html',
   '/manifest.json',
-  '/icon.svg'
+  '/icon.svg',
+  '/terugblik.html'
 ];
 
 self.addEventListener('install', e => {

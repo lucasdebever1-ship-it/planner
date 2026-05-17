@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="color-scheme" content="light">
+  <title>Terugblik – Struct</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#3ddc97">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Struct">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #ffffff; color: #1a1a1a;
+      max-width: 480px; margin: 0 auto;
+      padding: 40px 20px 90px;
+    }
+
+    .pagina-header {
+      display: flex; justify-content: space-between;
+      align-items: center; margin-bottom: 6px;
+    }
+    .pagina-header h1 { margin: 0; font-size: 1.4rem; font-weight: 700; letter-spacing: -0.3px; }
+
+    .back-btn {
+      display: flex; align-items: center; gap: 5px;
+      color: #3ddc97; font-size: 0.88rem; font-weight: 600;
+      text-decoration: none; -webkit-tap-highlight-color: transparent; flex-shrink: 0;
+    }
+
+    .week-bereik { font-size: 0.85rem; color: #bbb; margin-bottom: 28px; font-weight: 500; }
+
+    .sectie-label {
+      font-size: 0.72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.9px;
+      color: #aaa; margin: 0 0 12px;
+    }
+    .sectie-mt { margin-top: 28px; }
+
+    /* Samenvatting */
+    .samenvatting-kaart {
+      background: linear-gradient(135deg, #f0fbf5, #e8f8ef);
+      border: 1px solid #b8efd3; border-radius: 14px;
+      padding: 16px 18px; margin-bottom: 28px;
+      display: flex; gap: 28px;
+    }
+    .sam-blok { display: flex; flex-direction: column; }
+    .sam-getal { font-size: 2.2rem; font-weight: 800; color: #1a1a1a; letter-spacing: -1.5px; line-height: 1; }
+    .sam-label { font-size: 0.78rem; color: #2bc47e; font-weight: 600; margin-top: 3px; }
+
+    /* Toets rijen */
+    .toets-rij {
+      background: #f8f8f8; border: 1px solid #ebebeb; border-radius: 12px;
+      padding: 12px 14px; margin-bottom: 9px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .toets-rij-info { flex: 1; min-width: 0; }
+    .toets-rij-vak { font-size: 0.9rem; font-weight: 700; color: #1a1a1a; }
+    .toets-rij-sub { font-size: 0.77rem; color: #aaa; margin-top: 1px; }
+    .cijfer-input {
+      width: 58px; background: #fff; border: 1.5px solid #e0e0e0;
+      border-radius: 9px; color: #1a1a1a; font-size: 1rem; font-weight: 700;
+      padding: 8px 6px; text-align: center; outline: none;
+      font-family: inherit; transition: border-color 0.15s, background 0.15s;
+      -moz-appearance: textfield; appearance: none;
+    }
+    .cijfer-input::-webkit-outer-spin-button,
+    .cijfer-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+    .cijfer-input:focus { border-color: #3ddc97; }
+    .cijfer-input.goed { border-color: #3ddc97; background: #f0fbf5; color: #2bc47e; }
+    .cijfer-input.laag { border-color: #e05252; background: #fff5f5; color: #e05252; }
+
+    /* Weekbeoordeling */
+    .week-opties { display: flex; gap: 8px; margin-bottom: 4px; }
+    .week-optie {
+      flex: 1; padding: 13px 6px; text-align: center;
+      background: #f5f5f5; border: 1.5px solid #e8e8e8; border-radius: 12px;
+      cursor: pointer; font-size: 0.85rem; font-weight: 600; color: #888;
+      transition: all 0.15s; -webkit-tap-highlight-color: transparent;
+      font-family: inherit;
+    }
+    .week-optie.actief { background: #f0fbf5; border-color: #3ddc97; color: #1a1a1a; }
+
+    /* Gemiddelden */
+    .gem-kaart {
+      background: #f8f8f8; border: 1px solid #ebebeb;
+      border-radius: 12px; padding: 4px 14px;
+    }
+    .gem-rij {
+      display: flex; align-items: center; gap: 10px;
+      padding: 11px 0; border-bottom: 1px solid #f0f0f0;
+    }
+    .gem-rij:last-child { border-bottom: none; }
+    .gem-vak { font-size: 0.88rem; font-weight: 600; flex: 1; min-width: 0;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .gem-bar-wrap { width: 70px; background: #ebebeb; border-radius: 4px; height: 5px; flex-shrink: 0; }
+    .gem-bar { height: 5px; border-radius: 4px; }
+    .gem-bar.goed { background: #3ddc97; }
+    .gem-bar.laag { background: #e05252; }
+    .gem-getal { font-size: 0.95rem; font-weight: 800; min-width: 28px; text-align: right; }
+    .gem-getal.goed { color: #2bc47e; }
+    .gem-getal.laag { color: #e05252; }
+
+    /* Opslaan */
+    .btn-opslaan {
+      width: 100%; padding: 14px; background: #3ddc97; border: none;
+      border-radius: 12px; color: #fff; font-size: 0.95rem; font-weight: 700;
+      cursor: pointer; font-family: inherit; margin-top: 28px;
+      transition: background 0.15s;
+    }
+    .btn-opslaan:hover { background: #2bc47e; }
+    .btn-opslaan:disabled { background: #c0e8d4; cursor: default; }
+
+    /* Motivatie */
+    .motivatie-kaart {
+      background: linear-gradient(135deg, #f0fbf5, #e8f8ef);
+      border: 1px solid #b8efd3; border-radius: 16px;
+      padding: 24px 20px; text-align: center; margin-top: 28px;
+    }
+    .motivatie-emoji { font-size: 2.6rem; line-height: 1; margin-bottom: 12px; }
+    .motivatie-tekst { font-size: 1.05rem; font-weight: 800; color: #1a1a1a; line-height: 1.4; margin-bottom: 6px; }
+    .motivatie-sub { font-size: 0.85rem; color: #2bc47e; font-weight: 600; }
+
+    .al-ingevuld {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #f0fbf5; border: 1px solid #b8efd3; border-radius: 8px;
+      padding: 7px 12px; font-size: 0.83rem; color: #2bc47e;
+      font-weight: 600; margin-bottom: 20px;
+    }
+
+    .leeg { text-align: center; color: #bbb; padding: 48px 0 20px; font-size: 0.9rem; }
+
+    /* Tabbar */
+    .tabbar {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #ffffff; border-top: 1px solid #ebebeb;
+      display: flex; z-index: 100;
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      box-shadow: 0 -2px 12px rgba(0,0,0,0.06);
+    }
+    .tab {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; gap: 3px; padding: 10px 4px 12px;
+      text-decoration: none; color: #bbb; font-size: 0.6rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      -webkit-tap-highlight-color: transparent; transition: color 0.15s;
+    }
+    .tab:active { opacity: 0.7; }
+    .tab.actief { color: #3ddc97; }
+    .tab-icoon { display: flex; align-items: center; justify-content: center; }
+    .tab .icoon-outline { display: block; }
+    .tab .icoon-filled  { display: none; }
+    .tab.actief .icoon-outline { display: none; }
+    .tab.actief .icoon-filled  { display: block; }
+  </style>
+</head>
+<body>
+
+  <div class="pagina-header">
+    <h1 id="pagina-titel">Terugblik</h1>
+    <a href="index.html" class="back-btn">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+      Home
+    </a>
+  </div>
+  <div class="week-bereik" id="week-bereik"></div>
+  <div id="inhoud"></div>
+
+  <!-- Tabbar -->
+  <nav class="tabbar">
+    <a href="index.html" class="tab">
+      <span class="tab-icoon">
+        <svg class="icoon-outline" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11L12 3L21 11V21H15V16H9V21H3V11Z"/></svg>
+        <svg class="icoon-filled"  width="22" height="22" viewBox="0 0 24 24"><path d="M3 11L12 3L21 11V21H15V16H9V21H3V11Z" fill="#3ddc97"/></svg>
+      </span>Home</a>
+    <a href="vakken.html" class="tab">
+      <span class="tab-icoon">
+        <svg class="icoon-outline" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7V20"/><path d="M12 7C10.5 5.8 8 5.5 5 6.5V20C8 19 10.5 19.5 12 20"/><path d="M12 7C13.5 5.8 16 5.5 19 6.5V20C16 19 13.5 19.5 12 20"/></svg>
+        <svg class="icoon-filled"  width="22" height="22" viewBox="0 0 24 24"><path d="M11 7.5C9.5 6.3 7 5.8 4.5 6.8V20C7 19 9.5 19.5 11 20.5V7.5Z" fill="#3ddc97"/><path d="M13 7.5C14.5 6.3 17 5.8 19.5 6.8V20C17 19 14.5 19.5 13 20.5V7.5Z" fill="#3ddc97"/></svg>
+      </span>Vakken</a>
+    <a href="week.html" class="tab">
+      <span class="tab-icoon">
+        <svg class="icoon-outline" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="17" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/><line x1="7" y1="14" x2="10.5" y2="14"/><line x1="13.5" y1="14" x2="17" y2="14"/><line x1="7" y1="18" x2="10.5" y2="18"/></svg>
+        <svg class="icoon-filled"  width="22" height="22" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="17" rx="2" fill="#3ddc97"/><rect x="7" y="3" width="2" height="4" rx="1" fill="#3ddc97"/><rect x="15" y="3" width="2" height="4" rx="1" fill="#3ddc97"/><line x1="3" y1="10" x2="21" y2="10" stroke="white" stroke-width="1.5" stroke-opacity="0.5"/><line x1="7" y1="14" x2="10.5" y2="14" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-opacity="0.5"/><line x1="13.5" y1="14" x2="17" y2="14" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-opacity="0.5"/><line x1="7" y1="18" x2="10.5" y2="18" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-opacity="0.5"/></svg>
+      </span>Week</a>
+    <a href="overzicht.html" class="tab">
+      <span class="tab-icoon">
+        <svg class="icoon-outline" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><rect x="9" y="2" width="6" height="3" rx="1"/><path d="M8.5 13L11 15.5L15.5 10"/></svg>
+        <svg class="icoon-filled"  width="22" height="22" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2" fill="#3ddc97"/><rect x="9" y="2" width="6" height="3" rx="1" fill="#2bc47e"/><path d="M8.5 13L11 15.5L15.5 10" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+      </span>Toetsen</a>
+    <a href="afspraken.html" class="tab">
+      <span class="tab-icoon">
+        <svg class="icoon-outline" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 15.5"/></svg>
+        <svg class="icoon-filled"  width="22" height="22" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#3ddc97"/><polyline points="12 7 12 12 15.5 15.5" stroke="white" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+      </span>Afspraken</a>
+  </nav>
+
+  <script>
+    // ── Helpers ──
+    function normaliseer(d) { const r = new Date(d); r.setHours(0,0,0,0); return r; }
+    function toDatumStr(d) {
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+    function parseDatum(s) { return normaliseer(new Date(s + 'T00:00:00')); }
+
+    function isoWeek(datumStr) {
+      const d = new Date(datumStr + 'T00:00:00');
+      d.setHours(0, 0, 0, 0);
+      d.setDate(d.getDate() + 3 - (d.getDay() + 6) % 7);
+      const week1 = new Date(d.getFullYear(), 0, 4);
+      return d.getFullYear() + '-W' +
+        String(1 + Math.round(((d - week1) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7)).padStart(2, '0');
+    }
+
+    function getMaandagVanIsoWeek(isoStr) {
+      const [jaarStr, weekStr] = isoStr.split('-W');
+      const jaar = parseInt(jaarStr), week = parseInt(weekStr);
+      const jan4 = new Date(jaar, 0, 4);
+      const jan4Dag = (jan4.getDay() + 6) % 7;
+      const ma = new Date(jan4);
+      ma.setDate(jan4.getDate() - jan4Dag + (week - 1) * 7);
+      ma.setHours(0, 0, 0, 0);
+      return ma;
+    }
+
+    const MAANDEN = ['januari','februari','maart','april','mei','juni',
+                     'juli','augustus','september','oktober','november','december'];
+
+    function formatDatumKort(d) {
+      return `${d.getDate()} ${MAANDEN[d.getMonth()]}`;
+    }
+
+    // ── Week bepalen ──
+    const vandaag = normaliseer(new Date());
+    let weekStr = sessionStorage.getItem('terugblik_week');
+    sessionStorage.removeItem('terugblik_week');
+    if (!weekStr) {
+      // Meest recente voltooide week: de week waarvan de zondag <= vandaag
+      const refDag = vandaag.getDay() === 0 ? vandaag : (() => {
+        const d = new Date(vandaag);
+        d.setDate(d.getDate() - d.getDay()); // vorige zondag
+        return d;
+      })();
+      weekStr = isoWeek(toDatumStr(refDag));
+    }
+
+    const weekMaandag = getMaandagVanIsoWeek(weekStr);
+    const weekZondag  = new Date(weekMaandag); weekZondag.setDate(weekMaandag.getDate() + 6);
+
+    const weekNr = weekStr.split('-W')[1];
+    document.getElementById('pagina-titel').textContent = `Terugblik week ${weekNr}`;
+    document.getElementById('week-bereik').textContent =
+      `${formatDatumKort(weekMaandag)} – ${formatDatumKort(weekZondag)} ${weekZondag.getFullYear()}`;
+
+    // ── Data laden ──
+    const vakken    = JSON.parse(localStorage.getItem('vakken')    || '[]');
+    const afspraken = JSON.parse(localStorage.getItem('afspraken') || '[]');
+    const maStr     = toDatumStr(weekMaandag);
+    const zoStr     = toDatumStr(weekZondag);
+
+    function inWeek(datumStr) { return datumStr >= maStr && datumStr <= zoStr; }
+
+    // Verzamel toetsen in de week
+    const toetsenInWeek = [];
+    vakken.forEach(v => {
+      const toetsen = v.toetsen || (v.toetsdatum ? [{ naam: 'Toets', datum: v.toetsdatum, type: '' }] : []);
+      toetsen.forEach(t => {
+        if (t.datum && inWeek(t.datum)) {
+          toetsenInWeek.push({ vakNaam: v.naam, toetsNaam: t.naam || 'Toets', datum: t.datum });
+        }
+      });
+    });
+
+    // Gepland / gedaan tellen
+    let gepland = 0, gedaan = 0;
+    // Toetsen: altijd gepland en gedaan (ze hebben plaatsgevonden)
+    gepland += toetsenInWeek.length; gedaan += toetsenInWeek.length;
+    // Huiswerk
+    vakken.forEach(v => {
+      (v.huiswerk || []).forEach(h => {
+        if (!h.inleverdatum || !inWeek(h.inleverdatum.slice(0,10))) return;
+        gepland++;
+        if (h.gedaan) gedaan++;
+      });
+    });
+    // Afspraken (alleen eenmalige)
+    afspraken.forEach(a => {
+      if (a.herhaling === 'wekelijks') return;
+      if (!a.datum || !inWeek(a.datum)) return;
+      gepland++;
+      if (a.afgerond) gedaan++;
+    });
+
+    // ── Terugblik data ──
+    const tbKey = 'terugblik_' + weekStr;
+    const opgeslagenTb = JSON.parse(localStorage.getItem(tbKey) || '{}');
+    const alIngevuld = !!opgeslagenTb.ingevuld;
+
+    // Cijfers
+    function laadCijfers() { return JSON.parse(localStorage.getItem('cijfers') || '[]'); }
+    function slaCijfersOp(c) { localStorage.setItem('cijfers', JSON.stringify(c)); }
+
+    // Gemiddelden per vak berekenen
+    function berekenGemiddelden() {
+      const cijfers = laadCijfers();
+      const perVak = {};
+      cijfers.forEach(c => {
+        if (!perVak[c.vakNaam]) perVak[c.vakNaam] = [];
+        perVak[c.vakNaam].push(c.cijfer);
+      });
+      return Object.entries(perVak)
+        .filter(([, arr]) => arr.length >= 1)
+        .map(([vak, arr]) => ({
+          vak,
+          gem: Math.round((arr.reduce((s, c) => s + c, 0) / arr.length) * 10) / 10,
+          aantal: arr.length
+        }))
+        .sort((a, b) => b.gem - a.gem);
+    }
+
+    // ── Motivatie bepalen ──
+    function bepaalMotivatie(stemming, ingevoerdeCijfers) {
+      const gem = ingevoerdeCijfers.length
+        ? ingevoerdeCijfers.reduce((s, c) => s + c, 0) / ingevoerdeCijfers.length : null;
+      if (stemming === 'goed') {
+        if (gem === null || gem >= 7.5) return { emoji: '🎉', tekst: 'Geweldige week!', sub: 'Sterk bezig — blijf zo doorgaan.' };
+        if (gem >= 6)  return { emoji: '💪', tekst: 'Solide week!', sub: 'Goed op weg. Volgende week kun je er nog een schepje bovenop.' };
+        return { emoji: '📚', tekst: 'Week voelde goed — maar de cijfers kunnen omhoog.', sub: 'Struct past je leeradvies aan voor de volgende toets.' };
+      }
+      if (stemming === 'oké') {
+        if (gem !== null && gem >= 7) return { emoji: '👍', tekst: 'Oké week, maar je cijfers liegen er niet om!', sub: 'Kleine stapjes elke dag maken het verschil.' };
+        return { emoji: '👍', tekst: 'Een normale week — dat telt ook mee.', sub: 'Consistentie is belangrijker dan perfectie.' };
+      }
+      if (stemming === 'zwaar') {
+        return { emoji: '🌱', tekst: 'Zware week gehad — dat is helemaal oké.', sub: 'Gun jezelf rust. Morgen begin je fris.' };
+      }
+      return { emoji: '✅', tekst: 'Terugblik opgeslagen!', sub: 'Goed bezig met je voortgang bijhouden.' };
+    }
+
+    // ── Render ──
+    let gekozenStemming = opgeslagenTb.stemming || null;
+
+    function renderGemiddelden() {
+      const gems = berekenGemiddelden().filter(g => g.aantal >= 2);
+      if (!gems.length) return '';
+      return `<p class="sectie-label sectie-mt">Gemiddelde cijfers</p>
+        <div class="gem-kaart">
+          ${gems.map(g => {
+            const klasse = g.gem >= 6 ? 'goed' : 'laag';
+            const breedte = Math.min(100, Math.round(g.gem / 10 * 100));
+            return `<div class="gem-rij">
+              <span class="gem-vak">${g.vak}</span>
+              <div class="gem-bar-wrap"><div class="gem-bar ${klasse}" style="width:${breedte}%"></div></div>
+              <span class="gem-getal ${klasse}">${g.gem}</span>
+            </div>`;
+          }).join('')}
+        </div>`;
+    }
+
+    function render() {
+      const container = document.getElementById('inhoud');
+
+      // Samenvatting
+      let html = `
+        <div class="samenvatting-kaart">
+          <div class="sam-blok">
+            <span class="sam-getal">${gepland}</span>
+            <span class="sam-label">gepland</span>
+          </div>
+          <div class="sam-blok">
+            <span class="sam-getal">${gedaan}</span>
+            <span class="sam-label">gedaan</span>
+          </div>
+        </div>`;
+
+      if (alIngevuld) {
+        html += `<div class="al-ingevuld">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Terugblik al ingevuld
+        </div>`;
+      }
+
+      // Toetsresultaten
+      if (toetsenInWeek.length) {
+        html += `<p class="sectie-label">Toetsresultaten</p>`;
+        const cijfers = laadCijfers();
+        toetsenInWeek.forEach((t, idx) => {
+          const bestaand = cijfers.find(c => c.vakNaam === t.vakNaam && c.datum === t.datum);
+          const val = bestaand ? bestaand.cijfer : '';
+          const klasse = val ? (val >= 6 ? 'goed' : 'laag') : '';
+          html += `<div class="toets-rij">
+            <div class="toets-rij-info">
+              <div class="toets-rij-vak">${t.vakNaam}</div>
+              <div class="toets-rij-sub">${t.toetsNaam} · ${formatDatumKort(parseDatum(t.datum))}</div>
+            </div>
+            <input type="number" class="cijfer-input ${klasse}" id="cijfer-${idx}"
+              value="${val}" min="1" max="10" placeholder="—"
+              ${alIngevuld ? 'readonly' : ''}>
+          </div>`;
+        });
+      } else {
+        html += `<div class="leeg">Geen toetsen deze week</div>`;
+      }
+
+      // Gemiddelden
+      html += renderGemiddelden();
+
+      // Weekbeoordeling
+      html += `<p class="sectie-label sectie-mt">Hoe was je week?</p>
+        <div class="week-opties">
+          <button class="week-optie${gekozenStemming === 'goed'  ? ' actief' : ''}" onclick="kiesStemming('goed')"  ${alIngevuld ? 'disabled' : ''}>😊 Goed</button>
+          <button class="week-optie${gekozenStemming === 'oké'   ? ' actief' : ''}" onclick="kiesStemming('oké')"   ${alIngevuld ? 'disabled' : ''}>😐 Oké</button>
+          <button class="week-optie${gekozenStemming === 'zwaar' ? ' actief' : ''}" onclick="kiesStemming('zwaar')" ${alIngevuld ? 'disabled' : ''}>😓 Zwaar</button>
+        </div>`;
+
+      if (!alIngevuld) {
+        html += `<button class="btn-opslaan" onclick="slaOp()">Terugblik opslaan</button>`;
+      }
+
+      // Motivatie (als al ingevuld)
+      if (alIngevuld && opgeslagenTb.stemming) {
+        const cijfers = laadCijfers();
+        const weekCijfers = toetsenInWeek
+          .map(t => cijfers.find(c => c.vakNaam === t.vakNaam && c.datum === t.datum)?.cijfer)
+          .filter(c => c !== undefined);
+        const m = bepaalMotivatie(opgeslagenTb.stemming, weekCijfers);
+        html += `<div class="motivatie-kaart">
+          <div class="motivatie-emoji">${m.emoji}</div>
+          <div class="motivatie-tekst">${m.tekst}</div>
+          <div class="motivatie-sub">${m.sub}</div>
+        </div>`;
+      }
+
+      container.innerHTML = html;
+
+      // Cijfer-input colorering on change
+      if (!alIngevuld) {
+        toetsenInWeek.forEach((_, idx) => {
+          const inp = document.getElementById('cijfer-' + idx);
+          if (!inp) return;
+          inp.addEventListener('input', () => {
+            const v = parseFloat(inp.value);
+            inp.className = 'cijfer-input' + (inp.value ? (v >= 6 ? ' goed' : ' laag') : '');
+          });
+        });
+      }
+    }
+
+    function kiesStemming(s) {
+      gekozenStemming = s;
+      document.querySelectorAll('.week-optie').forEach(b => b.classList.remove('actief'));
+      event.currentTarget.classList.add('actief');
+    }
+
+    function slaOp() {
+      // Cijfers opslaan
+      const cijfers = laadCijfers().filter(c =>
+        !toetsenInWeek.some(t => t.vakNaam === c.vakNaam && c.datum === t.datum)
+      );
+      const ingevoerd = [];
+      toetsenInWeek.forEach((t, idx) => {
+        const inp = document.getElementById('cijfer-' + idx);
+        const val = inp ? parseFloat(inp.value) : NaN;
+        if (!isNaN(val) && val >= 1 && val <= 10) {
+          cijfers.push({ vakNaam: t.vakNaam, toetsNaam: t.toetsNaam, datum: t.datum, cijfer: val });
+          ingevoerd.push(val);
+        }
+      });
+      slaCijfersOp(cijfers);
+
+      // Terugblik opslaan
+      const tb = { ingevuld: true, stemming: gekozenStemming, gepland, gedaan };
+      localStorage.setItem(tbKey, JSON.stringify(tb));
+
+      // Motivatie tonen
+      const m = bepaalMotivatie(gekozenStemming, ingevoerd);
+      const container = document.getElementById('inhoud');
+      container.insertAdjacentHTML('beforeend', `
+        <div class="motivatie-kaart">
+          <div class="motivatie-emoji">${m.emoji}</div>
+          <div class="motivatie-tekst">${m.tekst}</div>
+          <div class="motivatie-sub">${m.sub}</div>
+        </div>`);
+
+      document.querySelector('.btn-opslaan').disabled = true;
+      document.querySelector('.btn-opslaan').textContent = 'Opgeslagen ✓';
+    }
+
+    render();
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+  </script>
+</body>
+</html>
