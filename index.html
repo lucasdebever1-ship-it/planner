@@ -151,6 +151,45 @@
     }
     .streak-blok.record { animation: streak-pop 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97); }
 
+    /* ── Snel toevoegen ── */
+    .snel-wrap { margin-top: 14px; }
+    .snel-bar {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 0;
+    }
+    .snel-label { font-size: 0.8rem; color: #ccc; font-weight: 600; flex-shrink: 0; }
+    .snel-knoppen { display: flex; gap: 6px; }
+    .snel-knop {
+      padding: 6px 12px; background: #f5f5f5; border: 1.5px solid #e8e8e8;
+      border-radius: 20px; font-size: 0.78rem; font-weight: 700; color: #888;
+      cursor: pointer; font-family: inherit; transition: all 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .snel-knop:hover, .snel-knop.actief { background: #f0fbf5; border-color: #3ddc97; color: #2bc47e; }
+    .snel-form-kaart {
+      background: #fff; border: 1px solid #e8e8e8; border-radius: 14px;
+      padding: 14px; margin-top: 10px;
+    }
+    .snel-input {
+      width: 100%; background: #f8f8f8; border: 1.5px solid #e8e8e8;
+      border-radius: 9px; color: #1a1a1a; font-size: 0.88rem;
+      padding: 9px 12px; margin-bottom: 8px; outline: none;
+      font-family: inherit; appearance: none; transition: border-color 0.15s;
+    }
+    .snel-input:focus { border-color: #3ddc97; }
+    .snel-form-footer { display: flex; gap: 8px; margin-top: 4px; }
+    .snel-btn-ann {
+      padding: 9px 14px; background: none; border: 1.5px solid #e0e0e0;
+      border-radius: 9px; color: #888; font-size: 0.83rem; cursor: pointer;
+      font-family: inherit;
+    }
+    .snel-btn-opl {
+      flex: 1; padding: 9px; background: #3ddc97; border: none;
+      border-radius: 9px; color: #fff; font-size: 0.83rem; font-weight: 600;
+      cursor: pointer; font-family: inherit;
+    }
+    .snel-btn-opl:hover { background: #2bc47e; }
+
     /* ── Terugblik kaart ── */
     .terugblik-kaart {
       background: #fff; border: 1.5px solid #3ddc97;
@@ -326,6 +365,17 @@
     <div id="week-waarschuwing"></div>
     <p class="sectie-label">Vandaag</p>
     <div id="vandaag-lijst"></div>
+    <div class="snel-wrap">
+      <div class="snel-bar">
+        <span class="snel-label">Snel toevoegen</span>
+        <div class="snel-knoppen">
+          <button class="snel-knop" onclick="toonSnelForm('toets')">Toets</button>
+          <button class="snel-knop" onclick="toonSnelForm('huiswerk')">Huiswerk</button>
+          <button class="snel-knop" onclick="toonSnelForm('afspraak')">Afspraak</button>
+        </div>
+      </div>
+      <div id="snel-form-wrap"></div>
+    </div>
 
     <p class="sectie-label sectie-label-mt">Komende week</p>
     <div class="week-rij" id="week-rij"></div>
@@ -851,6 +901,140 @@
     renderVandaag();
     renderWeekRij();
     renderTip();
+
+    // ── Auto-opruimen ──
+    function autoOpruimen() {
+      const nu = new Date(); nu.setHours(0,0,0,0);
+      const nuMs = nu.getTime();
+
+      // 1. Toetsen > 7 dagen voorbij → archief
+      const vk = JSON.parse(localStorage.getItem('vakken') || '[]');
+      const archief = JSON.parse(localStorage.getItem('archief_toetsen') || '[]');
+      let gewijzigd = false;
+      vk.forEach(v => {
+        if (!v.toetsen) return;
+        const behoud = [], archiveer = [];
+        v.toetsen.forEach(t => {
+          if (t.datum && nuMs - new Date(t.datum + 'T00:00:00').getTime() > 7 * 86400000) {
+            archiveer.push({ ...t, vakNaam: v.naam });
+          } else {
+            behoud.push(t);
+          }
+        });
+        if (archiveer.length) { archief.push(...archiveer); v.toetsen = behoud; gewijzigd = true; }
+        // Huiswerk gedaan > 1 dag
+        if (v.huiswerk) {
+          const hwVoor = v.huiswerk.length;
+          v.huiswerk = v.huiswerk.filter(h => {
+            if (!h.gedaan || !h.inleverdatum) return true;
+            return nuMs - new Date(h.inleverdatum.slice(0,10) + 'T00:00:00').getTime() <= 86400000;
+          });
+          if (v.huiswerk.length !== hwVoor) gewijzigd = true;
+        }
+      });
+      if (gewijzigd) {
+        localStorage.setItem('vakken', JSON.stringify(vk));
+        localStorage.setItem('archief_toetsen', JSON.stringify(archief));
+      }
+
+      // 2. Afspraken > 3 dagen voorbij
+      const afspr = JSON.parse(localStorage.getItem('afspraken') || '[]');
+      const gefilterd = afspr.filter(a => {
+        if (a.herhaling === 'wekelijks') return true;
+        const eindDag = a.einddatum || a.datum;
+        if (!eindDag) return true;
+        return nuMs - new Date(eindDag + 'T00:00:00').getTime() <= 3 * 86400000;
+      });
+      if (gefilterd.length !== afspr.length)
+        localStorage.setItem('afspraken', JSON.stringify(gefilterd));
+    }
+    autoOpruimen();
+
+    // ── Snel toevoegen ──
+    let snelActief = null;
+
+    function toonSnelForm(type) {
+      if (snelActief === type) { sluitSnelForm(); return; }
+      snelActief = type;
+      document.querySelectorAll('.snel-knop').forEach(b => b.classList.remove('actief'));
+      event.currentTarget.classList.add('actief');
+
+      const vk2 = JSON.parse(localStorage.getItem('vakken') || '[]');
+      const vakOpties = vk2.length
+        ? vk2.map(v => `<option value="${v.naam}">${v.naam}</option>`).join('')
+        : '<option value="">— geen vakken —</option>';
+
+      const vandaagVal = vandaagStr;
+      let html = '<div class="snel-form-kaart">';
+
+      if (type === 'toets') {
+        html += `<select class="snel-input" id="sf-vak">${vakOpties}</select>
+          <select class="snel-input" id="sf-type">
+            <option>Proefwerk</option><option>SO</option><option>Mondeling</option>
+            <option>Luistertoets</option><option>Schrijfvaardigheid</option><option>PO</option><option>Anders</option>
+          </select>
+          <input type="date" class="snel-input" id="sf-datum" value="${vandaagVal}">`;
+      } else if (type === 'huiswerk') {
+        html += `<select class="snel-input" id="sf-hw-vak">${vakOpties}</select>
+          <input type="text" class="snel-input" id="sf-hw-omschr" placeholder="Omschrijving" autocomplete="off">
+          <input type="date" class="snel-input" id="sf-hw-datum" value="${vandaagVal}">`;
+      } else {
+        html += `<input type="text" class="snel-input" id="sf-afsp-titel" placeholder="Titel afspraak" autocomplete="off">
+          <input type="date" class="snel-input" id="sf-afsp-datum" value="${vandaagVal}">
+          <input type="time" class="snel-input" id="sf-afsp-tijd">`;
+      }
+
+      html += `<div class="snel-form-footer">
+        <button class="snel-btn-ann" onclick="sluitSnelForm()">Annuleren</button>
+        <button class="snel-btn-opl" onclick="slaSnelOp('${type}')">Toevoegen</button>
+      </div></div>`;
+
+      document.getElementById('snel-form-wrap').innerHTML = html;
+      const eerste = document.querySelector('#snel-form-wrap input, #snel-form-wrap select');
+      if (eerste && eerste.type !== 'date') eerste.focus();
+    }
+
+    function sluitSnelForm() {
+      snelActief = null;
+      document.getElementById('snel-form-wrap').innerHTML = '';
+      document.querySelectorAll('.snel-knop').forEach(b => b.classList.remove('actief'));
+    }
+
+    function slaSnelOp(type) {
+      const vk2 = JSON.parse(localStorage.getItem('vakken') || '[]');
+      if (type === 'toets') {
+        const vakNaam = document.getElementById('sf-vak')?.value;
+        const toetsType = document.getElementById('sf-type')?.value;
+        const datum = document.getElementById('sf-datum')?.value;
+        if (!vakNaam || !datum) return;
+        const idx = vk2.findIndex(v => v.naam === vakNaam);
+        if (idx < 0) return;
+        if (!vk2[idx].toetsen) vk2[idx].toetsen = [];
+        vk2[idx].toetsen.push({ naam: toetsType, datum, type: toetsType, id: Date.now().toString() });
+        localStorage.setItem('vakken', JSON.stringify(vk2));
+      } else if (type === 'huiswerk') {
+        const vakNaam = document.getElementById('sf-hw-vak')?.value;
+        const omschr  = document.getElementById('sf-hw-omschr')?.value.trim();
+        const datum   = document.getElementById('sf-hw-datum')?.value;
+        if (!vakNaam || !datum) return;
+        const idx = vk2.findIndex(v => v.naam === vakNaam);
+        if (idx < 0) return;
+        if (!vk2[idx].huiswerk) vk2[idx].huiswerk = [];
+        vk2[idx].huiswerk.push({ omschrijving: omschr, inleverdatum: datum, gedaan: false, id: Date.now().toString() });
+        localStorage.setItem('vakken', JSON.stringify(vk2));
+      } else {
+        const titel = document.getElementById('sf-afsp-titel')?.value.trim();
+        const datum  = document.getElementById('sf-afsp-datum')?.value;
+        const tijd   = document.getElementById('sf-afsp-tijd')?.value;
+        if (!titel || !datum) return;
+        const afspr2 = JSON.parse(localStorage.getItem('afspraken') || '[]');
+        afspr2.push({ id: Date.now().toString(), titel, datum, tijd: tijd || '', eindtijd: '', einddatum: '', categorie: 'overig', herhaling: 'eenmalig', afgerond: false });
+        localStorage.setItem('afspraken', JSON.stringify(afspr2));
+      }
+      sluitSnelForm();
+      renderVandaag();
+      renderWeekRij();
+    }
 
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 

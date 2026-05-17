@@ -406,11 +406,29 @@
         return true;
       });
 
+      // Auto-opruimen: afspraken > 3 dagen voorbij
+      (function() {
+        const nu = new Date(); nu.setHours(0,0,0,0); const nuMs = nu.getTime();
+        const alle = JSON.parse(localStorage.getItem('afspraken') || '[]');
+        const gefilterd = alle.filter(a => {
+          if (a.herhaling === 'wekelijks') return true;
+          const eindDag = a.einddatum || a.datum;
+          return !eindDag || nuMs - new Date(eindDag + 'T00:00:00').getTime() <= 3 * 86400000;
+        });
+        if (gefilterd.length !== alle.length)
+          localStorage.setItem('afspraken', JSON.stringify(gefilterd));
+      })();
+
       const container = document.getElementById('afspraken-lijst');
       if (!lijst.length) {
-        container.innerHTML = `<div class="leeg">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#d8d8d8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto 14px"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 15.5"/></svg>
-          Nog geen afspraken —<br>tik op + om er een toe te voegen
+        container.innerHTML = `<div style="text-align:center;padding:40px 0 20px">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#d8d8d8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto 16px"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 15.5"/></svg>
+          <div style="font-size:1rem;font-weight:700;color:#1a1a1a;margin-bottom:6px">Nog geen afspraken</div>
+          <div style="font-size:0.85rem;color:#aaa;margin-bottom:20px">Voeg werk, sport, sociale afspraken en meer toe.</div>
+          <button onclick="toonForm()"
+            style="background:#3ddc97;border:none;border-radius:12px;color:#fff;padding:13px 28px;font-size:0.95rem;font-weight:700;cursor:pointer;font-family:inherit">
+            Nieuwe afspraak toevoegen
+          </button>
         </div>`;
         return;
       }

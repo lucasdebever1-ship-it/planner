@@ -545,6 +545,19 @@
     function render() {
       const vakken = laad();
       sluitForms();
+      if (!vakken.length) {
+        document.getElementById('lijst').innerHTML = `
+          <div style="text-align:center;padding:40px 0 20px">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#d8d8d8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto 16px"><path d="M12 7V20"/><path d="M12 7C10.5 5.8 8 5.5 5 6.5V20C8 19 10.5 19.5 12 20"/><path d="M12 7C13.5 5.8 16 5.5 19 6.5V20C16 19 13.5 19.5 12 20"/></svg>
+            <div style="font-size:1rem;font-weight:700;color:#1a1a1a;margin-bottom:6px">Nog geen vakken</div>
+            <div style="font-size:0.85rem;color:#aaa;margin-bottom:20px">Voeg je vakken toe om toetsen en huiswerk bij te houden.</div>
+            <button onclick="document.getElementById('naam').focus();window.scrollTo({top:0,behavior:'smooth'})"
+              style="background:#3ddc97;border:none;border-radius:12px;color:#fff;padding:13px 28px;font-size:0.95rem;font-weight:700;cursor:pointer;font-family:inherit">
+              Voeg je eerste vak toe
+            </button>
+          </div>`;
+        return;
+      }
       document.getElementById('lijst').innerHTML = vakken.map((v, i) => `
         <div class="kaart" data-i="${i}">
           <div class="kaart-header">
@@ -732,6 +745,31 @@
       else if (btn.classList.contains('hw-opslaan'))     { slaHuiswerkOp(i); }
       else if (btn.classList.contains('hw-annuleer'))    { btn.closest('.hw-formrij').remove(); }
     });
+
+    // Auto-opruimen (gedeeld met index.html)
+    (function autoOpruimen() {
+      const nu = new Date(); nu.setHours(0,0,0,0); const nuMs = nu.getTime();
+      const vk = laad();
+      const archief = JSON.parse(localStorage.getItem('archief_toetsen') || '[]');
+      let gewijzigd = false;
+      vk.forEach(v => {
+        if (v.toetsen) {
+          const behoud = [], arc = [];
+          v.toetsen.forEach(t => {
+            if (t.datum && nuMs - new Date(t.datum + 'T00:00:00').getTime() > 7 * 86400000) arc.push({ ...t, vakNaam: v.naam });
+            else behoud.push(t);
+          });
+          if (arc.length) { archief.push(...arc); v.toetsen = behoud; gewijzigd = true; }
+        }
+        if (v.huiswerk) {
+          const voor = v.huiswerk.length;
+          v.huiswerk = v.huiswerk.filter(h => !h.gedaan || !h.inleverdatum ||
+            nuMs - new Date(h.inleverdatum.slice(0,10) + 'T00:00:00').getTime() <= 86400000);
+          if (v.huiswerk.length !== voor) gewijzigd = true;
+        }
+      });
+      if (gewijzigd) { sla(vk); localStorage.setItem('archief_toetsen', JSON.stringify(archief)); }
+    })();
 
     render();
 
