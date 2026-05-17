@@ -118,6 +118,42 @@
     /* Leeg */
     .leeg { text-align: center; color: #d0d0d0; padding: 32px 0 16px; font-size: 0.85rem; font-weight: 500; }
 
+    /* ── Tijdblokken ── */
+    .tijdlijn { display: flex; flex-direction: column; gap: 8px; }
+
+    .tijdblok-vrij {
+      background: linear-gradient(135deg, #edfaf3, #e2f7ea);
+      border: 1px solid #afe8c8; border-radius: 14px;
+      padding: 13px 15px;
+      box-shadow: 0 1px 6px rgba(61,220,151,0.14);
+    }
+    .tijdblok-vrij-tijd {
+      font-size: 0.72rem; font-weight: 800; color: #2bc47e;
+      letter-spacing: 0.04em; margin-bottom: 3px;
+    }
+    .tijdblok-vrij-titel { font-size: 0.92rem; font-weight: 700; color: #111; }
+    .tijdblok-vrij-tip { font-size: 0.8rem; color: #2a5a40; margin-top: 5px; line-height: 1.45; }
+
+    .tijdblok-event {
+      border-radius: 14px; padding: 12px 15px;
+      border: 1px solid #e8e8e8; border-left: 3.5px solid #e8e8e8;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .tijdblok-training { background: #f0fbf5; border-color: #b4eed0; border-left-color: #2bc47e; }
+    .tijdblok-event-tijd {
+      font-size: 0.71rem; font-weight: 800; color: #b0b0b0;
+      letter-spacing: 0.04em; margin-bottom: 2px;
+    }
+    .tijdblok-event-naam { font-size: 0.92rem; font-weight: 700; color: #111; }
+    .tijdblok-event-cat { font-size: 0.75rem; color: #aaa; margin-top: 2px; }
+
+    .dag-vrij-weekend {
+      text-align: center; padding: 22px 16px;
+      background: #f0fbf5; border: 1px solid #b8efd3;
+      border-radius: 14px; font-size: 0.93rem; font-weight: 700; color: #2bc47e;
+      box-shadow: 0 1px 6px rgba(61,220,151,0.12);
+    }
+
     /* ── Navigatie ── */
     .hamburger-btn {
       background: none; border: none; cursor: pointer;
@@ -395,80 +431,181 @@
       document.getElementById('dag-rij').innerHTML = html;
     }
 
-    function renderDagInhoud() {
-      const isVandaagGeselecteerd = gekozenDag.getTime() === vandaag.getTime();
-      const { toetsKaarten, hwKaarten, startKaarten, bezigKaarten, afspraakKaarten, trainingKaarten, werkKaarten } = berekenKaarten(gekozenDag);
-      let html = '';
+    // ── Tijdlijn helpers ──
+    function tijdMinuten(t) {
+      if (!t) return -1;
+      const [h, m] = t.split(':').map(Number);
+      return h * 60 + m;
+    }
 
-      toetsKaarten.forEach(k => {
-        if (isVandaagGeselecteerd) {
-          html += `<div class="toets-banner">
-            <div class="banner-emoji">📝</div>
-            <div class="banner-titel">TOETS VANDAAG</div>
-            <div class="banner-vak">${k.vak} — ${k.naam}</div>
-          </div>`;
+    function urgentsteVak(dag) {
+      const vk = JSON.parse(localStorage.getItem('vakken') || '[]');
+      let soonest = null;
+      vk.forEach(v => {
+        const toetsen = v.toetsen || (v.toetsdatum ? [{ datum: v.toetsdatum }] : []);
+        toetsen.forEach(t => {
+          if (!t.datum) return;
+          const dagsTot = Math.round((parseDatum(t.datum) - dag) / 86400000);
+          if (dagsTot >= 0 && dagsTot <= 14 && (!soonest || dagsTot < soonest.dagsTot)) {
+            soonest = { vak: v.naam, dagsTot };
+          }
+        });
+      });
+      return soonest;
+    }
+
+    function vrijBlokHtml(begin, eind, urgentVak) {
+      const tijdStr = eind ? `${begin} – ${eind}` : `Vrij vanaf ${begin}`;
+      let tipHtml = '';
+      if (urgentVak) {
+        const wanneer = urgentVak.dagsTot === 0 ? 'toets vandaag!'
+          : urgentVak.dagsTot === 1 ? 'toets morgen!'
+          : `toets over ${urgentVak.dagsTot} dagen`;
+        tipHtml = `<div class="tijdblok-vrij-tip">📚 Beste tijd voor <strong>${urgentVak.vak}</strong> — ${wanneer}</div>`;
+      }
+      return `<div class="tijdblok-vrij">
+        <div class="tijdblok-vrij-tijd">${tijdStr}</div>
+        <div class="tijdblok-vrij-titel">Vrij om te leren</div>
+        ${tipHtml}
+      </div>`;
+    }
+
+    function eventBlokHtml(ev) {
+      const tijdStr = ev.begin ? (ev.eind ? `${ev.begin} – ${ev.eind}` : ev.begin) : '';
+      if (ev.type === 'training') {
+        return `<div class="tijdblok-event tijdblok-training">
+          ${tijdStr ? `<div class="tijdblok-event-tijd">${tijdStr}</div>` : ''}
+          <div class="tijdblok-event-naam">${ev.naam}</div>
+        </div>`;
+      }
+      // afspraak
+      return `<div class="tijdblok-event" style="border-left-color:${ev.kleur};background:#fafafa">
+        ${tijdStr ? `<div class="tijdblok-event-tijd">${tijdStr}</div>` : ''}
+        <div class="tijdblok-event-naam">${ev.naam}</div>
+        ${ev.catLabel ? `<div class="tijdblok-event-cat">${ev.catLabel}</div>` : ''}
+      </div>`;
+    }
+
+    function renderDagInhoud() {
+      const isVandaag = gekozenDag.getTime() === vandaag.getTime();
+      const dagNr = gekozenDag.getDay();
+      const isWeekend = dagNr === 0 || dagNr === 6;
+      const dagStr = toDatumStr(gekozenDag);
+
+      const { toetsKaarten, hwKaarten, startKaarten, bezigKaarten } = berekenKaarten(gekozenDag);
+
+      // Vrij moment voor deze dag
+      const vm = JSON.parse(localStorage.getItem('vrijeMomenten') || '{}');
+      const vrijVanaf = vm[dagNr] || null;
+      const vrijVal   = tijdMinuten(vrijVanaf);
+
+      // Timed events (afspraken met tijd + trainingen met vaste tijd)
+      const timedEvents = [];
+      // Untimed afspraken (geen begin-tijd → toon als kaart)
+      const untimedAfspraken = [];
+
+      const afspraken = JSON.parse(localStorage.getItem('afspraken') || '[]');
+      afspraken.forEach(a => {
+        if (a.afgerond) return;
+        const match = a.herhaling === 'wekelijks'
+          ? parseDatum(a.datum).getDay() === dagNr && a.datum <= dagStr
+          : a.einddatum ? a.datum <= dagStr && dagStr <= a.einddatum : a.datum === dagStr;
+        if (!match) return;
+        const kleur    = CAT_KLEUREN[a.categorie] || '#888';
+        const catLabel = a.einddatum ? 'Meerdaagse afspraak' : (CAT_LABELS[a.categorie] || 'Overig');
+        if (a.tijd) {
+          timedEvents.push({ type: 'afspraak', naam: a.titel, begin: a.tijd, eind: a.eindtijd || null, kleur, catLabel });
         } else {
-          html += `<div class="kaart kaart-toets">
-            <div class="kaart-vak">${k.vak}</div>
-            ${k.naam ? `<div class="kaart-naam">${k.naam}${k.type ? ` · ${k.type}` : ''}</div>` : ''}
-            <div class="kaart-status">📝 Toets</div>
-          </div>`;
+          untimedAfspraken.push({ kleur, catLabel, ...a });
         }
       });
 
+      const trainingen = JSON.parse(localStorage.getItem('trainingen') || '[]');
+      trainingen.forEach(t => {
+        if (!Array.isArray(t.dagen) || !t.dagen.includes(dagNr)) return;
+        const ti = t.tijden && t.tijden[dagNr];
+        if (!ti || ti.wisselend) return;
+        timedEvents.push({ type: 'training', naam: t.naam, begin: ti.begin || null, eind: ti.eind || null });
+      });
+
+      timedEvents.sort((a, b) => tijdMinuten(a.begin) - tijdMinuten(b.begin));
+
+      const urgentVak = urgentsteVak(gekozenDag);
+      let html = '';
+
+      // ── Vaste kaarten bovenaan (geen tijd) ──
+      toetsKaarten.forEach(k => {
+        html += isVandaag
+          ? `<div class="toets-banner"><div class="banner-emoji">📝</div><div class="banner-titel">TOETS VANDAAG</div><div class="banner-vak">${k.vak} — ${k.naam}</div></div>`
+          : `<div class="kaart kaart-toets"><div class="kaart-vak">${k.vak}</div>${k.naam ? `<div class="kaart-naam">${k.naam}${k.type ? ` · ${k.type}` : ''}</div>` : ''}<div class="kaart-status">📝 Toets</div></div>`;
+      });
+
       hwKaarten.forEach(k => {
-        html += `<div class="kaart kaart-huiswerk">
-          <div class="kaart-vak">${k.vak}</div>
-          <div class="kaart-naam">${k.omschrijving}</div>
-          <div class="kaart-status">📋 Inleveren</div>
-        </div>`;
+        html += `<div class="kaart kaart-huiswerk"><div class="kaart-vak">${k.vak}</div><div class="kaart-naam">${k.omschrijving}</div><div class="kaart-status">📋 Inleveren</div></div>`;
       });
 
       startKaarten.forEach(k => {
         const over = k.dagenTot === 1 ? '1 dag' : `${k.dagenTot} dagen`;
-        html += `<div class="kaart kaart-start">
-          <div class="kaart-vak">${k.vak}</div>
-          ${k.naam ? `<div class="kaart-naam">${k.naam}${k.type ? ` · ${k.type}` : ''}</div>` : ''}
-          <div class="kaart-status">📚 Begin met leren · toets over ${over}</div>
-        </div>`;
+        html += `<div class="kaart kaart-start"><div class="kaart-vak">${k.vak}</div>${k.naam ? `<div class="kaart-naam">${k.naam}</div>` : ''}<div class="kaart-status">📚 Begin met leren · toets over ${over}</div></div>`;
       });
 
       bezigKaarten.forEach(k => {
         const nog = k.dagenTot === 1 ? '1 dag' : `${k.dagenTot} dagen`;
-        html += `<div class="kaart kaart-bezig">
-          <div class="kaart-vak">${k.vak}</div>
-          ${k.naam ? `<div class="kaart-naam">${k.naam}${k.type ? ` · ${k.type}` : ''}</div>` : ''}
-          <div class="kaart-status">📚 Leren — nog ${nog} tot de toets</div>
-        </div>`;
+        html += `<div class="kaart kaart-bezig"><div class="kaart-vak">${k.vak}</div>${k.naam ? `<div class="kaart-naam">${k.naam}</div>` : ''}<div class="kaart-status">📚 Leren — nog ${nog} tot de toets</div></div>`;
       });
 
-      afspraakKaarten.forEach(a => {
-        const kleur    = CAT_KLEUREN[a.categorie] || '#888';
-        const catLabel = a.einddatum ? 'Meerdaagse afspraak' : (CAT_LABELS[a.categorie] || 'Overig');
-        const tijdStr  = a.tijd ? `${a.tijd} · ` : '';
-        html += `<div class="kaart kaart-afspraak" style="border-left-color:${kleur}">
-          <div class="kaart-vak">${a.titel}</div>
-          <div class="kaart-naam">${tijdStr}${catLabel}</div>
-        </div>`;
+      untimedAfspraken.forEach(a => {
+        html += `<div class="kaart kaart-afspraak" style="border-left-color:${a.kleur}"><div class="kaart-vak">${a.titel}</div><div class="kaart-naam">${a.catLabel}</div></div>`;
       });
 
-      trainingKaarten.forEach(t => {
-        const tijdStr = t.begin ? `${t.begin}${t.eind ? `–${t.eind}` : ''}` : '';
-        html += `<div class="kaart kaart-training">
-          <div class="kaart-vak">${t.naam}</div>
-          ${tijdStr ? `<div class="kaart-naam">${tijdStr}</div>` : ''}
-        </div>`;
-      });
+      // ── Tijdlijn ──
+      const heeftFlags = html.length > 0;
 
-      werkKaarten.forEach(w => {
-        const tijdTekst = w.beginTijd
-          ? `${w.beginTijd}${w.eindTijd ? ` – ${w.eindTijd}` : ''}`
-          : '';
-        html += `<div class="kaart kaart-werk">
-          <div class="kaart-vak">Werkdienst</div>
-          ${tijdTekst ? `<div class="kaart-naam">${tijdTekst}</div>` : ''}
-        </div>`;
-      });
+      if (!vrijVanaf && !timedEvents.length) {
+        if (isWeekend && !heeftFlags) {
+          html += `<div class="dag-vrij-weekend">🌿 Hele dag vrij</div>`;
+        } else if (!heeftFlags) {
+          html += `<div class="leeg">Niets gepland</div>`;
+        }
+      } else {
+        let lastEnd = null;
+        let vrijGetoond = false;
+
+        timedEvents.forEach(ev => {
+          const evVal   = tijdMinuten(ev.begin);
+          const lastVal = tijdMinuten(lastEnd);
+
+          if (vrijVanaf) {
+            if (lastEnd === null) {
+              // Eerste event — vrij blok ervoor?
+              if (evVal > vrijVal) {
+                html += vrijBlokHtml(vrijVanaf, ev.begin, urgentVak);
+                vrijGetoond = true;
+              }
+            } else if (lastVal >= vrijVal && evVal > lastVal) {
+              // Gat tussen events, na vrijVanaf
+              html += vrijBlokHtml(lastEnd, ev.begin, urgentVak);
+              vrijGetoond = true;
+            }
+          }
+
+          html += eventBlokHtml(ev);
+          lastEnd = ev.eind || ev.begin;
+        });
+
+        // Geen timed events of alle events vóór vrijVanaf: toon open vrij blok
+        if (vrijVanaf && !vrijGetoond) {
+          const lastVal = tijdMinuten(lastEnd);
+          if (lastVal < vrijVal) {
+            html += vrijBlokHtml(vrijVanaf, null, urgentVak);
+          }
+        }
+
+        // Weekend zonder tijdblokken én vrijVanaf
+        if (isWeekend && !timedEvents.length && !vrijVanaf && !heeftFlags) {
+          html += `<div class="dag-vrij-weekend">🌿 Hele dag vrij</div>`;
+        }
+      }
 
       if (!html) html = '<div class="leeg">Niets gepland</div>';
       document.getElementById('dag-inhoud').innerHTML = html;
