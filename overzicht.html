@@ -438,23 +438,35 @@
         });
       });
 
-      // Weekdruk-scoring: toetsen + werkdagen + trainingsdagen
-      const werk       = JSON.parse(localStorage.getItem('werk')       || '[]');
-      const trainingen = JSON.parse(localStorage.getItem('trainingen') || '[]');
-      const werkDagen     = new Set(werk.flatMap(e => Array.isArray(e.dagen) ? e.dagen : []));
-      const trainingDagen = new Set(trainingen.flatMap(e => Array.isArray(e.dagen) ? e.dagen : []));
-      const basisScore    = werkDagen.size + trainingDagen.size;
-
+      // Weekdruk-scoring: alleen toetsen + huiswerk deadlines + eenmalige afspraken
       const weekTelling = {};
+      // Toetsen per week
       items.forEach(r => {
         if (r.toets.datum && r.categorie !== 'verlopen') {
-          const w = isoWeek(r.toets.datum); weekTelling[w] = (weekTelling[w] || 0) + 1;
+          const w = isoWeek(r.toets.datum);
+          weekTelling[w] = (weekTelling[w] || 0) + 1;
         }
       });
+      // Huiswerk deadlines per week
+      vakken.forEach(v => {
+        (v.huiswerk || []).forEach(h => {
+          if (!h.inleverdatum || h.gedaan) return;
+          const w = isoWeek(h.inleverdatum.slice(0,10));
+          weekTelling[w] = (weekTelling[w] || 0) + 1;
+        });
+      });
+      // Eenmalige afspraken (geen wekelijks) per week
+      const afspraken2 = JSON.parse(localStorage.getItem('afspraken') || '[]');
+      afspraken2.forEach(a => {
+        if (a.afgerond || a.herhaling === 'wekelijks' || !a.datum) return;
+        const w = isoWeek(a.datum);
+        weekTelling[w] = (weekTelling[w] || 0) + 1;
+      });
+
       items.forEach(r => {
         const score = r.toets.datum && r.categorie !== 'verlopen'
-          ? (weekTelling[isoWeek(r.toets.datum)] || 0) + basisScore : 0;
-        r.drukkeWeek = score > 4;
+          ? (weekTelling[isoWeek(r.toets.datum)] || 0) : 0;
+        r.drukkeWeek = score >= 3;
       });
 
       // Waarschuwingsbanner: alleen eerstvolgende drukke week die nog niet voorbij is

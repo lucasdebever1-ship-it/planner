@@ -780,12 +780,11 @@
 
     // ── Weekdruk-waarschuwing ──
     function berekenWeekScore(weekMaandag) {
-      const werk2       = JSON.parse(localStorage.getItem('werk')       || '[]');
-      const trainingen2 = JSON.parse(localStorage.getItem('trainingen') || '[]');
-      const werkDagen2     = new Set(werk2.flatMap(e => Array.isArray(e.dagen) ? e.dagen : []));
-      const trainingDagen2 = new Set(trainingen2.flatMap(e => Array.isArray(e.dagen) ? e.dagen : []));
-      let score = werkDagen2.size + trainingDagen2.size;
       const weekEinde = addDagen(weekMaandag, 7);
+      const maStr = toDatumStr(weekMaandag);
+      const zoStr = toDatumStr(addDagen(weekMaandag, 6));
+      let score = 0;
+      // Toetsen
       vakken.forEach(v => {
         const toetsen = v.toetsen || (v.toetsdatum ? [{ datum: v.toetsdatum }] : []);
         toetsen.forEach(t => {
@@ -793,6 +792,18 @@
           const d = parseDatum(t.datum);
           if (d >= weekMaandag && d < weekEinde) score++;
         });
+        // Huiswerk deadlines
+        (v.huiswerk || []).forEach(h => {
+          if (!h.inleverdatum || h.gedaan) return;
+          const ds = h.inleverdatum.slice(0,10);
+          if (ds >= maStr && ds <= zoStr) score++;
+        });
+      });
+      // Eenmalige afspraken (geen wekelijks)
+      const afspr = JSON.parse(localStorage.getItem('afspraken') || '[]');
+      afspr.forEach(a => {
+        if (a.afgerond || a.herhaling === 'wekelijks' || !a.datum) return;
+        if (a.datum >= maStr && a.datum <= zoStr) score++;
       });
       return score;
     }
@@ -803,7 +814,7 @@
       for (let w = 0; w < 4; w++) {
         const wMaandag = addDagen(maandag, w * 7);
         if (addDagen(wMaandag, 6).getTime() < vandaag.getTime()) continue; // week al voorbij
-        if (berekenWeekScore(wMaandag) > 4) {
+        if (berekenWeekScore(wMaandag) >= 3) {
           const datumStr = wMaandag.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' });
           banner = `<div class="week-waarschuwing">⚠️ Drukke week van ${datumStr} — begin eerder met leren</div>`;
           break;
