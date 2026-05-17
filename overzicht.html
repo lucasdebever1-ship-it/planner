@@ -31,94 +31,104 @@
     }
     .pagina-header h1 { margin: 0; font-size: 1.4rem; font-weight: 700; letter-spacing: -0.3px; color: #1a1a1a; }
 
-    .groep { margin-bottom: 36px; }
+    .groep { margin-bottom: 32px; }
 
     .groep-header {
-      display: flex; align-items: center; gap: 8px; margin-bottom: 16px;
+      display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
     }
-    .groep-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .groep-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
     .groep-label {
-      font-size: 0.72rem; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.9px; color: #888;
+      font-size: 0.7rem; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 1.1px; color: #b0b0b0;
+      flex: 1;
     }
     .groep-count {
-      font-size: 0.7rem; color: #aaa;
-      background: #f0f0f0; border-radius: 20px; padding: 1px 8px;
+      font-size: 0.68rem; color: #bbb; font-weight: 700;
+      background: #f0f0f0; border-radius: 20px; padding: 2px 8px;
     }
 
     details.groep summary { list-style: none; }
     details.groep summary::-webkit-details-marker { display: none; }
     details.groep summary .groep-header { cursor: pointer; }
-    details.groep summary .groep-label { color: #bbb; }
 
-    .groep-kaarten { display: flex; flex-direction: column; gap: 16px; }
+    .groep-kaarten { display: flex; flex-direction: column; gap: 10px; }
 
+    /* Toetskaart — zelfde stijl als week.html tijdblokken */
     .toets-kaart {
-      background: #f5f5f5;
-      border: 1px solid #ebebeb;
-      border-radius: 16px;
-      padding: 20px;
-      transition: border-color 0.15s, box-shadow 0.15s;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      background: #fff;
+      border: 1px solid #e8e8e8; border-left: 3.5px solid #ccc;
+      border-radius: 14px; padding: 14px 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      transition: box-shadow 0.18s;
     }
-    .toets-kaart:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
-    .toets-kaart.urgent  { background: #fff5f5; border-color: #ffd0d0; }
-    .toets-kaart.verlopen { opacity: 0.4; }
+    .toets-kaart:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+    .toets-kaart.urgent        { border-left-color: #e05252; background: #fff8f8; border-color: #fcd8d8; }
+    .toets-kaart.deze-week     { border-left-color: #f09040; background: #fffaf5; border-color: #fde4c0; }
+    .toets-kaart.volgende-week { border-left-color: #c8a820; background: #fffdee; border-color: #f0e090; }
+    .toets-kaart.later         { border-left-color: #ccc; }
+    .toets-kaart.verlopen      { border-left-color: #ddd; opacity: 0.45; }
+
+    .kaart-datumrij {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 4px;
+    }
+    .kaart-datum-tekst {
+      font-size: 0.71rem; font-weight: 800; color: #b0b0b0; letter-spacing: 0.04em;
+    }
+    .dagen-pill {
+      font-size: 0.72rem; font-weight: 700;
+      border-radius: 20px; padding: 3px 10px;
+      white-space: nowrap; flex-shrink: 0;
+    }
+
+    .vak-naam {
+      font-size: 1.05rem; font-weight: 800; line-height: 1.2;
+      letter-spacing: -0.2px; color: #111; margin-bottom: 2px;
+    }
+    .verlopen .vak-naam { text-decoration: line-through; color: #bbb; }
+    .toets-type { font-size: 0.8rem; color: #999; margin-bottom: 0; }
 
     .drukke-badge {
-      display: inline-block; font-size: 0.72rem; font-weight: 700;
+      display: inline-block; font-size: 0.69rem; font-weight: 700;
       color: #c07820; background: #fff8f0; border: 1px solid #f0c890;
-      border-radius: 20px; padding: 3px 10px; margin-bottom: 12px;
+      border-radius: 20px; padding: 2px 9px; margin-bottom: 8px;
       letter-spacing: 0.03em;
     }
 
     .week-waarschuwing {
       background: #fffbeb; border: 1px solid #f5d060;
-      border-left: 3px solid #f0b020; border-radius: 10px;
+      border-left: 3px solid #f0b020; border-radius: 12px;
       padding: 11px 14px; font-size: 0.87rem; font-weight: 600;
-      color: #7a5810; margin-bottom: 14px; line-height: 1.4;
+      color: #7a5810; margin-bottom: 16px; line-height: 1.4;
     }
 
-    .vak-naam { font-size: 1.3rem; font-weight: 800; line-height: 1.2; margin-bottom: 4px; letter-spacing: -0.2px; color: #1a1a1a; }
-    .verlopen .vak-naam { text-decoration: line-through; color: #bbb; }
-    .toets-type { font-size: 0.9rem; color: #6b6b6b; margin-bottom: 14px; }
-
-    .kaart-midden {
-      display: flex; justify-content: space-between; align-items: flex-end; gap: 10px;
-    }
-    .toets-datum-groot { font-size: 1.05rem; font-weight: 600; color: #444; }
-
-    .dagen-pill {
-      font-size: 0.8rem; font-weight: 700;
-      border-radius: 20px; padding: 5px 12px;
-      white-space: nowrap; flex-shrink: 0;
-    }
-
-    .kaart-advies { margin-top: 14px; font-size: 0.95rem; font-weight: 600; line-height: 1.4; }
+    .kaart-advies { margin-top: 10px; font-size: 0.83rem; font-weight: 600; line-height: 1.45; }
     .leeradvies   { color: #2bc47e; }
     .waarschuwing { color: #e05252; }
 
     .feedback-kaart {
-      background: #fafafa; border: 1px solid #e8e8e8;
-      border-left: 3px solid #3ddc97; border-radius: 14px;
-      padding: 16px 18px; margin-bottom: 10px;
+      background: #fff; border: 1px solid #e0efe8;
+      border-left: 3.5px solid #3ddc97; border-radius: 14px;
+      padding: 15px 16px; box-shadow: 0 1px 4px rgba(61,220,151,0.08);
     }
-    .feedback-vraag { font-size: 0.93rem; font-weight: 700; color: #1a1a1a; margin-bottom: 3px; }
-    .feedback-info  { font-size: 0.8rem; color: #bbb; margin-bottom: 14px; }
+    .feedback-vraag { font-size: 0.92rem; font-weight: 700; color: #111; margin-bottom: 2px; }
+    .feedback-info  { font-size: 0.78rem; color: #bbb; margin-bottom: 12px; }
     .feedback-knoppen { display: flex; gap: 7px; }
     .feedback-btn {
       flex: 1; padding: 9px 4px; border-radius: 10px;
-      font-size: 0.78rem; font-weight: 700; cursor: pointer;
+      font-size: 0.76rem; font-weight: 700; cursor: pointer;
       font-family: inherit; border: 1.5px solid; text-align: center;
-      transition: opacity 0.15s;
+      transition: all 0.15s;
     }
-    .feedback-btn:hover  { opacity: 0.75; }
-    .feedback-btn:active { transform: scale(0.97); }
-    .feedback-btn.te-weinig { color: #e05252; border-color: #ffd0d0; background: #fff5f5; }
-    .feedback-btn.precies   { color: #2bc47e; border-color: #b8efd3; background: #f0fbf5; }
-    .feedback-btn.te-veel   { color: #3a6edc; border-color: #c8d8ff; background: #f0f5ff; }
+    .feedback-btn:active { transform: scale(0.96); }
+    .feedback-btn.te-weinig { color: #e05252; border-color: #fcd8d8; background: #fff5f5; }
+    .feedback-btn.precies   { color: #2bc47e; border-color: #afe8c8; background: #edfaf3; }
+    .feedback-btn.te-veel   { color: #3a6edc; border-color: #c4d4ff; background: #f0f4ff; }
 
-    .geen { color: #aaa; font-size: 0.9rem; margin-top: 8px; }
+    .geen {
+      text-align: center; color: #c0c0c0;
+      font-size: 0.88rem; padding: 48px 0 24px; font-weight: 500;
+    }
 
     /* ── Navigatie ── */
     .hamburger-btn {
@@ -196,9 +206,10 @@
 
   <div id="week-waarschuwingen"></div>
   <div id="inhoud"></div>
-  <p id="leeg" class="geen" style="display:none">
-    Geen toetsen gevonden. Voeg vakken en toetsen toe via de vakken-pagina.
-  </p>
+  <div id="leeg" class="geen" style="display:none">
+    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto 14px"><rect x="5" y="4" width="14" height="17" rx="2"/><rect x="9" y="2" width="6" height="3" rx="1"/><path d="M8.5 13L11 15.5L15.5 10"/></svg>
+    Geen toetsen — voeg ze toe via de vakken-pagina.
+  </div>
 
   <!-- Menu -->
   <div class="menu-overlay" id="menu-overlay">
@@ -374,13 +385,13 @@
       const { categorie, dagsTotToets, dagsTotBegin, vak, moeilijkheid, toets } = r;
       const pilStijl = {
         'urgent':        'background:#fff0f0;color:#e05252',
-        'deze-week':     'background:#fff8f0;color:#d07030',
-        'volgende-week': 'background:#fffcf0;color:#b09020',
-        'later':         'background:#f0f0f0;color:#888',
+        'deze-week':     'background:#fff4e8;color:#d07030',
+        'volgende-week': 'background:#fffce0;color:#a08010',
+        'later':         'background:#f0f0f0;color:#999',
         'verlopen':      'background:#f5f5f5;color:#bbb',
       }[categorie] || '';
       const dagenStr = dagsTotToets !== null ? dagenTekst(dagsTotToets) : null;
-      const drukBadge = r.drukkeWeek ? `<div class="drukke-badge">Drukke week</div>` : '';
+      const drukBadge = r.drukkeWeek ? `<div class="drukke-badge">⚡ Drukke week</div>` : '';
       let advies = '';
       if (categorie === 'urgent') {
         advies = `<div class="kaart-advies waarschuwing">⚠️ Je bent te laat met beginnen!</div>`;
@@ -396,12 +407,12 @@
       }
       return `<div class="toets-kaart ${categorie}">
         ${drukBadge}
-        <div class="vak-naam">${vak}</div>
-        <div class="toets-type">${toets.naam}</div>
-        <div class="kaart-midden">
-          <span class="toets-datum-groot">${formatDatum(toets.datum)}</span>
+        <div class="kaart-datumrij">
+          <span class="kaart-datum-tekst">${formatDatum(toets.datum)}</span>
           ${dagenStr ? `<span class="dagen-pill" style="${pilStijl}">${dagenStr}</span>` : ''}
         </div>
+        <div class="vak-naam">${vak}</div>
+        <div class="toets-type">${toets.naam}</div>
         ${advies}
       </div>`;
     }
@@ -468,7 +479,8 @@
       });
 
       const inhoud = document.getElementById('inhoud');
-      if (!items.length) { document.getElementById('leeg').style.display = ''; inhoud.innerHTML = ''; return; }
+      if (!items.length) { document.getElementById('leeg').style.display = 'block'; inhoud.innerHTML = ''; return; }
+      document.getElementById('leeg').style.display = 'none';
 
       const secties = [
         { id: 'urgent',        label: 'Actie vereist', dot: '#e05252' },
