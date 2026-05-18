@@ -38,7 +38,7 @@
 
     .sectie-label {
       font-size: 0.72rem; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.9px;
+      letter-spacing: 0.3px;
       color: #aaa; margin: 0 0 12px;
     }
     .sectie-mt { margin-top: 28px; }
@@ -150,7 +150,7 @@
       flex: 1; display: flex; flex-direction: column; position: relative;
       align-items: center; gap: 3px; padding: 11px 4px 13px;
       text-decoration: none; color: #c0c0c0; font-size: 0.58rem; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.06em;
+      letter-spacing: 0.02em;
       -webkit-tap-highlight-color: transparent; transition: color 0.18s;
     }
     .tab:active { opacity: 0.6; }
@@ -337,18 +337,18 @@
       const gem = ingevoerdeCijfers.length
         ? ingevoerdeCijfers.reduce((s, c) => s + c, 0) / ingevoerdeCijfers.length : null;
       if (stemming === 'goed') {
-        if (gem === null || gem >= 7.5) return { emoji: '🎉', tekst: 'Geweldige week!', sub: 'Sterk bezig — blijf zo doorgaan.' };
-        if (gem >= 6)  return { emoji: '💪', tekst: 'Solide week!', sub: 'Goed op weg. Volgende week kun je er nog een schepje bovenop.' };
-        return { emoji: '📚', tekst: 'Week voelde goed — maar de cijfers kunnen omhoog.', sub: 'Struct past je leeradvies aan voor de volgende toets.' };
+        if (gem === null || gem >= 7.5) return { tekst: 'Geweldige week!', sub: 'Sterk bezig, blijf zo doorgaan.' };
+        if (gem >= 6)  return { tekst: 'Solide week!', sub: 'Goed op weg. Volgende week kun je er nog een schepje bovenop.' };
+        return { tekst: 'Week voelde goed, maar de cijfers kunnen omhoog.', sub: 'Het leeradvies wordt aangepast voor de volgende toets.' };
       }
       if (stemming === 'oké') {
-        if (gem !== null && gem >= 7) return { emoji: '👍', tekst: 'Oké week, maar je cijfers liegen er niet om!', sub: 'Kleine stapjes elke dag maken het verschil.' };
-        return { emoji: '👍', tekst: 'Een normale week — dat telt ook mee.', sub: 'Consistentie is belangrijker dan perfectie.' };
+        if (gem !== null && gem >= 7) return { tekst: 'Oké week, maar je cijfers liegen er niet om!', sub: 'Kleine stapjes elke dag maken het verschil.' };
+        return { tekst: 'Een normale week, dat telt ook mee.', sub: 'Consistentie is belangrijker dan perfectie.' };
       }
       if (stemming === 'zwaar') {
-        return { emoji: '🌱', tekst: 'Zware week gehad — dat is helemaal oké.', sub: 'Gun jezelf rust. Morgen begin je fris.' };
+        return { tekst: 'Zware week gehad, dat is helemaal oké.', sub: 'Gun jezelf rust. Morgen begin je fris.' };
       }
-      return { emoji: '✅', tekst: 'Terugblik opgeslagen!', sub: 'Goed bezig met je voortgang bijhouden.' };
+      return { tekst: 'Terugblik opgeslagen!', sub: 'Goed bezig met je voortgang bijhouden.' };
     }
 
     // ── Render ──
@@ -422,9 +422,9 @@
       // Weekbeoordeling
       html += `<p class="sectie-label sectie-mt">Hoe was je week?</p>
         <div class="week-opties">
-          <button class="week-optie${gekozenStemming === 'goed'  ? ' actief' : ''}" onclick="kiesStemming('goed')"  ${alIngevuld ? 'disabled' : ''}>😊 Goed</button>
-          <button class="week-optie${gekozenStemming === 'oké'   ? ' actief' : ''}" onclick="kiesStemming('oké')"   ${alIngevuld ? 'disabled' : ''}>😐 Oké</button>
-          <button class="week-optie${gekozenStemming === 'zwaar' ? ' actief' : ''}" onclick="kiesStemming('zwaar')" ${alIngevuld ? 'disabled' : ''}>😓 Zwaar</button>
+          <button class="week-optie${gekozenStemming === 'goed'  ? ' actief' : ''}" onclick="kiesStemming('goed')"  ${alIngevuld ? 'disabled' : ''}>Goed</button>
+          <button class="week-optie${gekozenStemming === 'oké'   ? ' actief' : ''}" onclick="kiesStemming('oké')"   ${alIngevuld ? 'disabled' : ''}>Oké</button>
+          <button class="week-optie${gekozenStemming === 'zwaar' ? ' actief' : ''}" onclick="kiesStemming('zwaar')" ${alIngevuld ? 'disabled' : ''}>Zwaar</button>
         </div>`;
 
       if (!alIngevuld) {
@@ -439,7 +439,6 @@
           .filter(c => c !== undefined);
         const m = bepaalMotivatie(opgeslagenTb.stemming, weekCijfers);
         html += `<div class="motivatie-kaart">
-          <div class="motivatie-emoji">${m.emoji}</div>
           <div class="motivatie-tekst">${m.tekst}</div>
           <div class="motivatie-sub">${m.sub}</div>
         </div>`;
@@ -491,7 +490,6 @@
       const container = document.getElementById('inhoud');
       container.insertAdjacentHTML('beforeend', `
         <div class="motivatie-kaart">
-          <div class="motivatie-emoji">${m.emoji}</div>
           <div class="motivatie-tekst">${m.tekst}</div>
           <div class="motivatie-sub">${m.sub}</div>
         </div>`);

@@ -61,7 +61,7 @@
     /* ── Sectie labels ── */
     .sectie-label {
       font-size: 0.7rem; font-weight: 800;
-      text-transform: uppercase; letter-spacing: 1.1px;
+      letter-spacing: 0.3px;
       color: #b0b0b0; margin: 0 0 10px;
     }
     .sectie-label-mt { margin-top: 28px; }
@@ -81,7 +81,7 @@
 
     .dag-kaart-type {
       font-size: 0.65rem; font-weight: 800;
-      text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px;
+      letter-spacing: 0.02em; margin-bottom: 3px;
     }
     .dag-kaart-toets    .dag-kaart-type { color: #e05252; }
     .dag-kaart-huiswerk .dag-kaart-type { color: #3a6edc; }
@@ -327,7 +327,7 @@
       align-items: center; gap: 3px; padding: 11px 4px 13px;
       text-decoration: none; color: #c0c0c0;
       font-size: 0.58rem; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.06em;
+      letter-spacing: 0.02em;
       -webkit-tap-highlight-color: transparent; transition: color 0.18s;
     }
     .tab:active { opacity: 0.6; }
@@ -367,15 +367,15 @@
         <div class="checkin-titel">Hoe zit je erin vandaag?</div>
         <div class="checkin-opties">
           <button class="checkin-optie" onclick="kiesCheckin('klaar')">
-            <span class="checkin-emoji">💪</span>
+            
             <span class="checkin-label">Klaar voor de dag</span>
           </button>
           <button class="checkin-optie" onclick="kiesCheckin('gaat-wel')">
-            <span class="checkin-emoji">😐</span>
+            
             <span class="checkin-label">Gaat wel</span>
           </button>
           <button class="checkin-optie" onclick="kiesCheckin('geen-energie')">
-            <span class="checkin-emoji">😴</span>
+            
             <span class="checkin-label">Geen energie</span>
           </button>
         </div>
@@ -411,7 +411,7 @@
     <p class="sectie-label sectie-label-mt">Komende week</p>
     <div class="week-rij" id="week-rij"></div>
 
-    <p class="sectie-label">Tip van Struct</p>
+    <p class="sectie-label">Tip</p>
     <div class="tip-kaart" id="tip-kaart"></div>
   </div>
 
@@ -676,8 +676,8 @@
       if (!checkin && patroon) {
         const dagNaam = DAGEN_LANG[vandaag.getDay()];
         bannerWrap.innerHTML = patroon === 'rustig'
-          ? `<div class="patroon-banner patroon-rustig">💆 Struct weet dat ${dagNaam} vaak een rustige dag is — we plannen het licht.</div>`
-          : `<div class="patroon-banner patroon-productief">⚡ Dit is meestal een productieve dag voor je — maak er gebruik van.</div>`;
+          ? `<div class="patroon-banner patroon-rustig">Op ${dagNaam} is het voor jou vaak rustig, we houden het wat kalmer.</div>`
+          : `<div class="patroon-banner patroon-productief">Dit is voor jou een goede dag, ga ervoor.</div>`;
       } else {
         bannerWrap.innerHTML = '';
       }
@@ -691,14 +691,14 @@
       }
 
       if (!items.length) {
-        container.innerHTML = '<div class="vandaag-leeg">Rustige dag — geniet ervan 🎉</div>';
+        container.innerHTML = '<div class="vandaag-leeg">Niks gepland, lekker rustig.</div>';
         return;
       }
 
       if (stemming === 'gaat-wel') {
         const top = items[0];
         container.innerHTML =
-          `<div class="checkin-modus-banner checkin-gaat-wel">😐 Focus op één ding: <strong>${top.titel}</strong></div>` +
+          `<div class="checkin-modus-banner checkin-gaat-wel">Focus op één ding: <strong>${top.titel}</strong></div>` +
           kaartHtml(top);
         return;
       }
@@ -706,10 +706,10 @@
       if (stemming === 'geen-energie') {
         const vast = items.filter(i => i.type === 'toets' || i.type === 'afspraak');
         if (!vast.length) {
-          container.innerHTML = `<div class="checkin-modus-banner checkin-geen-energie">😴 Neem het rustig — niets staat er echt vast vandaag.</div>`;
+          container.innerHTML = `<div class="checkin-modus-banner checkin-geen-energie">Neem het rustig, er staat niks vast vandaag.</div>`;
         } else {
           container.innerHTML =
-            `<div class="checkin-modus-banner checkin-geen-energie">😴 Neem het rustig — alleen <strong>${vast[0].titel}</strong> staat vast.</div>` +
+            `<div class="checkin-modus-banner checkin-geen-energie">Neem het rustig, alleen <strong>${vast[0].titel}</strong> staat echt vast.</div>` +
             vast.map(kaartHtml).join('');
         }
         return;
@@ -741,7 +741,7 @@
       document.getElementById('week-rij').innerHTML = html;
     }
 
-    // ── Tip van Struct ──
+    // ── Tip ──
     function renderTip() {
       const tip = bepaalTip();
       document.getElementById('tip-kaart').innerHTML = `
@@ -767,16 +767,16 @@
       if (stemming === 'gaat-wel') {
         const items = getItemsOpDag(vandaag);
         if (items.length) {
-          return `Doe het rustig aan vandaag — focus alleen op <strong>${items[0].titel}</strong>. De rest kan wachten.`;
+          return `Doe het rustig aan vandaag. Focus alleen op <strong>${items[0].titel}</strong>, de rest kan wachten.`;
         }
-        return 'Gaat wel vandaag? Gebruik de rustige dag om alvast iets voor te bereiden.';
+        return 'Gaat wel vandaag. Gebruik de extra tijd om alvast iets voor te bereiden.';
       }
       if (stemming === 'geen-energie') {
         const vast = getItemsOpDag(vandaag).filter(i => i.type === 'toets' || i.type === 'afspraak');
         if (vast.length) {
-          return `Geen energie? Prima — doe alleen wat echt niet kan wachten: <strong>${vast[0].titel}</strong>.`;
+          return `Geen energie? Doe alleen wat echt niet kan wachten: <strong>${vast[0].titel}</strong>.`;
         }
-        return 'Geen energie? Dat is oké. Er staat vandaag niets dat echt vast staat — neem rust.';
+        return 'Geen energie? Dat is oké. Neem gewoon rust.';
       }
 
       // ── 1. Toets morgen? ──
@@ -786,7 +786,7 @@
         const toetsen = v.toetsen || (v.toetsdatum ? [{ datum: v.toetsdatum }] : []);
         for (const t of toetsen) {
           if (t.datum === morgenStr) {
-            return `Je hebt morgen <strong>${v.naam}</strong> — klaar voor de toets?`;
+            return `Je hebt morgen <strong>${v.naam}</strong>. Ben je er klaar voor?`;
           }
         }
       }
@@ -796,7 +796,7 @@
       let weekTotaal = 0;
       for (let i = 0; i < 7; i++) weekTotaal += getItemsOpDag(addDagen(maandag, i)).length;
       if (weekTotaal >= 5) {
-        return `Deze week heb je <strong>${weekTotaal} verplichtingen</strong> — begin eerder met leren.`;
+        return `Deze week heb je <strong>${weekTotaal} verplichtingen</strong>. Begin er op tijd mee.`;
       }
 
       // ── 3. Training vanavond? ──
@@ -805,7 +805,7 @@
         const t = trainingVandaag[0];
         const wanneer = t.sortTijd ? `om ${t.sortTijd}` : 'vandaag';
         const vrijHier = vrijTipDeel(vandaag);
-        return `${t.titel} ${wanneer}${vrijHier} — zorg dat je op tijd klaar bent.`;
+        return `${t.titel} ${wanneer}${vrijHier}. Zorg dat je op tijd klaar bent.`;
       }
 
       // ── 3b. Toets over 2-7 dagen + vrij moment? ──
@@ -816,7 +816,7 @@
           const dagsTot = Math.round((parseDatum(t.datum) - vandaag) / 86400000);
           if (dagsTot >= 2 && dagsTot <= 7 && vm[vandaag.getDay()]) {
             const vrijH = vm[vandaag.getDay()];
-            return `Toets <strong>${v.naam}</strong> over ${dagsTot} dagen — je bent vandaag vrij vanaf ${vrijH}.`;
+            return `Toets <strong>${v.naam}</strong> over ${dagsTot} dagen. Je bent vandaag vrij vanaf ${vrijH}.`;
           }
         }
       }
@@ -824,12 +824,12 @@
       // ── 4. Generieke tips, roteren per dag ──
       const generiek = [
         'Korte studiesessies van 25 minuten werken beter dan lang achter elkaar.',
-        'Schrijf stof over in je eigen woorden — dat helpt met onthouden.',
+        'Schrijf stof over in je eigen woorden, dat helpt met onthouden.',
         'Begin moeilijke onderwerpen als eerste, als je hoofd nog fris is.',
         'Na het leren even bewegen helpt de stof te verankeren.',
         'Plan je leermomenten in je agenda, net zoals afspraken.',
         'Herhaling na een dag, een week en een maand zorgt voor langdurig geheugen.',
-        'Zorg voor voldoende slaap — je brein verwerkt geleerde stof tijdens het slapen.',
+        'Zorg voor voldoende slaap, je brein verwerkt geleerde stof tijdens het slapen.',
       ];
       const dagVanJaar = Math.floor((vandaag - new Date(vandaag.getFullYear(), 0, 0)) / 86400000);
       return generiek[dagVanJaar % generiek.length];
@@ -873,7 +873,7 @@
         if (addDagen(wMaandag, 6).getTime() < vandaag.getTime()) continue; // week al voorbij
         if (berekenWeekScore(wMaandag) >= 3) {
           const datumStr = wMaandag.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' });
-          banner = `<div class="week-waarschuwing">⚠️ Drukke week van ${datumStr} — begin eerder met leren</div>`;
+          banner = `<div class="week-waarschuwing">Drukke week van ${datumStr}, begin alvast eerder.</div>`;
           break;
         }
       }
@@ -945,7 +945,7 @@
         blok.style.background = 'none';
         blok.style.border = 'none';
         blok.style.padding = '0 0 8px';
-        blok.innerHTML = '<span class="streak-start">Begin vandaag je streak</span>';
+        blok.innerHTML = '<span class="streak-start">Vandaag je eerste dag</span>';
       } else {
         const mv = huidig === 1 ? 'dag' : 'dagen';
         blok.innerHTML = `
@@ -957,7 +957,7 @@
           if (!sessionStorage.getItem(key)) {
             sessionStorage.setItem(key, '1');
             const lbl = document.getElementById('streak-label');
-            lbl.textContent = 'Nieuw record! 🎉';
+            lbl.textContent = 'Nieuw record! ';
             setTimeout(() => { const l = document.getElementById('streak-label'); if (l) l.textContent = `${mv} op rij`; }, 3000);
             blok.classList.add('record');
             setTimeout(() => blok.classList.remove('record'), 600);
@@ -977,7 +977,7 @@
           <svg class="terugblik-icoon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
           <div class="terugblik-tekst-blok">
             <div class="terugblik-titel">Terugblik invullen</div>
-            <div class="terugblik-sub">Week ${wk.split('-W')[1]} — hoe ging het?</div>
+            <div class="terugblik-sub">Week ${wk.split('-W')[1]}, hoe ging het?</div>
           </div>
           <svg class="terugblik-pijl" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
         </a>`;
@@ -1206,8 +1206,8 @@
           const naam = profiel2.naam ? ` ${profiel2.naam}` : '';
           const body = n > 0
             ? `Je hebt vandaag ${n} ding${n === 1 ? '' : 'en'} gepland.`
-            : 'Een rustige dag vandaag — geniet ervan!';
-          toon(`Goedemorgen${naam} —`, body, 'dagoverzicht');
+            : 'Niks gepland vandaag, lekker rustig.';
+          toon(`Goedemorgen${naam},`, body, 'dagoverzicht');
         }
       }
 
@@ -1227,13 +1227,13 @@
             const startDagen = getLeerDagenN(t.type || 'Anders', v.moeilijkheid);
             if (startDagen > 0 && dagsTot === startDagen) {
               const key = `toets_start_${t.datum}_${v.naam}`;
-              if (!al(key)) { markeer(key); toon(`${v.naam} —`, 'Begin vandaag met leren.', key); }
+              if (!al(key)) { markeer(key); toon(v.naam, 'Begin vandaag met leren.', key); }
             }
           }
 
           if (dagsTot === 1 && s.toets_morgen !== false) {
             const key = `toets_morgen_${t.datum}_${v.naam}`;
-            if (!al(key)) { markeer(key); toon(`Morgen toets ${v.naam} —`, 'Ben je er klaar voor?', key); }
+            if (!al(key)) { markeer(key); toon(`Morgen toets ${v.naam}`, 'Ben je er klaar voor?', key); }
           }
         }
       }

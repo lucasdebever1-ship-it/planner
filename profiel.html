@@ -69,7 +69,7 @@
     .sectie { margin-bottom: 28px; }
     .sectie-label {
       font-size: 0.72rem; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.9px; color: #aaa;
+      letter-spacing: 0.3px; color: #aaa;
       margin: 0 0 10px;
     }
 
@@ -328,7 +328,7 @@
       align-items: center; gap: 3px; padding: 11px 4px 13px;
       text-decoration: none; color: #c0c0c0;
       font-size: 0.58rem; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.06em;
+      letter-spacing: 0.02em;
       -webkit-tap-highlight-color: transparent; transition: color 0.18s;
     }
     .tab:active { opacity: 0.6; }
@@ -796,7 +796,7 @@
         if (t.id === bewerkId) return renderBewerkForm(t);
         const dagRegels = (t.dagen || []).map(d => {
           const ti = t.tijden && t.tijden[d];
-          if (!ti || ti.wisselend) return `${DAG_LANG[d]} — Wisselend`;
+          if (!ti || ti.wisselend) return `${DAG_LANG[d]}, wisselend`;
           if (ti.begin) return `${DAG_LANG[d]} ${ti.begin}${ti.eind ? `–${ti.eind}` : ''}`;
           return DAG_LANG[d];
         }).join(', ');
@@ -871,7 +871,7 @@
       const heeftData = dagVolgorde.some(d => (patronen[d] || []).length > 0);
 
       if (!heeftData) {
-        container.innerHTML = `<p class="patroon-leeg">Geen data nog — vul elke dag je check-in in om patronen te leren.</p>`;
+        container.innerHTML = `<p class="patroon-leeg">Nog geen data. Vul elke dag je check-in in om patronen te zien.</p>`;
         return;
       }
 
@@ -908,9 +908,9 @@
               <div class="patroon-bar-geen-energ" style="width:${breedteGeenEn}%"></div>
             </div>
             <div class="patroon-knoppen">
-              <button class="patroon-btn ${actOv === 'productief' ? 'actief productief' : ''}" onclick="setPatroonOverride(${d},'productief')">💪 Productief</button>
-              <button class="patroon-btn ${actOv === 'rustig' ? 'actief rustig' : ''}" onclick="setPatroonOverride(${d},'rustig')">💆 Rustig</button>
-              <button class="patroon-btn ${actOv === 'auto' ? 'actief auto' : ''}" onclick="setPatroonOverride(${d},'auto')">✦ Auto</button>
+              <button class="patroon-btn ${actOv === 'productief' ? 'actief productief' : ''}" onclick="setPatroonOverride(${d},'productief')">Productief</button>
+              <button class="patroon-btn ${actOv === 'rustig' ? 'actief rustig' : ''}" onclick="setPatroonOverride(${d},'rustig')">Rustig</button>
+              <button class="patroon-btn ${actOv === 'auto' ? 'actief auto' : ''}" onclick="setPatroonOverride(${d},'auto')">Auto</button>
             </div>
           </div>`;
         }).join('');

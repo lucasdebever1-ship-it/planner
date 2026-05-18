@@ -67,7 +67,7 @@
     .dag-pill.vandaag:not(.geselecteerd) { color: #3ddc97; }
     .dag-pill.geselecteerd { background: #3ddc97; color: #ffffff; }
 
-    .dag-letter { font-size: 0.58rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
+    .dag-letter { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.02em; }
     .dag-getal  { font-size: 1rem; font-weight: 700; line-height: 1; position: relative; }
 
     .dag-pill.vandaag:not(.geselecteerd) .dag-getal::after {
@@ -112,7 +112,7 @@
       box-shadow: 0 4px 16px rgba(240,192,64,0.15);
     }
     .banner-emoji { font-size: 2rem; line-height: 1; margin-bottom: 6px; }
-    .banner-titel { font-size: 1.1rem; font-weight: 800; color: #c07820; letter-spacing: 0.07em; }
+    .banner-titel { font-size: 1.1rem; font-weight: 800; color: #c07820; letter-spacing: 0.02em; }
     .banner-vak   { font-size: 0.82rem; color: #b09060; margin-top: 5px; }
 
     /* Leeg */
@@ -200,7 +200,7 @@
       align-items: center; gap: 3px; padding: 11px 4px 13px;
       text-decoration: none; color: #c0c0c0;
       font-size: 0.58rem; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.06em;
+      letter-spacing: 0.02em;
       -webkit-tap-highlight-color: transparent; transition: color 0.18s;
     }
     .tab:active { opacity: 0.6; }
@@ -246,12 +246,12 @@
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
         Profiel
       </a>
-      <a href="instellingen.html" class="menu-item" onclick="sluitMenu()">⚙️&nbsp; Instellingen</a>
+      <a href="instellingen.html" class="menu-item" onclick="sluitMenu()">Instellingen</a>
       <a href="terugblik.html" class="menu-item" onclick="sluitMenu()">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
         Terugblik
       </a>
-      <button class="menu-item rood" onclick="resetProfiel()">🔄&nbsp; Profiel resetten</button>
+      <button class="menu-item rood" onclick="resetProfiel()">Profiel resetten</button>
     </div>
   </div>
 
@@ -461,7 +461,7 @@
         const wanneer = urgentVak.dagsTot === 0 ? 'toets vandaag!'
           : urgentVak.dagsTot === 1 ? 'toets morgen!'
           : `toets over ${urgentVak.dagsTot} dagen`;
-        tipHtml = `<div class="tijdblok-vrij-tip">📚 Beste tijd voor <strong>${urgentVak.vak}</strong> — ${wanneer}</div>`;
+        tipHtml = `<div class="tijdblok-vrij-tip">Beste tijd voor <strong>${urgentVak.vak}</strong>, ${wanneer}</div>`;
       }
       return `<div class="tijdblok-vrij">
         <div class="tijdblok-vrij-tijd">${tijdStr}</div>
@@ -536,22 +536,22 @@
       // ── Vaste kaarten bovenaan (geen tijd) ──
       toetsKaarten.forEach(k => {
         html += isVandaag
-          ? `<div class="toets-banner"><div class="banner-emoji">📝</div><div class="banner-titel">TOETS VANDAAG</div><div class="banner-vak">${k.vak} — ${k.naam}</div></div>`
-          : `<div class="kaart kaart-toets"><div class="kaart-vak">${k.vak}</div>${k.naam ? `<div class="kaart-naam">${k.naam}${k.type ? ` · ${k.type}` : ''}</div>` : ''}<div class="kaart-status">📝 Toets</div></div>`;
+          ? `<div class="toets-banner"><div class="banner-titel">Toets vandaag</div><div class="banner-vak">${k.vak} · ${k.naam}</div></div>`
+          : `<div class="kaart kaart-toets"><div class="kaart-vak">${k.vak}</div>${k.naam ? `<div class="kaart-naam">${k.naam}${k.type ? ` · ${k.type}` : ''}</div>` : ''}<div class="kaart-status">Toets</div></div>`;
       });
 
       hwKaarten.forEach(k => {
-        html += `<div class="kaart kaart-huiswerk"><div class="kaart-vak">${k.vak}</div><div class="kaart-naam">${k.omschrijving}</div><div class="kaart-status">📋 Inleveren</div></div>`;
+        html += `<div class="kaart kaart-huiswerk"><div class="kaart-vak">${k.vak}</div><div class="kaart-naam">${k.omschrijving}</div><div class="kaart-status">Inleveren</div></div>`;
       });
 
       startKaarten.forEach(k => {
         const over = k.dagenTot === 1 ? '1 dag' : `${k.dagenTot} dagen`;
-        html += `<div class="kaart kaart-start"><div class="kaart-vak">${k.vak}</div>${k.naam ? `<div class="kaart-naam">${k.naam}</div>` : ''}<div class="kaart-status">📚 Begin met leren · toets over ${over}</div></div>`;
+        html += `<div class="kaart kaart-start"><div class="kaart-vak">${k.vak}</div>${k.naam ? `<div class="kaart-naam">${k.naam}</div>` : ''}<div class="kaart-status">Begin met leren · toets over ${over}</div></div>`;
       });
 
       bezigKaarten.forEach(k => {
         const nog = k.dagenTot === 1 ? '1 dag' : `${k.dagenTot} dagen`;
-        html += `<div class="kaart kaart-bezig"><div class="kaart-vak">${k.vak}</div>${k.naam ? `<div class="kaart-naam">${k.naam}</div>` : ''}<div class="kaart-status">📚 Leren — nog ${nog} tot de toets</div></div>`;
+        html += `<div class="kaart kaart-bezig"><div class="kaart-vak">${k.vak}</div>${k.naam ? `<div class="kaart-naam">${k.naam}</div>` : ''}<div class="kaart-status">Leren, nog ${nog} tot de toets</div></div>`;
       });
 
       untimedAfspraken.forEach(a => {
@@ -563,7 +563,7 @@
 
       if (!vrijVanaf && !timedEvents.length) {
         if (isWeekend && !heeftFlags) {
-          html += `<div class="dag-vrij-weekend">🌿 Hele dag vrij</div>`;
+          html += `<div class="dag-vrij-weekend">Hele dag vrij</div>`;
         } else if (!heeftFlags) {
           html += `<div class="leeg">Niets gepland</div>`;
         }
@@ -603,7 +603,7 @@
 
         // Weekend zonder tijdblokken én vrijVanaf
         if (isWeekend && !timedEvents.length && !vrijVanaf && !heeftFlags) {
-          html += `<div class="dag-vrij-weekend">🌿 Hele dag vrij</div>`;
+          html += `<div class="dag-vrij-weekend">Hele dag vrij</div>`;
         }
       }
 

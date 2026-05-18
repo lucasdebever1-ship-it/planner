@@ -39,7 +39,7 @@
     .groep-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
     .groep-label {
       font-size: 0.7rem; font-weight: 800;
-      text-transform: uppercase; letter-spacing: 1.1px; color: #b0b0b0;
+      letter-spacing: 0.3px; color: #b0b0b0;
       flex: 1;
     }
     .groep-count {
@@ -176,7 +176,7 @@
       align-items: center; gap: 3px; padding: 11px 4px 13px;
       text-decoration: none; color: #c0c0c0;
       font-size: 0.58rem; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.06em;
+      letter-spacing: 0.02em;
       -webkit-tap-highlight-color: transparent; transition: color 0.18s;
     }
     .tab:active { opacity: 0.6; }
@@ -208,7 +208,7 @@
   <div id="inhoud"></div>
   <div id="leeg" class="geen" style="display:none">
     <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto 14px"><rect x="5" y="4" width="14" height="17" rx="2"/><rect x="9" y="2" width="6" height="3" rx="1"/><path d="M8.5 13L11 15.5L15.5 10"/></svg>
-    Geen toetsen — voeg ze toe via de vakken-pagina.
+    Geen toetsen, voeg ze toe via de vakken-pagina.
   </div>
 
   <!-- Menu -->
@@ -219,12 +219,12 @@
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
         Profiel
       </a>
-      <a href="instellingen.html" class="menu-item" onclick="sluitMenu()">⚙️&nbsp; Instellingen</a>
+      <a href="instellingen.html" class="menu-item" onclick="sluitMenu()">Instellingen</a>
       <a href="terugblik.html" class="menu-item" onclick="sluitMenu()">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
         Terugblik
       </a>
-      <button class="menu-item rood" onclick="resetProfiel()">🔄&nbsp; Profiel resetten</button>
+      <button class="menu-item rood" onclick="resetProfiel()">Profiel resetten</button>
     </div>
   </div>
 
@@ -391,10 +391,10 @@
         'verlopen':      'background:#f5f5f5;color:#bbb',
       }[categorie] || '';
       const dagenStr = dagsTotToets !== null ? dagenTekst(dagsTotToets) : null;
-      const drukBadge = r.drukkeWeek ? `<div class="drukke-badge">⚡ Drukke week</div>` : '';
+      const drukBadge = r.drukkeWeek ? `<div class="drukke-badge">Drukke week</div>` : '';
       let advies = '';
       if (categorie === 'urgent') {
-        advies = `<div class="kaart-advies waarschuwing">⚠️ Je bent te laat met beginnen!</div>`;
+        advies = `<div class="kaart-advies waarschuwing">Hier moet je echt mee beginnen.</div>`;
       } else if (categorie !== 'verlopen' && dagsTotBegin !== null) {
         const extraDagen = r.drukkeWeek ? 2 : 0;
         const beginD = new Date(toets.datum + 'T00:00:00');
@@ -402,8 +402,8 @@
         const { datum: vrijBegin, verschoven } = verschuifNaarVrijeDag(beginD);
         const vm = JSON.parse(localStorage.getItem('vrijeMomenten') || '{}');
         const vrijTijd = vm[vrijBegin.getDay()];
-        const tijdDeel = vrijTijd ? ` — vrij vanaf ${vrijTijd}` : '';
-        advies = `<div class="kaart-advies leeradvies">📚 Begin op ${vrijBegin.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' })}${tijdDeel}${verschoven ? ' (werkdag overgeslagen)' : ''}</div>`;
+        const tijdDeel = vrijTijd ? `, vrij vanaf ${vrijTijd}` : '';
+        advies = `<div class="kaart-advies leeradvies">Begin op ${vrijBegin.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' })}${tijdDeel}${verschoven ? ' (werkdag overgeslagen)' : ''}</div>`;
       }
       return `<div class="toets-kaart ${categorie}">
         ${drukBadge}
@@ -481,7 +481,7 @@
       document.getElementById('week-waarschuwingen').innerHTML = drukkeWeken.map(wk => {
         const ma = getMaandagVanIsoWeek(wk);
         const datumStr = ma.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' });
-        return `<div class="week-waarschuwing">⚠️ Drukke week van ${datumStr} — begin eerder met leren</div>`;
+        return `<div class="week-waarschuwing">Drukke week van ${datumStr}, begin alvast eerder.</div>`;
       }).join('');
       items.sort((a, b) => {
         if (!a.toets.datum && !b.toets.datum) return 0;

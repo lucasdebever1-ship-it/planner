@@ -43,7 +43,7 @@
     .form-rij { display: flex; gap: 10px; margin-bottom: 10px; }
 
     .form-group { display: flex; flex-direction: column; gap: 5px; }
-    .form-group label { font-size: 0.7rem; color: #aaa; text-transform: uppercase; letter-spacing: 0.7px; font-weight: 600; }
+    .form-group label { font-size: 0.7rem; color: #aaa; letter-spacing: 0.2px; font-weight: 600; }
     .form-group.flex1 { flex: 1; }
 
     input[type="text"],
@@ -200,7 +200,7 @@
     }
     .sectie-label {
       font-size: 0.68rem; font-weight: 700; color: #aaa;
-      text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 8px;
+      letter-spacing: 0.2px; margin-bottom: 8px;
     }
     .geen-hw { font-size: 0.82rem; color: #bbb; margin-bottom: 8px; display: block; }
     .huiswerk-lijst { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
@@ -309,7 +309,7 @@
       align-items: center; gap: 3px; padding: 11px 4px 13px;
       text-decoration: none; color: #c0c0c0;
       font-size: 0.58rem; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.06em;
+      letter-spacing: 0.02em;
       -webkit-tap-highlight-color: transparent; transition: color 0.18s;
     }
     .tab:active { opacity: 0.6; }
@@ -363,12 +363,12 @@
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
         Profiel
       </a>
-      <a href="instellingen.html" class="menu-item" onclick="sluitMenu()">⚙️&nbsp; Instellingen</a>
+      <a href="instellingen.html" class="menu-item" onclick="sluitMenu()">Instellingen</a>
       <a href="terugblik.html" class="menu-item" onclick="sluitMenu()">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
         Terugblik
       </a>
-      <button class="menu-item rood" onclick="resetProfiel()">🔄&nbsp; Profiel resetten</button>
+      <button class="menu-item rood" onclick="resetProfiel()">Profiel resetten</button>
     </div>
   </div>
 
@@ -510,7 +510,7 @@
     }
 
     function renderToetsen(toetsen, moeilijkheid, i, vakNaam) {
-      if (!toetsen.length) return '<span class="geen-toetsen">Nog geen toetsen — gebruik + om er een toe te voegen</span>';
+      if (!toetsen.length) return '<span class="geen-toetsen">Nog geen toetsen, gebruik + om er een toe te voegen</span>';
       return '<div class="toetsen-grid">' + toetsen.map((t, j) => {
         const begin = berekenBeginDatum(t.datum, t.type, moeilijkheid, vakNaam);
         return `<div class="toets-chip-group">
@@ -519,7 +519,7 @@
             ${t.type ? `<span class="toets-type-label">${t.type}</span>` : ''}
             <button class="toets-delete" data-i="${i}" data-j="${j}" title="Verwijder toets">✕</button>
           </div>
-          ${begin ? `<div class="leeradvies">📚 Begin op ${begin.tekst}${begin.verschoven ? ' (werkdag overgeslagen)' : ''}</div>` : ''}
+          ${begin ? `<div class="leeradvies">Begin op ${begin.tekst}${begin.verschoven ? ' (werkdag overgeslagen)' : ''}</div>` : ''}
         </div>`;
       }).join('') + '</div>';
     }
@@ -535,7 +535,7 @@
             <button class="hw-vink${h.gedaan ? ' gevinkd' : ''}" data-i="${i}" data-j="${j}">✓</button>
             <div class="hw-info">
               <span class="hw-omschrijving">${h.omschrijving}</span>
-              <span class="hw-datum">📅 ${datumTekst}${herhalTekst}</span>
+              <span class="hw-datum">${datumTekst}${herhalTekst}</span>
             </div>
             <button class="hw-delete" data-i="${i}" data-j="${j}" title="Verwijder">✕</button>
           </div>`;
@@ -544,7 +544,7 @@
       } else {
         html += '<span class="geen-hw">Nog geen huiswerk</span>';
       }
-      html += `<button class="btn-add-hw" data-i="${i}">📋 Huiswerk toevoegen</button></div>`;
+      html += `<button class="btn-add-hw" data-i="${i}">Huiswerk toevoegen</button></div>`;
       return html;
     }
 
@@ -572,7 +572,7 @@
             <div class="kaart-titel">
               <span class="vak-naam">${v.naam}</span>
               <span class="moeilijkheid-badge">${v.moeilijkheid} / 10</span>
-              ${heeftFeedback(v.naam) ? '<span class="gepersonaliseerd-badge">✦ Gepersonaliseerd</span>' : ''}
+              ${heeftFeedback(v.naam) ? '<span class="gepersonaliseerd-badge">Gepersonaliseerd</span>' : ''}
             </div>
             <div class="acties">
               <button class="edit"      data-i="${i}" title="Bewerken">&#x270F;</button>
@@ -657,7 +657,7 @@
         } else {
           datumInput.style.display = 'none';
           const datum = eerstvolgendeWeekdag(parseInt(select.value));
-          info.textContent = '📅 Eerst op: ' + new Date(datum + 'T00:00:00').toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' });
+          info.textContent = 'Eerst op: ' + new Date(datum + 'T00:00:00').toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' });
           info.style.display = '';
         }
       });
