@@ -23,16 +23,14 @@
     #splash {
       position: fixed; inset: 0; z-index: 999;
       background: #ffffff;
-      display: flex; align-items: center; justify-content: center;
-      opacity: 0; pointer-events: none;
-      will-change: opacity, transform;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 14px; opacity: 0; pointer-events: none;
     }
     .splash-naam {
       font-family: 'Inter', sans-serif;
-      font-size: 2.8rem; font-weight: 500;
-      color: #3ddc97; letter-spacing: 0.3em;
-      text-transform: uppercase; user-select: none;
-      will-change: letter-spacing;
+      font-size: 14px; font-weight: 400;
+      color: #888888; letter-spacing: 0.2em;
+      user-select: none;
     }
 
     body {
@@ -354,7 +352,14 @@
   </style>
 </head>
 <body>
-  <div id="splash"><span class="splash-naam">Struct</span></div>
+  <div id="splash">
+    <svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <text x="40" y="40" dominant-baseline="central" text-anchor="middle"
+            font-family="Inter, sans-serif" font-weight="600" font-size="72"
+            fill="#3ddc97">S</text>
+    </svg>
+    <span class="splash-naam">Struct</span>
+  </div>
 
   <div class="center">
     <div class="header-rij">
@@ -498,32 +503,21 @@
       sessionStorage.setItem('struct_splash_shown', '1');
       document.body.classList.add('splash-actief');
       const splash = document.getElementById('splash');
-      const tekst  = splash.querySelector('.splash-naam');
-
-      // Startpositie: iets ingezoomd en letters iets verder uit elkaar
-      splash.style.transform    = 'scale(0.97)';
-      tekst.style.letterSpacing = '0.46em';
 
       requestAnimationFrame(() => requestAnimationFrame(() => {
-        // Fade in: soepel inzoomen + letters samentrekken
-        splash.style.transition = 'opacity 0.65s cubic-bezier(0.22,1,0.36,1), transform 0.65s cubic-bezier(0.22,1,0.36,1)';
-        splash.style.opacity    = '1';
-        splash.style.transform  = 'scale(1)';
-        tekst.style.transition  = 'letter-spacing 0.65s cubic-bezier(0.22,1,0.36,1)';
-        tekst.style.letterSpacing = '0.3em';
+        splash.style.transition = 'opacity 0.6s ease';
+        splash.style.opacity = '1';
       }));
 
       setTimeout(() => {
-        // Fade out: versneld wegzoomen
-        splash.style.transition = 'opacity 0.4s cubic-bezier(0.4,0,1,1), transform 0.4s cubic-bezier(0.4,0,1,1)';
-        splash.style.opacity    = '0';
-        splash.style.transform  = 'scale(1.04)';
+        splash.style.transition = 'opacity 0.4s ease';
+        splash.style.opacity = '0';
         splash.addEventListener('transitionend', function handler(e) {
           if (e.propertyName !== 'opacity') return;
           splash.removeEventListener('transitionend', handler);
           splash.remove(); document.body.classList.remove('splash-actief'); naSplash();
         });
-      }, 1600); // 650ms fade-in + ~950ms vasthouden
+      }, 1600); // 0.6s fade-in + 1s vasthouden
     } else {
       document.getElementById('splash').remove();
       naSplash();
