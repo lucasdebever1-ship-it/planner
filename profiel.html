@@ -220,6 +220,42 @@
 
     .schema-leeg { font-size: 0.82rem; color: #bbb; padding: 2px 0 6px; }
 
+    /* ── Patronen ── */
+    .patroon-rij {
+      padding: 13px 16px; border-bottom: 1px solid #ebebeb;
+    }
+    .patroon-rij:last-child { border-bottom: none; }
+    .patroon-rij-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;
+    }
+    .patroon-dag-naam { font-size: 0.9rem; font-weight: 700; color: #1a1a1a; }
+    .patroon-label {
+      font-size: 0.72rem; font-weight: 700; border-radius: 20px;
+      padding: 2px 10px; letter-spacing: 0.04em;
+    }
+    .patroon-label.productief { background: #edfaf3; color: #2bc47e; }
+    .patroon-label.rustig     { background: #fdf5ff; color: #9b59b6; }
+    .patroon-label.gemengd    { background: #f5f5f5; color: #888; }
+    .patroon-label.weinig     { background: #f5f5f5; color: #c0c0c0; }
+    .patroon-bar-wrap {
+      display: flex; height: 6px; border-radius: 4px; overflow: hidden;
+      background: #f0f0f0; margin-bottom: 10px;
+    }
+    .patroon-bar-klaar      { background: #3ddc97; }
+    .patroon-bar-gaat-wel   { background: #f0a050; }
+    .patroon-bar-geen-energ { background: #9b59b6; }
+    .patroon-knoppen { display: flex; gap: 6px; }
+    .patroon-btn {
+      flex: 1; padding: 6px 4px; border-radius: 8px; border: 1.5px solid #e8e8e8;
+      font-size: 0.72rem; font-weight: 700; cursor: pointer; font-family: inherit;
+      background: #f8f8f8; color: #888; transition: all 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .patroon-btn.actief.productief { background: #edfaf3; border-color: #3ddc97; color: #2bc47e; }
+    .patroon-btn.actief.rustig     { background: #fdf5ff; border-color: #9b59b6; color: #9b59b6; }
+    .patroon-btn.actief.auto       { background: #f0f0f0; border-color: #bbb; color: #555; }
+    .patroon-leeg { font-size: 0.82rem; color: #bbb; padding: 14px 0 4px; text-align: center; }
+
     /* ── Vrije momenten ── */
     .vrij-rij {
       display: flex; align-items: center;
@@ -427,6 +463,12 @@
   <div class="sectie">
     <p class="sectie-label">Vrije momenten</p>
     <div class="veld-kaart" id="vrije-momenten-kaart"></div>
+  </div>
+
+  <!-- Mijn patronen -->
+  <div class="sectie">
+    <p class="sectie-label">Mijn patronen</p>
+    <div class="schema-kaart" id="patronen-kaart"></div>
   </div>
 
   <!-- Menu -->
@@ -799,6 +841,82 @@
     }
 
     renderVrijeMomenten();
+
+    // ── Mijn patronen ──
+    function analyseerPatroonProfiel(dagNr) {
+      const keuzes = (JSON.parse(localStorage.getItem('checkinPatronen') || '{}'))[dagNr] || [];
+      if (!keuzes.length) return null;
+      const totaal = keuzes.length;
+      const pctKlaar = keuzes.filter(k => k === 'klaar').length / totaal;
+      const pctLicht = keuzes.filter(k => k === 'gaat-wel' || k === 'geen-energie').length / totaal;
+      if (keuzes.length < 3) return 'weinig';
+      if (pctKlaar > 0.6) return 'productief';
+      if (pctLicht > 0.6) return 'rustig';
+      return 'gemengd';
+    }
+
+    function setPatroonOverride(dagNr, waarde) {
+      const ov = JSON.parse(localStorage.getItem('checkinPatronenOverride') || '{}');
+      if (waarde === 'auto') delete ov[dagNr];
+      else ov[dagNr] = waarde;
+      localStorage.setItem('checkinPatronenOverride', JSON.stringify(ov));
+      renderPatronen();
+    }
+
+    function renderPatronen() {
+      const patronen = JSON.parse(localStorage.getItem('checkinPatronen') || '{}');
+      const overrides = JSON.parse(localStorage.getItem('checkinPatronenOverride') || '{}');
+      const container = document.getElementById('patronen-kaart');
+      const dagVolgorde = [1,2,3,4,5,6,0];
+      const heeftData = dagVolgorde.some(d => (patronen[d] || []).length > 0);
+
+      if (!heeftData) {
+        container.innerHTML = `<p class="patroon-leeg">Geen data nog — vul elke dag je check-in in om patronen te leren.</p>`;
+        return;
+      }
+
+      const LABEL_MAP = { productief: 'Productief', rustig: 'Rustig', gemengd: 'Gemengd', weinig: 'Te weinig data' };
+
+      container.innerHTML = dagVolgorde
+        .filter(d => (patronen[d] || []).length > 0)
+        .map(d => {
+          const keuzes = patronen[d] || [];
+          const totaal = keuzes.length;
+          const nKlaar = keuzes.filter(k => k === 'klaar').length;
+          const nGaatWel = keuzes.filter(k => k === 'gaat-wel').length;
+          const nGeenEn = keuzes.filter(k => k === 'geen-energie').length;
+          const auto = analyseerPatroonProfiel(d) || 'weinig';
+          const ov = overrides[d] || null;
+          const huidig = ov || (auto !== 'weinig' ? auto : null);
+          const labelKlasse = huidig || 'weinig';
+          const labelTekst = LABEL_MAP[labelKlasse];
+
+          const breedteKlaar   = Math.round(nKlaar / totaal * 100);
+          const breedteGaatWel = Math.round(nGaatWel / totaal * 100);
+          const breedteGeenEn  = 100 - breedteKlaar - breedteGaatWel;
+
+          const actOv = ov || 'auto';
+
+          return `<div class="patroon-rij">
+            <div class="patroon-rij-header">
+              <span class="patroon-dag-naam">${DAG_LANG[d]}</span>
+              <span class="patroon-label ${labelKlasse}">${labelTekst}</span>
+            </div>
+            <div class="patroon-bar-wrap">
+              <div class="patroon-bar-klaar" style="width:${breedteKlaar}%"></div>
+              <div class="patroon-bar-gaat-wel" style="width:${breedteGaatWel}%"></div>
+              <div class="patroon-bar-geen-energ" style="width:${breedteGeenEn}%"></div>
+            </div>
+            <div class="patroon-knoppen">
+              <button class="patroon-btn ${actOv === 'productief' ? 'actief productief' : ''}" onclick="setPatroonOverride(${d},'productief')">💪 Productief</button>
+              <button class="patroon-btn ${actOv === 'rustig' ? 'actief rustig' : ''}" onclick="setPatroonOverride(${d},'rustig')">💆 Rustig</button>
+              <button class="patroon-btn ${actOv === 'auto' ? 'actief auto' : ''}" onclick="setPatroonOverride(${d},'auto')">✦ Auto</button>
+            </div>
+          </div>`;
+        }).join('');
+    }
+
+    renderPatronen();
 
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
   </script>

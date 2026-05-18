@@ -270,6 +270,15 @@
     .checkin-gaat-wel    { background: #fff8f0; border: 1px solid #ffd8a0; color: #7a5020; }
     .checkin-geen-energie { background: #f5f0ff; border: 1px solid #dcc8ff; color: #4a3080; }
 
+    /* ── Patroon banner ── */
+    .patroon-banner {
+      border-radius: 11px; padding: 10px 14px;
+      font-size: 0.83rem; margin-bottom: 12px;
+      line-height: 1.5; font-weight: 500;
+    }
+    .patroon-rustig     { background: #fdf5ff; border: 1px solid #e8d0f8; color: #6a3090; }
+    .patroon-productief { background: #edfaf3; border: 1px solid #afe8c8; color: #1a5a35; }
+
     /* ── Hamburger + menu ── */
     .hamburger-btn {
       background: none; border: none; cursor: pointer;
@@ -385,6 +394,7 @@
     <div id="terugblik-kaart-wrap"></div>
     <div id="week-waarschuwing"></div>
     <p class="sectie-label">Vandaag</p>
+    <div id="patroon-banner-wrap"></div>
     <div id="vandaag-lijst"></div>
     <div class="snel-wrap">
       <div class="snel-bar">
@@ -607,12 +617,44 @@
     // ── Check-in ──
     function getCheckin() { return localStorage.getItem('checkin_' + vandaagStr); }
 
+    // ── Patroonherkenning ──
+    function analyseerPatroon(dagNr) {
+      const override = JSON.parse(localStorage.getItem('checkinPatronenOverride') || '{}');
+      if (override[dagNr]) return override[dagNr]; // handmatige instelling wint
+
+      const patronen = JSON.parse(localStorage.getItem('checkinPatronen') || '{}');
+      const keuzes = patronen[dagNr] || [];
+      if (keuzes.length < 3) return null; // onvoldoende data
+
+      const totaal = keuzes.length;
+      const pctKlaar = keuzes.filter(k => k === 'klaar').length / totaal;
+      const pctLicht = keuzes.filter(k => k === 'gaat-wel' || k === 'geen-energie').length / totaal;
+
+      if (pctKlaar > 0.6) return 'productief';
+      if (pctLicht > 0.6) return 'rustig';
+      return null;
+    }
+
+    function slaCheckinPatroonOp(stemming) {
+      const patroonDagKey = 'patroon_dag_' + vandaagStr;
+      if (localStorage.getItem(patroonDagKey)) return; // al opgeslagen vandaag
+      const patronen = JSON.parse(localStorage.getItem('checkinPatronen') || '{}');
+      const dagNr = vandaag.getDay();
+      if (!patronen[dagNr]) patronen[dagNr] = [];
+      patronen[dagNr].push(stemming);
+      // Bewaar max 12 keuzes per dag (3 maanden)
+      if (patronen[dagNr].length > 12) patronen[dagNr] = patronen[dagNr].slice(-12);
+      localStorage.setItem('checkinPatronen', JSON.stringify(patronen));
+      localStorage.setItem(patroonDagKey, '1');
+    }
+
     function initCheckin() {
       if (!getCheckin()) document.getElementById('checkin-wrap').style.display = 'block';
     }
 
     function kiesCheckin(stemming) {
       localStorage.setItem('checkin_' + vandaagStr, stemming);
+      slaCheckinPatroonOp(stemming);
       document.getElementById('checkin-wrap').style.display = 'none';
       renderVandaag();
       renderTip();
@@ -622,8 +664,23 @@
     function renderVandaag() {
       const items = getItemsOpDag(vandaag);
       const container = document.getElementById('vandaag-lijst');
-      const stemming = getCheckin();
+      const checkin = getCheckin();
+      const patroon = analyseerPatroon(vandaag.getDay());
       const labels = { toets: 'Toets', huiswerk: 'Huiswerk', afspraak: 'Afspraak', training: 'Training' };
+
+      // Effectieve stemming: check-in van vandaag wint, anders patroon auto-mode
+      const stemming = checkin || (patroon === 'rustig' ? 'gaat-wel' : null);
+
+      // Patroonbanner renderen (alleen tonen als geen handmatige check-in)
+      const bannerWrap = document.getElementById('patroon-banner-wrap');
+      if (!checkin && patroon) {
+        const dagNaam = DAGEN_LANG[vandaag.getDay()];
+        bannerWrap.innerHTML = patroon === 'rustig'
+          ? `<div class="patroon-banner patroon-rustig">💆 Struct weet dat ${dagNaam} vaak een rustige dag is — we plannen het licht.</div>`
+          : `<div class="patroon-banner patroon-productief">⚡ Dit is meestal een productieve dag voor je — maak er gebruik van.</div>`;
+      } else {
+        bannerWrap.innerHTML = '';
+      }
 
       function kaartHtml(item) {
         return `<div class="dag-kaart dag-kaart-${item.type}">
