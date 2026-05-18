@@ -62,7 +62,7 @@
       transition: box-shadow 0.18s;
     }
     .toets-kaart:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
-    .toets-kaart.urgent        { border-left-color: #e05252; background: #fff8f8; border-color: #fcd8d8; }
+    .toets-kaart.urgent        { border-left-color: #e07020; background: #fffaf5; border-color: #fde4c0; }
     .toets-kaart.deze-week     { border-left-color: #f09040; background: #fffaf5; border-color: #fde4c0; }
     .toets-kaart.volgende-week { border-left-color: #c8a820; background: #fffdee; border-color: #f0e090; }
     .toets-kaart.later         { border-left-color: #ccc; }
@@ -104,7 +104,14 @@
 
     .kaart-advies { margin-top: 10px; font-size: 0.83rem; font-weight: 600; line-height: 1.45; }
     .leeradvies   { color: #2bc47e; }
-    .waarschuwing { color: #e05252; }
+    .waarschuwing { color: #d07020; }
+
+    .felicitatie-banner {
+      background: #edfaf3; border: 1px solid #afe8c8;
+      border-radius: 10px; padding: 10px 14px;
+      font-size: 0.85rem; font-weight: 600; color: #1a5a35;
+      margin-bottom: 12px;
+    }
 
     .feedback-kaart {
       background: #fff; border: 1px solid #e0efe8;
@@ -116,9 +123,9 @@
     .feedback-knoppen { display: flex; gap: 7px; }
     .feedback-btn {
       flex: 1; padding: 9px 4px; border-radius: 10px;
-      font-size: 0.76rem; font-weight: 700; cursor: pointer;
+      font-size: 0.85rem; font-weight: 700; cursor: pointer;
       font-family: inherit; border: 1.5px solid; text-align: center;
-      transition: all 0.15s;
+      transition: all 0.15s; min-height: 48px;
     }
     .feedback-btn:active { transform: scale(0.96); }
     .feedback-btn.te-weinig { color: #e05252; border-color: #fcd8d8; background: #fff5f5; }
@@ -175,8 +182,8 @@
       flex: 1; display: flex; flex-direction: column; position: relative;
       align-items: center; gap: 3px; padding: 11px 4px 13px;
       text-decoration: none; color: #c0c0c0;
-      font-size: 0.58rem; font-weight: 700;
-      letter-spacing: 0.02em;
+      font-size: 0.75rem; font-weight: 700;
+      letter-spacing: 0.01em;
       -webkit-tap-highlight-color: transparent; transition: color 0.18s;
     }
     .tab:active { opacity: 0.6; }
@@ -384,7 +391,7 @@
     function renderKaart(r) {
       const { categorie, dagsTotToets, dagsTotBegin, vak, moeilijkheid, toets } = r;
       const pilStijl = {
-        'urgent':        'background:#fff0f0;color:#e05252',
+        'urgent':        'background:#fff4e8;color:#d07020',
         'deze-week':     'background:#fff4e8;color:#d07030',
         'volgende-week': 'background:#fffce0;color:#a08010',
         'later':         'background:#f0f0f0;color:#999',
@@ -394,7 +401,7 @@
       const drukBadge = r.drukkeWeek ? `<div class="drukke-badge">Drukke week</div>` : '';
       let advies = '';
       if (categorie === 'urgent') {
-        advies = `<div class="kaart-advies waarschuwing">Hier moet je echt mee beginnen.</div>`;
+        advies = `<div class="kaart-advies waarschuwing">Dit wil je vandaag nog oppakken.</div>`;
       } else if (categorie !== 'verlopen' && dagsTotBegin !== null) {
         const extraDagen = r.drukkeWeek ? 2 : 0;
         const beginD = new Date(toets.datum + 'T00:00:00');
@@ -534,7 +541,12 @@
         </section>`;
       });
       if (verlopen.length) {
-        html += `<details class="groep">
+        const aankomend = items.filter(r => r.categorie !== 'verlopen').length;
+        const felicitatieTekst = aankomend > 0
+          ? `Goed bezig, nog ${aankomend} te gaan.`
+          : 'Alle toetsen afgerond!';
+        html += `<div class="felicitatie-banner">${felicitatieTekst}</div>
+        <details class="groep">
           <summary>
             <div class="groep-header">
               <span class="groep-dot" style="background:#ccc"></span>

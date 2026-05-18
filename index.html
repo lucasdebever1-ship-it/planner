@@ -88,7 +88,7 @@
     .dag-kaart-afspraak .dag-kaart-type { color: #9b59b6; }
     .dag-kaart-training .dag-kaart-type { color: #2bc47e; }
 
-    .dag-kaart-titel { font-size: 0.94rem; font-weight: 700; color: #111; line-height: 1.3; }
+    .dag-kaart-titel { font-size: 1rem; font-weight: 700; color: #111; line-height: 1.3; }
     .dag-kaart-sub   { font-size: 0.8rem; color: #878787; margin-top: 2px; }
 
     .vandaag-leeg {
@@ -97,6 +97,14 @@
       border-radius: 14px; border: 1px solid #ebebeb;
       letter-spacing: 0.01em;
     }
+    .btn-toon-alles {
+      width: 100%; margin-top: 8px; padding: 12px;
+      background: none; border: 1.5px solid #e8e8e8;
+      border-radius: 12px; color: #888; font-size: 0.9rem;
+      font-weight: 600; cursor: pointer; font-family: inherit;
+      min-height: 48px; transition: border-color 0.15s, color 0.15s;
+    }
+    .btn-toon-alles:hover { border-color: #3ddc97; color: #2bc47e; }
 
     .week-waarschuwing {
       background: #fffbeb; border: 1px solid #f5d060;
@@ -184,7 +192,7 @@
     }
     .snel-input {
       width: 100%; background: #f8f8f8; border: 1.5px solid #e8e8e8;
-      border-radius: 9px; color: #1a1a1a; font-size: 0.88rem;
+      border-radius: 9px; color: #1a1a1a; font-size: 1rem;
       padding: 9px 12px; margin-bottom: 8px; outline: none;
       font-family: inherit; appearance: none; transition: border-color 0.15s;
     }
@@ -192,13 +200,13 @@
     .snel-form-footer { display: flex; gap: 8px; margin-top: 4px; }
     .snel-btn-ann {
       padding: 9px 14px; background: none; border: 1.5px solid #e0e0e0;
-      border-radius: 9px; color: #888; font-size: 0.83rem; cursor: pointer;
-      font-family: inherit;
+      border-radius: 9px; color: #888; font-size: 0.9rem; cursor: pointer;
+      font-family: inherit; min-height: 48px;
     }
     .snel-btn-opl {
       flex: 1; padding: 9px; background: #3ddc97; border: none;
-      border-radius: 9px; color: #fff; font-size: 0.83rem; font-weight: 600;
-      cursor: pointer; font-family: inherit;
+      border-radius: 9px; color: #fff; font-size: 0.9rem; font-weight: 600;
+      cursor: pointer; font-family: inherit; min-height: 48px;
     }
     .snel-btn-opl:hover { background: #2bc47e; }
 
@@ -231,13 +239,13 @@
     .notif-banner-acties { display: flex; gap: 8px; }
     .notif-btn-ja {
       flex: 1; padding: 9px; background: #3ddc97; border: none;
-      border-radius: 8px; color: #fff; font-size: 0.85rem; font-weight: 600;
-      cursor: pointer; font-family: inherit;
+      border-radius: 8px; color: #fff; font-size: 0.9rem; font-weight: 600;
+      cursor: pointer; font-family: inherit; min-height: 48px;
     }
     .notif-btn-nee {
       padding: 9px 14px; background: none; border: 1.5px solid #c8ead8;
-      border-radius: 8px; color: #3ddc97; font-size: 0.85rem;
-      cursor: pointer; font-family: inherit;
+      border-radius: 8px; color: #3ddc97; font-size: 0.9rem;
+      cursor: pointer; font-family: inherit; min-height: 48px;
     }
 
     /* ── Check-in ── */
@@ -326,8 +334,8 @@
       flex: 1; display: flex; flex-direction: column; position: relative;
       align-items: center; gap: 3px; padding: 11px 4px 13px;
       text-decoration: none; color: #c0c0c0;
-      font-size: 0.58rem; font-weight: 700;
-      letter-spacing: 0.02em;
+      font-size: 0.75rem; font-weight: 700;
+      letter-spacing: 0.01em;
       -webkit-tap-highlight-color: transparent; transition: color 0.18s;
     }
     .tab:active { opacity: 0.6; }
@@ -715,8 +723,18 @@
         return;
       }
 
-      container.innerHTML = items.map(kaartHtml).join('');
+      const MAX = 3;
+      if (!vandaagToonAlles && items.length > MAX) {
+        const extra = items.length - MAX;
+        container.innerHTML = items.slice(0, MAX).map(kaartHtml).join('') +
+          `<button class="btn-toon-alles" onclick="toggleVandaagAlles()">Toon alles (${extra} meer)</button>`;
+      } else {
+        container.innerHTML = items.map(kaartHtml).join('');
+      }
     }
+
+    let vandaagToonAlles = false;
+    function toggleVandaagAlles() { vandaagToonAlles = true; renderVandaag(); }
 
     // ── Sectie Komende week ──
     const DAG_LETTERS_ALLE = ['zo','ma','di','wo','do','vr','za'];
@@ -796,7 +814,7 @@
       let weekTotaal = 0;
       for (let i = 0; i < 7; i++) weekTotaal += getItemsOpDag(addDagen(maandag, i)).length;
       if (weekTotaal >= 5) {
-        return `Deze week heb je <strong>${weekTotaal} verplichtingen</strong>. Begin er op tijd mee.`;
+        return `Deze week heb je <strong>${weekTotaal} verplichtingen</strong>. Dit wil je vandaag nog oppakken.`;
       }
 
       // ── 3. Training vanavond? ──

@@ -56,8 +56,8 @@
       border-radius: 8px;
       color: #1a1a1a;
       padding: 10px 12px;
-      font-size: 0.95rem;
-      outline: none;
+      font-size: 1rem;
+      outline: none; min-height: 48px;
       transition: border-color 0.15s;
     }
     input[type="text"]:focus,
@@ -74,10 +74,11 @@
       border: none;
       border-radius: 8px;
       padding: 11px;
-      font-size: 0.95rem;
+      font-size: 1rem;
       font-weight: 600;
       cursor: pointer;
       transition: background 0.15s;
+      min-height: 48px;
     }
     .btn-primary:hover { background: #2bc47e; }
 
@@ -170,6 +171,12 @@
     .leeradvies   { font-size: 0.78rem; color: #2bc47e; margin-top: 3px; padding-left: 2px; }
     .geen-toetsen { font-size: 0.85rem; color: #bbb; }
 
+    .toets-voortgang {
+      height: 4px; border-radius: 2px; margin-top: 6px;
+      overflow: hidden; background: #e8e8e8;
+    }
+    .toets-voortgang-balk { height: 100%; border-radius: 2px; transition: width 0.4s; }
+
     .toets-type-label {
       font-size: 0.68rem; font-weight: 700; color: #6b6b6b;
       background: #f0f0f0; border-radius: 20px; padding: 2px 8px; flex-shrink: 0;
@@ -183,14 +190,14 @@
     .toets-formrij-knoppen { display: flex; gap: 8px; }
     .toets-formrij .btn-save {
       flex: 1; background: #3ddc97; color: #ffffff; border: none;
-      border-radius: 8px; padding: 9px; font-size: 0.9rem;
-      font-weight: 600; cursor: pointer; transition: background 0.15s;
+      border-radius: 8px; padding: 9px; font-size: 1rem;
+      font-weight: 600; cursor: pointer; transition: background 0.15s; min-height: 48px;
     }
     .toets-formrij .btn-save:hover { background: #2bc47e; }
     .toets-formrij .btn-cancel {
       background: #f5f5f5; border: 1px solid #e0e0e0; color: #888;
-      font-size: 0.9rem; cursor: pointer; padding: 9px 14px;
-      border-radius: 8px; transition: color 0.15s;
+      font-size: 1rem; cursor: pointer; padding: 9px 14px;
+      border-radius: 8px; transition: color 0.15s; min-height: 48px;
     }
     .toets-formrij .btn-cancel:hover { color: #444; }
 
@@ -252,14 +259,14 @@
     .hw-formrij-knoppen { display: flex; gap: 8px; }
     .hw-formrij .btn-save {
       flex: 1; background: #3ddc97; color: #ffffff; border: none;
-      border-radius: 8px; padding: 9px; font-size: 0.9rem;
-      font-weight: 700; cursor: pointer; transition: background 0.15s;
+      border-radius: 8px; padding: 9px; font-size: 1rem;
+      font-weight: 700; cursor: pointer; transition: background 0.15s; min-height: 48px;
     }
     .hw-formrij .btn-save:hover { background: #2bc47e; }
     .hw-formrij .btn-cancel {
       background: #f5f5f5; border: 1px solid #e0e0e0; color: #888;
-      font-size: 0.9rem; cursor: pointer; padding: 9px 14px;
-      border-radius: 8px; transition: color 0.15s;
+      font-size: 1rem; cursor: pointer; padding: 9px 14px;
+      border-radius: 8px; transition: color 0.15s; min-height: 48px;
     }
     .hw-formrij .btn-cancel:hover { color: #444; }
 
@@ -308,8 +315,8 @@
       flex: 1; display: flex; flex-direction: column; position: relative;
       align-items: center; gap: 3px; padding: 11px 4px 13px;
       text-decoration: none; color: #c0c0c0;
-      font-size: 0.58rem; font-weight: 700;
-      letter-spacing: 0.02em;
+      font-size: 0.75rem; font-weight: 700;
+      letter-spacing: 0.01em;
       -webkit-tap-highlight-color: transparent; transition: color 0.18s;
     }
     .tab:active { opacity: 0.6; }
@@ -511,14 +518,34 @@
 
     function renderToetsen(toetsen, moeilijkheid, i, vakNaam) {
       if (!toetsen.length) return '<span class="geen-toetsen">Nog geen toetsen, gebruik + om er een toe te voegen</span>';
+      const nu = new Date(); nu.setHours(0,0,0,0); const nuMs = nu.getTime();
       return '<div class="toetsen-grid">' + toetsen.map((t, j) => {
         const begin = berekenBeginDatum(t.datum, t.type, moeilijkheid, vakNaam);
+
+        // Voortgangsbalk
+        let voortgangHtml = '';
+        if (t.datum) {
+          const toetsMs = new Date(t.datum + 'T00:00:00').getTime();
+          if (toetsMs > nuMs) {
+            const aanpassing = getVakAanpassing(vakNaam || '');
+            const leerDagen = getLeerDagen(t.type, moeilijkheid) + aanpassing;
+            if (leerDagen > 0) {
+              const beginMs = toetsMs - leerDagen * 86400000;
+              const achteraan = nuMs > beginMs;
+              const pct = nuMs <= beginMs ? 0 : Math.min(100, Math.round((nuMs - beginMs) / (toetsMs - beginMs) * 100));
+              const kleur = achteraan ? '#e07020' : '#3ddc97';
+              voortgangHtml = `<div class="toets-voortgang"><div class="toets-voortgang-balk" style="width:${pct}%;background:${kleur}"></div></div>`;
+            }
+          }
+        }
+
         return `<div class="toets-chip-group">
           <div class="toets-chip">
             <span class="toets-chip-naam">${t.naam} · ${formatDatum(t.datum)}</span>
             ${t.type ? `<span class="toets-type-label">${t.type}</span>` : ''}
             <button class="toets-delete" data-i="${i}" data-j="${j}" title="Verwijder toets">✕</button>
           </div>
+          ${voortgangHtml}
           ${begin ? `<div class="leeradvies">Begin op ${begin.tekst}${begin.verschoven ? ' (werkdag overgeslagen)' : ''}</div>` : ''}
         </div>`;
       }).join('') + '</div>';
