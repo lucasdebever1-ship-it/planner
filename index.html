@@ -22,14 +22,14 @@
     /* ── Splashscreen ── */
     #splash {
       position: fixed; inset: 0; z-index: 999;
-      background: #ffffff;
+      background: #3ddc97;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 14px; opacity: 0; pointer-events: none;
+      gap: 18px; opacity: 0; pointer-events: none;
     }
     .splash-naam {
       font-family: 'Inter', sans-serif;
-      font-size: 14px; font-weight: 400;
-      color: #888888; letter-spacing: 0.2em;
+      font-size: 18px; font-weight: 600;
+      color: #ffffff; letter-spacing: 0.04em;
       user-select: none;
     }
 
@@ -353,10 +353,9 @@
 </head>
 <body>
   <div id="splash">
-    <svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <text x="40" y="40" dominant-baseline="central" text-anchor="middle"
-            font-family="Inter, sans-serif" font-weight="600" font-size="72"
-            fill="#3ddc97">S</text>
+    <svg width="80" height="80" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <line x1="11" y1="12" x2="27" y2="12" stroke="white" stroke-width="2" stroke-linecap="round" stroke-opacity="0.8"/>
+      <polyline points="11,22 17,28 29,16" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>
     <span class="splash-naam">Struct</span>
   </div>
@@ -505,19 +504,19 @@
       const splash = document.getElementById('splash');
 
       requestAnimationFrame(() => requestAnimationFrame(() => {
-        splash.style.transition = 'opacity 0.6s ease';
+        splash.style.transition = 'opacity 0.4s ease';
         splash.style.opacity = '1';
       }));
 
       setTimeout(() => {
-        splash.style.transition = 'opacity 0.4s ease';
+        splash.style.transition = 'opacity 0.3s ease';
         splash.style.opacity = '0';
         splash.addEventListener('transitionend', function handler(e) {
           if (e.propertyName !== 'opacity') return;
           splash.removeEventListener('transitionend', handler);
           splash.remove(); document.body.classList.remove('splash-actief'); naSplash();
         });
-      }, 1600); // 0.6s fade-in + 1s vasthouden
+      }, 1900); // 0.4s fade-in + 1.5s vasthouden
     } else {
       document.getElementById('splash').remove();
       naSplash();
