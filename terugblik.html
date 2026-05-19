@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <meta name="color-scheme" content="light">
-  <title>Terugblik – Struct</title>
+  <title>Voortgang – Struct</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#3ddc97">
   <link rel="apple-touch-icon" href="icon.svg">
@@ -28,10 +28,69 @@
     }
     .pagina-header h1 { margin: 0; font-size: 1.4rem; font-weight: 700; letter-spacing: -0.3px; }
 
-    .back-btn {
-      display: flex; align-items: center; gap: 5px;
-      color: #3ddc97; font-size: 0.88rem; font-weight: 600;
-      text-decoration: none; -webkit-tap-highlight-color: transparent; flex-shrink: 0;
+    /* ── Hamburger ── */
+    .hamburger-btn {
+      background: none; border: none; cursor: pointer;
+      padding: 6px 8px; border-radius: 8px;
+      display: flex; flex-direction: column; gap: 5px; align-items: center;
+      transition: background 0.15s; -webkit-tap-highlight-color: transparent;
+    }
+    .hamburger-btn:hover { background: #f0f0f0; }
+    .hamburger-streep { display: block; width: 20px; height: 2px; background: #888; border-radius: 2px; }
+    .menu-overlay { position: fixed; inset: 0; z-index: 200; display: none; }
+    .menu-overlay.open { display: block; }
+    .menu-achtergrond { position: absolute; inset: 0; }
+    .menu-kaart {
+      position: absolute; top: 52px; right: 20px;
+      background: #ffffff; border: 1px solid #e8e8e8;
+      border-radius: 12px; min-width: 210px; overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    }
+    .menu-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 18px; text-decoration: none;
+      color: #1a1a1a; font-size: 0.95rem;
+      border: none; background: none; width: 100%;
+      text-align: left; cursor: pointer;
+      border-bottom: 1px solid #f0f0f0;
+      transition: background 0.15s; font-family: inherit;
+    }
+    .menu-item:last-child { border-bottom: none; }
+    .menu-item:hover { background: #f5f5f5; }
+    .menu-item.rood { color: #e05252; }
+
+    /* ── Streak ── */
+    .streak-blok {
+      background: linear-gradient(135deg, #edfaf3, #e2f7ea);
+      border: 1px solid #afe8c8; border-radius: 16px;
+      padding: 15px 18px; display: flex; align-items: center; gap: 13px;
+      margin-bottom: 22px; box-shadow: 0 2px 10px rgba(61,220,151,0.14);
+    }
+    .streak-vlam  { font-size: 1.9rem; line-height: 1; flex-shrink: 0; }
+    .streak-getal { font-size: 2.8rem; font-weight: 800; color: #111; line-height: 1; letter-spacing: -2.5px; }
+    .streak-label { font-size: 0.87rem; font-weight: 700; color: #2bc47e; }
+    .streak-start { font-size: 0.85rem; color: #999; font-weight: 500; }
+    .streak-best  { font-size: 0.78rem; color: #aaa; margin-top: 2px; }
+
+    /* ── Patronen ── */
+    .patroon-rij { padding: 13px 16px; border-bottom: 1px solid #ebebeb; }
+    .patroon-rij:last-child { border-bottom: none; }
+    .patroon-rij-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .patroon-dag-naam { font-size: 0.9rem; font-weight: 700; color: #1a1a1a; }
+    .patroon-label { font-size: 0.72rem; font-weight: 700; border-radius: 20px; padding: 2px 10px; letter-spacing: 0.04em; }
+    .patroon-label.productief { background: #edfaf3; color: #2bc47e; }
+    .patroon-label.rustig     { background: #fdf5ff; color: #9b59b6; }
+    .patroon-label.gemengd    { background: #f5f5f5; color: #888; }
+    .patroon-label.weinig     { background: #f5f5f5; color: #c0c0c0; }
+    .patroon-bar-wrap { display: flex; height: 6px; border-radius: 4px; overflow: hidden; background: #f0f0f0; margin-bottom: 6px; }
+    .patroon-bar-klaar      { background: #3ddc97; }
+    .patroon-bar-gaat-wel   { background: #f0a050; }
+    .patroon-bar-geen-energ { background: #9b59b6; }
+    .patroon-leeg { font-size: 0.82rem; color: #bbb; padding: 14px 16px; text-align: center; }
+
+    .kaart-blok {
+      background: #f5f5f5; border: 1px solid #ebebeb;
+      border-radius: 14px; overflow: hidden; margin-bottom: 22px;
     }
 
     .week-bereik { font-size: 0.85rem; color: #bbb; margin-bottom: 28px; font-weight: 500; }
@@ -183,14 +242,33 @@
 <body>
 
   <div class="pagina-header">
-    <h1 id="pagina-titel">Terugblik</h1>
-    <a href="index.html" class="back-btn">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
-      Home
-    </a>
+    <h1>Voortgang</h1>
+    <button class="hamburger-btn" id="hamburger" aria-label="Menu">
+      <span class="hamburger-streep"></span>
+      <span class="hamburger-streep"></span>
+      <span class="hamburger-streep"></span>
+    </button>
   </div>
+
+  <div id="streak-blok" class="streak-blok"></div>
+
+  <p class="sectie-label">Dagpatronen</p>
+  <div class="kaart-blok" id="patronen-kaart"></div>
+
+  <p class="sectie-label sectie-mt">Terugblik</p>
   <div class="week-bereik" id="week-bereik"></div>
   <div id="inhoud"></div>
+
+  <!-- Menu -->
+  <div class="menu-overlay" id="menu-overlay">
+    <div class="menu-achtergrond" onclick="sluitMenu()"></div>
+    <div class="menu-kaart">
+      <button class="menu-item rood" onclick="resetProfiel()">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.75"/></svg>
+        Onboarding resetten
+      </button>
+    </div>
+  </div>
 
   <!-- Tabbar -->
   <nav class="tabbar">
@@ -198,30 +276,107 @@
       <span class="tab-icoon">
         <svg class="icoon-outline" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11L12 3L21 11V21H15V16H9V21H3V11Z"/></svg>
         <svg class="icoon-filled"  width="22" height="22" viewBox="0 0 24 24"><path d="M3 11L12 3L21 11V21H15V16H9V21H3V11Z" fill="#3ddc97"/></svg>
-      </span>Home</a>
-    <a href="vakken.html" class="tab">
-      <span class="tab-icoon">
-        <svg class="icoon-outline" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7V20"/><path d="M12 7C10.5 5.8 8 5.5 5 6.5V20C8 19 10.5 19.5 12 20"/><path d="M12 7C13.5 5.8 16 5.5 19 6.5V20C16 19 13.5 19.5 12 20"/></svg>
-        <svg class="icoon-filled"  width="22" height="22" viewBox="0 0 24 24"><path d="M11 7.5C9.5 6.3 7 5.8 4.5 6.8V20C7 19 9.5 19.5 11 20.5V7.5Z" fill="#3ddc97"/><path d="M13 7.5C14.5 6.3 17 5.8 19.5 6.8V20C17 19 14.5 19.5 13 20.5V7.5Z" fill="#3ddc97"/></svg>
-      </span>Vakken</a>
+      </span>Vandaag</a>
     <a href="week.html" class="tab">
       <span class="tab-icoon">
-        <svg class="icoon-outline" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="17" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/><line x1="7" y1="14" x2="10.5" y2="14"/><line x1="13.5" y1="14" x2="17" y2="14"/><line x1="7" y1="18" x2="10.5" y2="18"/></svg>
-        <svg class="icoon-filled"  width="22" height="22" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="17" rx="2" fill="#3ddc97"/><rect x="7" y="3" width="2" height="4" rx="1" fill="#3ddc97"/><rect x="15" y="3" width="2" height="4" rx="1" fill="#3ddc97"/><line x1="3" y1="10" x2="21" y2="10" stroke="white" stroke-width="1.5" stroke-opacity="0.5"/><line x1="7" y1="14" x2="10.5" y2="14" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-opacity="0.5"/><line x1="13.5" y1="14" x2="17" y2="14" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-opacity="0.5"/><line x1="7" y1="18" x2="10.5" y2="18" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-opacity="0.5"/></svg>
-      </span>Week</a>
-    <a href="overzicht.html" class="tab">
+        <svg class="icoon-outline" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="17" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></svg>
+        <svg class="icoon-filled"  width="22" height="22" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="17" rx="2" fill="#3ddc97"/><rect x="7" y="3" width="2" height="4" rx="1" fill="#3ddc97"/><rect x="15" y="3" width="2" height="4" rx="1" fill="#3ddc97"/><line x1="3" y1="10" x2="21" y2="10" stroke="white" stroke-width="1.5" stroke-opacity="0.5"/></svg>
+      </span>Agenda</a>
+    <a href="terugblik.html" class="tab actief">
       <span class="tab-icoon">
-        <svg class="icoon-outline" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><rect x="9" y="2" width="6" height="3" rx="1"/><path d="M8.5 13L11 15.5L15.5 10"/></svg>
-        <svg class="icoon-filled"  width="22" height="22" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2" fill="#3ddc97"/><rect x="9" y="2" width="6" height="3" rx="1" fill="#2bc47e"/><path d="M8.5 13L11 15.5L15.5 10" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
-      </span>Toetsen</a>
-    <a href="afspraken.html" class="tab">
+        <svg class="icoon-outline" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        <svg class="icoon-filled"  width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3ddc97" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+      </span>Voortgang</a>
+    <a href="profiel.html" class="tab">
       <span class="tab-icoon">
-        <svg class="icoon-outline" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 15.5"/></svg>
-        <svg class="icoon-filled"  width="22" height="22" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#3ddc97"/><polyline points="12 7 12 12 15.5 15.5" stroke="white" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
-      </span>Afspraken</a>
+        <svg class="icoon-outline" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        <svg class="icoon-filled"  width="22" height="22" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="#3ddc97"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#3ddc97" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+      </span>Mijn profiel</a>
   </nav>
 
   <script>
+    // ── Navigatie ──
+    document.getElementById('hamburger').addEventListener('click', () => {
+      document.getElementById('menu-overlay').classList.toggle('open');
+    });
+    function sluitMenu() { document.getElementById('menu-overlay').classList.remove('open'); }
+    function resetProfiel() {
+      sluitMenu();
+      if (confirm('Wil je de app resetten? Alle gegevens worden verwijderd.')) {
+        localStorage.clear(); location.replace('onboarding.html');
+      }
+    }
+
+    // ── Streak display ──
+    function renderStreak() {
+      const huidig = parseInt(localStorage.getItem('streak_huidig') || '0');
+      const langste = parseInt(localStorage.getItem('streak_langste') || '0');
+      const blok = document.getElementById('streak-blok');
+      if (huidig === 0) {
+        blok.style.cssText = 'background:none;border:none;padding:0 0 8px';
+        blok.innerHTML = '<span class="streak-start">Nog geen streak gestart</span>';
+      } else {
+        const mv = huidig === 1 ? 'dag' : 'dagen';
+        blok.innerHTML = `
+          <span class="streak-vlam">🔥</span>
+          <div>
+            <div style="display:flex;align-items:baseline;gap:6px">
+              <span class="streak-getal">${huidig}</span>
+              <span class="streak-label">${mv} op rij</span>
+            </div>
+            ${langste > huidig ? `<div class="streak-best">Langste: ${langste} dagen</div>` : ''}
+          </div>`;
+      }
+    }
+
+    // ── Patronen display ──
+    const DAG_LANG_P = ['Zondag','Maandag','Dinsdag','Woensdag','Donderdag','Vrijdag','Zaterdag'];
+    function analyseerPatroon(dagNr) {
+      const keuzes = (JSON.parse(localStorage.getItem('checkinPatronen') || '{}'))[dagNr] || [];
+      if (!keuzes.length) return null;
+      const totaal = keuzes.length;
+      const pctKlaar = keuzes.filter(k => k === 'klaar').length / totaal;
+      const pctLicht = keuzes.filter(k => k === 'gaat-wel' || k === 'geen-energie').length / totaal;
+      if (keuzes.length < 3) return 'weinig';
+      if (pctKlaar > 0.6) return 'productief';
+      if (pctLicht > 0.6) return 'rustig';
+      return 'gemengd';
+    }
+    function renderPatronen() {
+      const patronen = JSON.parse(localStorage.getItem('checkinPatronen') || '{}');
+      const container = document.getElementById('patronen-kaart');
+      const dagVolgorde = [1,2,3,4,5,6,0];
+      const heeftData = dagVolgorde.some(d => (patronen[d] || []).length > 0);
+      if (!heeftData) {
+        container.innerHTML = '<p class="patroon-leeg">Nog geen data. Vul elke dag je check-in in om patronen te zien.</p>';
+        return;
+      }
+      const LABEL_MAP = { productief:'Productief', rustig:'Rustig', gemengd:'Gemengd', weinig:'Te weinig data' };
+      container.innerHTML = dagVolgorde
+        .filter(d => (patronen[d] || []).length > 0)
+        .map(d => {
+          const keuzes = patronen[d] || [];
+          const totaal = keuzes.length;
+          const nKlaar = keuzes.filter(k => k === 'klaar').length;
+          const nGaatWel = keuzes.filter(k => k === 'gaat-wel').length;
+          const label = analyseerPatroon(d) || 'weinig';
+          const brK = Math.round(nKlaar / totaal * 100);
+          const brG = Math.round(nGaatWel / totaal * 100);
+          const brE = 100 - brK - brG;
+          return `<div class="patroon-rij">
+            <div class="patroon-rij-header">
+              <span class="patroon-dag-naam">${DAG_LANG_P[d]}</span>
+              <span class="patroon-label ${label}">${LABEL_MAP[label]}</span>
+            </div>
+            <div class="patroon-bar-wrap">
+              <div class="patroon-bar-klaar" style="width:${brK}%"></div>
+              <div class="patroon-bar-gaat-wel" style="width:${brG}%"></div>
+              <div class="patroon-bar-geen-energ" style="width:${brE}%"></div>
+            </div>
+          </div>`;
+        }).join('');
+    }
+
     // ── Helpers ──
     function normaliseer(d) { const r = new Date(d); r.setHours(0,0,0,0); return r; }
     function toDatumStr(d) {
@@ -510,6 +665,8 @@
       document.querySelector('.btn-opslaan').textContent = 'Opgeslagen ✓';
     }
 
+    renderStreak();
+    renderPatronen();
     render();
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 

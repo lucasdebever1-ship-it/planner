@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <meta name="color-scheme" content="light">
-  <title>Week – Struct</title>
+  <title>Agenda – Struct</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#3ddc97">
   <link rel="apple-touch-icon" href="icon.svg">
@@ -228,12 +228,25 @@
     }
     body { animation: pagina-in 0.15s ease both; }
     .kaart, .tijdblok-vrij, .tijdblok-event, .dag-vrij-weekend { animation: kaart-in 0.2s ease both; }
+
+    /* ── Agenda sub-nav ── */
+    .sub-nav {
+      display: flex; background: #f0f0f0; border-radius: 10px;
+      padding: 3px; margin-bottom: 20px; gap: 0;
+    }
+    .sub-tab {
+      flex: 1; text-align: center; padding: 8px 4px;
+      border-radius: 8px; font-size: 0.88rem; font-weight: 600;
+      color: #999; text-decoration: none;
+      transition: background 0.15s, color 0.15s;
+    }
+    .sub-tab.actief { background: #fff; color: #1a1a1a; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
   </style>
 </head>
 <body>
 
   <div class="pagina-header">
-    <h1>Weekkalender</h1>
+    <h1>Agenda</h1>
     <button class="hamburger-btn" id="hamburger" aria-label="Menu">
       <span class="hamburger-streep"></span>
       <span class="hamburger-streep"></span>
@@ -247,6 +260,11 @@
     <button class="btn-week" id="btn-volgende">›</button>
   </div>
 
+  <div class="sub-nav">
+    <a href="week.html"      class="sub-tab actief">Week</a>
+    <a href="overzicht.html" class="sub-tab">Toetsen</a>
+    <a href="afspraken.html" class="sub-tab">Afspraken</a>
+  </div>
   <div class="dag-rij" id="dag-rij"></div>
   <div class="dag-inhoud" id="dag-inhoud"></div>
 
@@ -254,16 +272,10 @@
   <div class="menu-overlay" id="menu-overlay">
     <div class="menu-achtergrond" onclick="sluitMenu()"></div>
     <div class="menu-kaart">
-      <a href="profiel.html" class="menu-item" onclick="sluitMenu()">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-        Profiel
-      </a>
-      <a href="instellingen.html" class="menu-item" onclick="sluitMenu()">Instellingen</a>
-      <a href="terugblik.html" class="menu-item" onclick="sluitMenu()">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-        Terugblik
-      </a>
-      <button class="menu-item rood" onclick="resetProfiel()">Profiel resetten</button>
+      <button class="menu-item rood" onclick="resetProfiel()">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.75"/></svg>
+        Onboarding resetten
+      </button>
     </div>
   </div>
 
@@ -273,27 +285,22 @@
       <span class="tab-icoon">
         <svg class="icoon-outline" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11L12 3L21 11V21H15V16H9V21H3V11Z"/></svg>
         <svg class="icoon-filled"  width="22" height="22" viewBox="0 0 24 24"><path d="M3 11L12 3L21 11V21H15V16H9V21H3V11Z" fill="#3ddc97"/></svg>
-      </span>Home</a>
-    <a href="vakken.html" class="tab">
-      <span class="tab-icoon">
-        <svg class="icoon-outline" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7V20"/><path d="M12 7C10.5 5.8 8 5.5 5 6.5V20C8 19 10.5 19.5 12 20"/><path d="M12 7C13.5 5.8 16 5.5 19 6.5V20C16 19 13.5 19.5 12 20"/></svg>
-        <svg class="icoon-filled"  width="22" height="22" viewBox="0 0 24 24"><path d="M11 7.5C9.5 6.3 7 5.8 4.5 6.8V20C7 19 9.5 19.5 11 20.5V7.5Z" fill="#3ddc97"/><path d="M13 7.5C14.5 6.3 17 5.8 19.5 6.8V20C17 19 14.5 19.5 13 20.5V7.5Z" fill="#3ddc97"/></svg>
-      </span>Vakken</a>
+      </span>Vandaag</a>
     <a href="week.html" class="tab actief">
       <span class="tab-icoon">
-        <svg class="icoon-outline" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="17" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/><line x1="7" y1="14" x2="10.5" y2="14"/><line x1="13.5" y1="14" x2="17" y2="14"/><line x1="7" y1="18" x2="10.5" y2="18"/></svg>
-        <svg class="icoon-filled"  width="22" height="22" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="17" rx="2" fill="#3ddc97"/><rect x="7" y="3" width="2" height="4" rx="1" fill="#3ddc97"/><rect x="15" y="3" width="2" height="4" rx="1" fill="#3ddc97"/><line x1="3" y1="10" x2="21" y2="10" stroke="white" stroke-width="1.5" stroke-opacity="0.5"/><line x1="7" y1="14" x2="10.5" y2="14" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-opacity="0.5"/><line x1="13.5" y1="14" x2="17" y2="14" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-opacity="0.5"/><line x1="7" y1="18" x2="10.5" y2="18" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-opacity="0.5"/></svg>
-      </span>Week</a>
-    <a href="overzicht.html" class="tab">
+        <svg class="icoon-outline" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="17" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/></svg>
+        <svg class="icoon-filled"  width="22" height="22" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="17" rx="2" fill="#3ddc97"/><rect x="7" y="3" width="2" height="4" rx="1" fill="#3ddc97"/><rect x="15" y="3" width="2" height="4" rx="1" fill="#3ddc97"/><line x1="3" y1="10" x2="21" y2="10" stroke="white" stroke-width="1.5" stroke-opacity="0.5"/></svg>
+      </span>Agenda</a>
+    <a href="terugblik.html" class="tab">
       <span class="tab-icoon">
-        <svg class="icoon-outline" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><rect x="9" y="2" width="6" height="3" rx="1"/><path d="M8.5 13L11 15.5L15.5 10"/></svg>
-        <svg class="icoon-filled"  width="22" height="22" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2" fill="#3ddc97"/><rect x="9" y="2" width="6" height="3" rx="1" fill="#2bc47e"/><path d="M8.5 13L11 15.5L15.5 10" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
-      </span>Toetsen</a>
-    <a href="afspraken.html" class="tab">
+        <svg class="icoon-outline" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        <svg class="icoon-filled"  width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3ddc97" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+      </span>Voortgang</a>
+    <a href="profiel.html" class="tab">
       <span class="tab-icoon">
-        <svg class="icoon-outline" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 15.5"/></svg>
-        <svg class="icoon-filled"  width="22" height="22" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#3ddc97"/><polyline points="12 7 12 12 15.5 15.5" stroke="white" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
-      </span>Afspraken</a>
+        <svg class="icoon-outline" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        <svg class="icoon-filled"  width="22" height="22" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" fill="#3ddc97"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#3ddc97" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+      </span>Mijn profiel</a>
   </nav>
 
   <script>
@@ -304,7 +311,7 @@
     function sluitMenu() { document.getElementById('menu-overlay').classList.remove('open'); }
     function resetProfiel() {
       sluitMenu();
-      if (confirm('Wil je het profiel resetten? Alle gegevens worden verwijderd.')) {
+      if (confirm('Wil je de app resetten? Alle gegevens worden verwijderd.')) {
         localStorage.clear(); location.replace('onboarding.html');
       }
     }
@@ -652,6 +659,18 @@
       tab.addEventListener('click', function(e) {
         if (this.classList.contains('actief')) return;
         if (document.getElementById('splash')) return;
+        e.preventDefault();
+        var href = this.getAttribute('href');
+        document.body.style.transition = 'opacity 0.15s ease';
+        document.body.style.opacity = '0';
+        setTimeout(function() { location.href = href; }, 150);
+      });
+    });
+
+    // ── Sub-tab overgangen ──
+    document.querySelectorAll('a.sub-tab').forEach(function(t) {
+      t.addEventListener('click', function(e) {
+        if (this.classList.contains('actief')) return;
         e.preventDefault();
         var href = this.getAttribute('href');
         document.body.style.transition = 'opacity 0.15s ease';
