@@ -157,25 +157,11 @@
     .tip-tekst strong { color: #184a2e; font-weight: 700; }
 
     /* ── Streak ── */
-    .streak-blok {
-      background: linear-gradient(135deg, #edfaf3, #e2f7ea);
-      border: 1px solid #afe8c8; border-radius: 16px;
-      padding: 15px 18px; display: flex; align-items: center; gap: 13px;
-      margin-bottom: 22px;
-      box-shadow: 0 2px 10px rgba(61,220,151,0.14);
-    }
-    .streak-vlam  { font-size: 1.9rem; line-height: 1; flex-shrink: 0; }
-    .streak-getal { font-size: 2.8rem; font-weight: 800; color: #111; line-height: 1; letter-spacing: -2.5px; }
-    .streak-label { font-size: 0.87rem; font-weight: 700; color: #2bc47e; letter-spacing: 0.01em; }
-    .streak-start { font-size: 0.85rem; color: #999; font-weight: 500; }
-
-    @keyframes streak-pop {
-      0%   { transform: scale(1); }
-      35%  { transform: scale(1.2); }
-      65%  { transform: scale(0.96); }
-      100% { transform: scale(1); }
-    }
-    .streak-blok.record { animation: streak-pop 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97); }
+    .streak-mini { display: inline-flex; align-items: center; gap: 5px; margin-bottom: 6px; }
+    .streak-mini-vlam { font-size: 0.95rem; line-height: 1; }
+    .streak-mini-tekst { font-size: 0.8rem; color: #999; font-weight: 500; }
+    .streak-uitleg { font-size: 0.75rem; color: #bbb; margin: 0 0 18px; }
+    .streak-nul { font-size: 0.78rem; color: #bbb; font-weight: 400; margin: 0 0 18px; }
 
     /* ── Snel toevoegen ── */
     .snel-wrap { margin-top: 14px; }
@@ -363,7 +349,7 @@
       from { opacity: 0; transform: translateY(8px); }
       to   { opacity: 1; transform: translateY(0); }
     }
-    .dag-kaart, .streak-blok, .tip-kaart, .week-waarschuwing, .patroon-banner, .checkin-kaart { animation: kaart-in 0.3s ease-out both; }
+    .dag-kaart, .tip-kaart, .week-waarschuwing, .patroon-banner, .checkin-kaart { animation: kaart-in 0.3s ease-out both; }
 
     /* ── Noise texture ── */
     body { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); background-size: 200px 200px; }
@@ -679,6 +665,7 @@
       localStorage.setItem('checkin_' + vandaagStr, stemming);
       slaCheckinPatroonOp(stemming);
       document.getElementById('checkin-wrap').style.display = 'none';
+      renderStreak(updateStreak());
       renderVandaag();
       renderTip();
     }
@@ -920,54 +907,30 @@
     }
 
     // ── Streak ──
-    const STREAK_LEER = { Mondeling:7, Proefwerk:4, SO:1, Luistertoets:0, Schrijfvaardigheid:2, PO:14, Anders:3 };
-
-    function getLeerDagenStreak(type, moeilijkheid) {
-      const inst = JSON.parse(localStorage.getItem('instellingen') || '{}');
-      const key  = type || 'Anders';
-      const basis = inst[key] !== undefined ? inst[key] : (STREAK_LEER[key] ?? STREAK_LEER.Anders);
-      if (basis === 0) return 0;
-      return Math.max(1, Math.round(basis * ((moeilijkheid || 5) / 5)));
-    }
-
-    function getVakAanpassingStreak(naam) {
-      return JSON.parse(localStorage.getItem('feedback') || '[]')
-        .filter(f => f.vak === naam)
-        .reduce((s, f) => s + (f.antwoord === 'te-weinig' ? 2 : f.antwoord === 'te-veel' ? -1 : 0), 0);
-    }
-
-    function heeftGemisteBegindatum() {
-      for (const v of vakken) {
-        const toetsen = v.toetsen || (v.toetsdatum ? [{ datum: v.toetsdatum }] : []);
-        for (const t of toetsen) {
-          if (!t.datum) continue;
-          const toetsDatum = parseDatum(t.datum);
-          const dagsTotToets = Math.round((toetsDatum - vandaag) / 86400000);
-          if (dagsTotToets < 0) continue;
-          const startDagen = getLeerDagenStreak(t.type, v.moeilijkheid) + getVakAanpassingStreak(v.naam);
-          if (startDagen > 0 && dagsTotToets < startDagen) return true;
-        }
-      }
-      return false;
-    }
-
     function updateStreak() {
       const str      = toDatumStr(vandaag);
       const gisteren = toDatumStr(addDagen(vandaag, -1));
-      const huidig   = parseInt(localStorage.getItem('streak_huidig')         || '0');
-      const langste  = parseInt(localStorage.getItem('streak_langste')        || '0');
-      const last     = localStorage.getItem('streak_laatste_datum')           || '';
-      const gemist   = heeftGemisteBegindatum();
+      const huidig   = parseInt(localStorage.getItem('streak_huidig')  || '0');
+      const langste  = parseInt(localStorage.getItem('streak_langste') || '0');
+      const last     = localStorage.getItem('streak_laatste_datum')    || '';
+      const checkinGedaan = !!getCheckin();
+
+      if (!checkinGedaan) {
+        // Geen check-in vandaag: streak verbroken als laatste actieve dag > gisteren
+        if (last && last !== str && last !== gisteren) {
+          localStorage.setItem('streak_huidig', '0');
+          return { huidig: 0, nieuwRecord: false };
+        }
+        return { huidig, nieuwRecord: false };
+      }
 
       let nieuw;
-      if (gemist) {
-        nieuw = 0;
-      } else if (last === str) {
+      if (last === str) {
         nieuw = huidig;
       } else if (last === gisteren) {
         nieuw = huidig + 1;
       } else {
-        nieuw = 1; // eerste keer of na een gat
+        nieuw = 1;
       }
 
       const nieuwRecord = nieuw > langste && nieuw > 1;
@@ -981,25 +944,21 @@
       const { huidig, nieuwRecord } = data;
       const blok = document.getElementById('streak-blok');
       if (huidig === 0) {
-        blok.style.background = 'none';
-        blok.style.border = 'none';
-        blok.style.padding = '0 0 8px';
-        blok.innerHTML = '<span class="streak-start">Vandaag je eerste dag</span>';
+        blok.innerHTML = '<p class="streak-nul">Begin vandaag je streak door de check-in in te vullen.</p>';
       } else {
         const mv = huidig === 1 ? 'dag' : 'dagen';
         blok.innerHTML = `
-          <span class="streak-vlam">🔥</span>
-          <span class="streak-getal">${huidig}</span>
-          <span class="streak-label" id="streak-label">${mv} op rij</span>`;
+          <div class="streak-mini">
+            <span class="streak-mini-vlam">🔥</span>
+            <span class="streak-mini-tekst" id="streak-label">${huidig} ${mv} actief</span>
+          </div>
+          <p class="streak-uitleg">Open de app elke dag om je streak te houden.</p>`;
         if (nieuwRecord) {
           const key = 'streak_record_' + huidig;
           if (!sessionStorage.getItem(key)) {
             sessionStorage.setItem(key, '1');
             const lbl = document.getElementById('streak-label');
-            lbl.textContent = 'Nieuw record! ';
-            setTimeout(() => { const l = document.getElementById('streak-label'); if (l) l.textContent = `${mv} op rij`; }, 3000);
-            blok.classList.add('record');
-            setTimeout(() => blok.classList.remove('record'), 600);
+            if (lbl) { lbl.textContent = 'Nieuw record! 🎉'; setTimeout(() => { const l = document.getElementById('streak-label'); if (l) l.textContent = `${huidig} ${mv} actief`; }, 3000); }
           }
         }
       }
