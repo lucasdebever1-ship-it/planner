@@ -266,21 +266,33 @@
 
     /* ── Vrije momenten ── */
     .vrij-rij {
-      display: flex; align-items: center;
-      padding: 11px 14px; border-bottom: 1px solid #ebebeb; gap: 10px;
+      padding: 12px 14px; border-bottom: 1px solid #ebebeb;
     }
     .vrij-rij:last-child { border-bottom: none; }
-    .vrij-dag { font-size: 0.88rem; font-weight: 600; color: #1a1a1a; min-width: 80px; flex-shrink: 0; }
-    .vrij-midden { flex: 1; display: flex; align-items: center; gap: 6px; justify-content: flex-end; }
-    .vrij-label { font-size: 0.82rem; color: #aaa; flex-shrink: 0; }
-    .vrij-input {
-      background: transparent; border: none; outline: none;
-      font-size: 0.88rem; color: #666; text-align: right;
-      font-family: inherit; appearance: none;
+    .vrij-rij-hoofd {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
     }
-    .vrij-input:focus { color: #1a1a1a; }
-    .vrij-hele-label { font-size: 0.82rem; font-weight: 600; color: #2bc47e; }
-    .vrij-niet-ingesteld { font-size: 0.82rem; color: #c8c8c8; }
+    .vrij-dag { font-size: 0.88rem; font-weight: 600; color: #1a1a1a; }
+    .vrij-chk-label {
+      display: flex; align-items: center; gap: 7px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .vrij-chk-tekst { font-size: 0.82rem; color: #c8c8c8; font-weight: 600; }
+    .vrij-chk-tekst.actief { color: #3ddc97; }
+    .vrij-uitklap {
+      display: flex; align-items: center; gap: 8px;
+      margin-top: 10px; padding-top: 10px;
+      border-top: 1px solid #f2f2f2; flex-wrap: wrap;
+    }
+    .vrij-vanaf-label { font-size: 0.8rem; color: #999; flex-shrink: 0; }
+    .vrij-input {
+      background: #fff; border: 1.5px solid #e8e8e8; border-radius: 8px;
+      color: #1a1a1a; font-size: 0.88rem; padding: 6px 10px;
+      outline: none; font-family: inherit; appearance: none;
+      transition: border-color 0.15s; flex-shrink: 0;
+    }
+    .vrij-input:focus { border-color: #3ddc97; }
+    .vrij-hddag-label { font-size: 0.8rem; color: #999; margin-left: auto; flex-shrink: 0; }
 
     /* Per-dag tijden */
     .dag-tijden-container { margin: 0 0 8px; }
@@ -1026,54 +1038,65 @@
       const vm = laadVrijeMomenten();
       const dagVolgorde = [1,2,3,4,5,6,0];
       document.getElementById('vrije-momenten-kaart').innerHTML = dagVolgorde.map(d => {
-        const v = vm[d];
-        const heleDag    = !!(v && typeof v === 'object' && v.heleDag);
-        const tijd       = v ? (typeof v === 'string' ? v : (v.tijd || '')) : '';
-        const heeftTijd  = !heleDag && !!tijd;
-        const nietIngest = !heleDag && !tijd;
+        const v       = vm[d];
+        const isVrij  = !!v;
+        const heleDag = !!(v && typeof v === 'object' && v.heleDag);
+        const tijd    = v ? (typeof v === 'string' ? v : (v.tijd || '')) : '';
         return `<div class="vrij-rij">
-          <span class="vrij-dag">${DAG_LANG_VM[d]}</span>
-          <div class="vrij-midden">
-            <span class="vrij-niet-ingesteld"${!nietIngest ? ' style="display:none"' : ''}>Niet ingesteld</span>
-            <span class="vrij-label"${!heeftTijd ? ' style="display:none"' : ''}>vrij vanaf</span>
-            <input type="time" class="vrij-input" data-dag="${d}" value="${tijd}"${heleDag ? ' style="display:none"' : ''}>
-            <span class="vrij-hele-label"${!heleDag ? ' style="display:none"' : ''}>Hele dag</span>
+          <div class="vrij-rij-hoofd">
+            <span class="vrij-dag">${DAG_LANG_VM[d]}</span>
+            <label class="vrij-chk-label">
+              <span class="vrij-chk-tekst${isVrij ? ' actief' : ''}">Vrij</span>
+              <label class="schakelaar">
+                <input type="checkbox" class="vrij-chk" data-dag="${d}"${isVrij ? ' checked' : ''}>
+                <span class="schakelaar-knop"></span>
+              </label>
+            </label>
           </div>
-          <label class="schakelaar" style="flex-shrink:0;margin-left:4px">
-            <input type="checkbox" class="vrij-hdv-chk" data-dag="${d}"${heleDag ? ' checked' : ''}>
-            <span class="schakelaar-knop"></span>
-          </label>
+          <div class="vrij-uitklap"${!isVrij ? ' style="display:none"' : ''}>
+            <span class="vrij-vanaf-label">Vrij vanaf</span>
+            <input type="time" class="vrij-input" data-dag="${d}" value="${tijd}"
+                   style="${heleDag ? 'visibility:hidden' : ''}">
+            <span class="vrij-hddag-label">Hele dag</span>
+            <label class="schakelaar" style="flex-shrink:0">
+              <input type="checkbox" class="vrij-hdv-chk" data-dag="${d}"${heleDag ? ' checked' : ''}>
+              <span class="schakelaar-knop"></span>
+            </label>
+          </div>
         </div>`;
       }).join('');
 
+      document.querySelectorAll('.vrij-chk').forEach(chk => {
+        chk.addEventListener('change', () => {
+          const d       = parseInt(chk.dataset.dag);
+          const vm2     = laadVrijeMomenten();
+          const rij     = chk.closest('.vrij-rij');
+          const uitklap = rij.querySelector('.vrij-uitklap');
+          const tekst   = rij.querySelector('.vrij-chk-tekst');
+          if (chk.checked) {
+            vm2[d] = { heleDag: false, tijd: '' };
+            uitklap.style.display = '';
+            tekst.classList.add('actief');
+          } else {
+            delete vm2[d];
+            uitklap.style.display = 'none';
+            tekst.classList.remove('actief');
+          }
+          slaVrijeMomentenOp(vm2);
+        });
+      });
+
       document.querySelectorAll('.vrij-hdv-chk').forEach(chk => {
         chk.addEventListener('change', () => {
-          const d = parseInt(chk.dataset.dag);
-          const vm2 = laadVrijeMomenten();
-          const rij     = chk.closest('.vrij-rij');
-          const labelEl = rij.querySelector('.vrij-label');
-          const inputEl = rij.querySelector('.vrij-input');
-          const heleEl  = rij.querySelector('.vrij-hele-label');
-          const nietEl  = rij.querySelector('.vrij-niet-ingesteld');
+          const d       = parseInt(chk.dataset.dag);
+          const vm2     = laadVrijeMomenten();
+          const inputEl = chk.closest('.vrij-uitklap').querySelector('.vrij-input');
           if (chk.checked) {
-            labelEl.style.display = 'none';
-            inputEl.style.display = 'none';
-            heleEl.style.display  = '';
-            nietEl.style.display  = 'none';
+            inputEl.style.visibility = 'hidden';
             vm2[d] = { heleDag: true };
           } else {
-            heleEl.style.display  = 'none';
-            inputEl.style.display = '';
-            const prevTijd = inputEl.value;
-            if (prevTijd) {
-              labelEl.style.display = '';
-              nietEl.style.display  = 'none';
-              vm2[d] = { heleDag: false, tijd: prevTijd };
-            } else {
-              labelEl.style.display = 'none';
-              nietEl.style.display  = '';
-              delete vm2[d];
-            }
+            inputEl.style.visibility = '';
+            vm2[d] = { heleDag: false, tijd: inputEl.value };
           }
           slaVrijeMomentenOp(vm2);
         });
@@ -1081,20 +1104,9 @@
 
       document.querySelectorAll('.vrij-input').forEach(inp => {
         inp.addEventListener('change', () => {
+          const d   = parseInt(inp.dataset.dag);
           const vm2 = laadVrijeMomenten();
-          const d       = parseInt(inp.dataset.dag);
-          const rij     = inp.closest('.vrij-rij');
-          const labelEl = rij.querySelector('.vrij-label');
-          const nietEl  = rij.querySelector('.vrij-niet-ingesteld');
-          if (inp.value) {
-            labelEl.style.display = '';
-            nietEl.style.display  = 'none';
-            vm2[d] = { heleDag: false, tijd: inp.value };
-          } else {
-            labelEl.style.display = 'none';
-            nietEl.style.display  = '';
-            delete vm2[d];
-          }
+          if (vm2[d]) vm2[d] = { heleDag: false, tijd: inp.value };
           slaVrijeMomentenOp(vm2);
         });
       });
