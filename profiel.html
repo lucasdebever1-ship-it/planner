@@ -379,6 +379,37 @@
     .inst-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     .inst-input:focus { border-color: #3ddc97; }
     .inst-dagen { font-size: 0.85rem; color: #aaa; }
+
+    /* Aangepaste toetstypen */
+    .inst-custom-rij {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px; border-bottom: 1px solid #ebebeb; gap: 12px;
+    }
+    .inst-custom-naam { font-size: 0.95rem; font-weight: 600; color: #1a1a1a; flex: 1; min-width: 0; }
+    .inst-custom-del {
+      background: none; border: none; cursor: pointer;
+      color: #d0d0d0; font-size: 1.1rem; padding: 2px 6px; line-height: 1;
+      transition: color 0.15s; flex-shrink: 0; -webkit-tap-highlight-color: transparent;
+    }
+    .inst-custom-del:hover { color: #e05252; }
+    .inst-add-rij {
+      display: flex; align-items: center; gap: 8px;
+      padding: 11px 14px; border-top: 1px solid #ebebeb;
+    }
+    .inst-add-naam {
+      flex: 1; min-width: 80px; background: transparent;
+      border: none; outline: none; font-size: 0.9rem;
+      color: #1a1a1a; font-family: inherit;
+    }
+    .inst-add-naam::placeholder { color: #c8c8c8; }
+    .inst-add-btn {
+      padding: 7px 12px; background: #3ddc97; border: none;
+      border-radius: 8px; color: #fff; font-size: 0.8rem; font-weight: 700;
+      cursor: pointer; font-family: inherit; flex-shrink: 0;
+      transition: background 0.15s; -webkit-tap-highlight-color: transparent;
+    }
+    .inst-add-btn:hover { background: #2bc47e; }
+
     .btn-standaard {
       padding: 10px 16px; background: #f5f5f5; border: 1px solid #e0e0e0;
       border-radius: 10px; color: #888; font-size: 0.9rem;
@@ -622,6 +653,13 @@
           <input type="number" class="inst-input" id="inst-Anders" min="0" max="60">
           <span class="inst-dagen">dagen</span>
         </div>
+      </div>
+      <div id="custom-types-lijst"></div>
+      <div class="inst-add-rij">
+        <input type="text" id="custom-type-naam" class="inst-add-naam" placeholder="Eigen toetstype…" autocomplete="off">
+        <input type="number" id="custom-type-dagen" class="inst-input" min="0" max="60" value="3" style="width:56px;height:36px">
+        <span class="inst-dagen">d</span>
+        <button class="inst-add-btn" onclick="voegTypeToegevoegd()">+ Toevoegen</button>
       </div>
     </div>
     <button class="btn-standaard" onclick="herstelStandaardInst()">Standaard herstellen</button>
@@ -1144,14 +1182,14 @@
     const INST_STANDAARD = { Mondeling:7, Proefwerk:4, SO:1, Luistertoets:0, Schrijfvaardigheid:2, PO:14, Anders:3 };
 
     function slaInstOp() {
-      const w = {};
+      const inst = JSON.parse(localStorage.getItem('instellingen') || '{}');
       Object.keys(INST_STANDAARD).forEach(type => {
         const inp = document.getElementById('inst-' + type);
         if (!inp) return;
         const val = parseInt(inp.value);
-        w[type] = isNaN(val) || val < 0 ? INST_STANDAARD[type] : Math.min(60, val);
+        inst[type] = isNaN(val) || val < 0 ? INST_STANDAARD[type] : Math.min(60, val);
       });
-      localStorage.setItem('instellingen', JSON.stringify(w));
+      localStorage.setItem('instellingen', JSON.stringify(inst));
     }
 
     function initInstInputs() {
@@ -1165,14 +1203,79 @@
     }
 
     function herstelStandaardInst() {
-      localStorage.removeItem('instellingen');
+      const inst = JSON.parse(localStorage.getItem('instellingen') || '{}');
       Object.entries(INST_STANDAARD).forEach(([type, val]) => {
+        inst[type] = val;
         const inp = document.getElementById('inst-' + type);
         if (inp) inp.value = val;
       });
+      localStorage.setItem('instellingen', JSON.stringify(inst));
+    }
+
+    // ── Aangepaste toetstypen ──
+    function laadCustomTypen() { return JSON.parse(localStorage.getItem('aangepaste_typen') || '[]'); }
+
+    function renderCustomTypen() {
+      const typen = laadCustomTypen();
+      const inst  = JSON.parse(localStorage.getItem('instellingen') || '{}');
+      document.getElementById('custom-types-lijst').innerHTML = typen.map(naam => {
+        const dagen = inst[naam] !== undefined ? inst[naam] : 3;
+        return `<div class="inst-custom-rij" data-type="${naam.replace(/"/g,'&quot;')}">
+          <span class="inst-custom-naam">${naam}</span>
+          <div class="inst-rij-rechts">
+            <input type="number" class="inst-input" min="0" max="60" value="${dagen}" style="width:56px"
+                   data-custom-type="${naam.replace(/"/g,'&quot;')}">
+            <span class="inst-dagen">dagen</span>
+          </div>
+          <button class="inst-custom-del" title="Verwijderen">×</button>
+        </div>`;
+      }).join('');
+
+      document.querySelectorAll('[data-custom-type]').forEach(inp => {
+        inp.addEventListener('input', () => {
+          const inst2 = JSON.parse(localStorage.getItem('instellingen') || '{}');
+          const val = parseInt(inp.value);
+          inst2[inp.dataset.customType] = isNaN(val) || val < 0 ? 3 : Math.min(60, val);
+          localStorage.setItem('instellingen', JSON.stringify(inst2));
+        });
+      });
+
+      document.querySelectorAll('.inst-custom-del').forEach(btn => {
+        btn.addEventListener('click', () => {
+          verwijderCustomType(btn.closest('.inst-custom-rij').dataset.type);
+        });
+      });
+    }
+
+    function voegTypeToegevoegd() {
+      const naam  = document.getElementById('custom-type-naam').value.trim();
+      const dagen = parseInt(document.getElementById('custom-type-dagen').value);
+      if (!naam) { document.getElementById('custom-type-naam').focus(); return; }
+      const typen = laadCustomTypen();
+      if (typen.includes(naam)) { document.getElementById('custom-type-naam').select(); return; }
+      typen.push(naam);
+      localStorage.setItem('aangepaste_typen', JSON.stringify(typen));
+      const inst = JSON.parse(localStorage.getItem('instellingen') || '{}');
+      inst[naam] = isNaN(dagen) || dagen < 0 ? 3 : Math.min(60, dagen);
+      localStorage.setItem('instellingen', JSON.stringify(inst));
+      document.getElementById('custom-type-naam').value = '';
+      document.getElementById('custom-type-dagen').value = '3';
+      renderCustomTypen();
+    }
+
+    function verwijderCustomType(naam) {
+      localStorage.setItem('aangepaste_typen', JSON.stringify(laadCustomTypen().filter(t => t !== naam)));
+      const inst = JSON.parse(localStorage.getItem('instellingen') || '{}');
+      delete inst[naam];
+      localStorage.setItem('instellingen', JSON.stringify(inst));
+      renderCustomTypen();
     }
 
     initInstInputs();
+    renderCustomTypen();
+    document.getElementById('custom-type-naam').addEventListener('keydown', e => {
+      if (e.key === 'Enter') voegTypeToegevoegd();
+    });
 
     // ── Meldingen ──
     function laadNotif() { return JSON.parse(localStorage.getItem('notificaties') || '{}'); }
