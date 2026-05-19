@@ -561,9 +561,13 @@
       const d = new Date(datum + 'T00:00:00');
       d.setDate(d.getDate() - dagen);
       const { datum: vrij, verschoven, ideaal } = verschuifNaarVrijeDag(d);
+      const _sd = JSON.parse(localStorage.getItem('schooldagen') || 'null');
+      const _se = localStorage.getItem('schoolEinde') || null;
+      const isBeginSchooldag = _sd && _sd.includes(vrij.getDay());
+      const tijdNote = isBeginSchooldag && _se ? ` na ${_se}` : '';
       const basis = vrij.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' });
       const extra = ideaal ? ' — ideale leerdag' : (verschoven ? ' (werkdag overgeslagen)' : '');
-      return { tekst: basis + extra, verschoven };
+      return { tekst: basis + tijdNote + extra, verschoven };
     }
 
     function renderToetsen(toetsen, moeilijkheid, i, vakNaam) {

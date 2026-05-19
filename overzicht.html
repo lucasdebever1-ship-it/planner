@@ -468,7 +468,10 @@
         const vm = JSON.parse(localStorage.getItem('vrijeMomenten') || '{}');
         const vrijData = vm[vrijBegin.getDay()];
         const vrijTijd = vrijData ? (typeof vrijData === 'string' ? vrijData : vrijData.tijd) : null;
-        const tijdDeel = vrijTijd ? `, vrij vanaf ${vrijTijd}` : '';
+        const _sd = JSON.parse(localStorage.getItem('schooldagen') || 'null');
+        const _se = localStorage.getItem('schoolEinde') || null;
+        const isBeginSchooldag = _sd && _sd.includes(vrijBegin.getDay());
+        const tijdDeel = isBeginSchooldag && _se ? ` na ${_se}` : (vrijTijd ? `, vrij vanaf ${vrijTijd}` : '');
         const ideaalDeel = ideaal ? ' — ideale leerdag' : '';
         const extraLabel = r.cijferAanpassing > 0 ? ' · Extra tijd ingepland op basis van je vorige cijfer.' : '';
         advies = `<div class="kaart-advies leeradvies">Begin op ${vrijBegin.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' })}${tijdDeel}${ideaalDeel}${verschoven && !ideaal ? ' (werkdag overgeslagen)' : ''}${extraLabel}</div>`;

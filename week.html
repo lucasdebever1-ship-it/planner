@@ -127,6 +127,13 @@
       line-height: 1.4;
     }
 
+    /* Schoolbanner */
+    .school-banner {
+      background: #f5f5f5; border: 1px solid #ebebeb;
+      border-radius: 10px; padding: 9px 14px;
+      font-size: 0.8rem; color: #aaa; font-weight: 600;
+    }
+
     /* Dag samenvatting */
     .dag-samenvatting {
       font-size: 0.78rem; color: #c8c8c8; font-weight: 500;
@@ -551,9 +558,10 @@
     }
 
     function renderDagInhoud() {
-      const dagNr     = gekozenDag.getDay();
-      const dagStr    = toDatumStr(gekozenDag);
+      const dagNr       = gekozenDag.getDay();
+      const dagStr      = toDatumStr(gekozenDag);
       const schooldagen = JSON.parse(localStorage.getItem('schooldagen') || 'null');
+      const schoolEinde = localStorage.getItem('schoolEinde') || null;
       const isSchooldag = !schooldagen || schooldagen.includes(dagNr);
 
       const { toetsKaarten, hwKaarten, startKaarten, bezigKaarten } = berekenKaarten(gekozenDag);
@@ -567,9 +575,7 @@
         else if (vrijData.tijd) vrijVanaf = vrijData.tijd;
       }
 
-      // Bouw uniforme itemlijst
       const items = [];
-
       toetsKaarten.forEach(k => items.push({ soort: 'toets',    ...k, sortTime: -1 }));
       hwKaarten.forEach(k    => items.push({ soort: 'huiswerk', ...k, sortTime: -1 }));
       startKaarten.forEach(k => items.push({ soort: 'start',    ...k, sortTime: -1 }));
@@ -595,17 +601,12 @@
                      sortTime: ti.begin ? tijdMinuten(ti.begin) : -1 });
       });
 
-      // Sorteer: ongetimed eerst, dan op tijd
       items.sort((a, b) => {
         if (a.sortTime < 0 && b.sortTime < 0) return 0;
         if (a.sortTime < 0) return -1;
         if (b.sortTime < 0) return 1;
         return a.sortTime - b.sortTime;
       });
-
-      const urgentVak    = urgentsteVak(gekozenDag);
-      const untimedItems = items.filter(i => i.sortTime < 0);
-      const timedItems   = items.filter(i => i.sortTime >= 0);
 
       // Samenvatting
       const samEl = document.getElementById('dag-samenvatting');
@@ -614,55 +615,59 @@
         samEl.textContent = n === 0 ? '' : n === 1 ? '1 ding vandaag' : `${n} dingen vandaag`;
       }
 
-      let html = '';
+      // Bovenste blok: schoolbanner OF vrije-dag
+      const heeftTrainingOfAfspraak = items.some(i => i.soort === 'training' || i.soort === 'afspraak');
+      let topperHtml = '';
+      if (isSchooldag && schoolEinde) {
+        topperHtml = `<div class="school-banner">School tot ${schoolEinde}</div>`;
+      } else if (!isSchooldag && !heeftTrainingOfAfspraak) {
+        topperHtml = `<div class="dag-vrij-weekend">Vrije dag</div>`;
+      }
+
+      const urgentVak    = urgentsteVak(gekozenDag);
+      const untimedItems = items.filter(i => i.sortTime < 0);
+      const timedItems   = items.filter(i => i.sortTime >= 0);
+
+      let itemsHtml = '';
 
       if (heleDagVrij) {
-        html += vrijBlokHeleDag(urgentVak);
-        timedItems.forEach(ev => { html += renderItem(ev); });
+        itemsHtml += vrijBlokHeleDag(urgentVak);
+        timedItems.forEach(ev => { itemsHtml += renderItem(ev); });
       } else {
-        untimedItems.forEach(i => { html += renderItem(i); });
+        untimedItems.forEach(i => { itemsHtml += renderItem(i); });
 
         if (vrijVanaf) {
           const vrijVal = tijdMinuten(vrijVanaf);
-          let lastEnd = null;
-          let vrijGetoond = false;
+          let lastEnd = null, vrijGetoond = false;
 
           timedItems.forEach(ev => {
             const evVal   = tijdMinuten(ev.begin);
             const lastVal = tijdMinuten(lastEnd);
-
             if (lastEnd === null) {
-              if (evVal > vrijVal) {
-                html += vrijBlokHtml(vrijVanaf, ev.begin, urgentVak);
-                vrijGetoond = true;
-              }
+              if (evVal > vrijVal) { itemsHtml += vrijBlokHtml(vrijVanaf, ev.begin, urgentVak); vrijGetoond = true; }
             } else if (lastVal >= vrijVal && evVal > lastVal) {
-              html += vrijBlokHtml(lastEnd, ev.begin, urgentVak);
-              vrijGetoond = true;
+              itemsHtml += vrijBlokHtml(lastEnd, ev.begin, urgentVak); vrijGetoond = true;
             }
-
-            html += renderItem(ev);
+            itemsHtml += renderItem(ev);
             lastEnd = ev.eind || ev.begin;
           });
 
           if (!vrijGetoond) {
             const lastVal = tijdMinuten(lastEnd);
-            if (lastEnd === null || lastVal < vrijVal) {
-              html += vrijBlokHtml(vrijVanaf, null, urgentVak);
-            }
+            if (lastEnd === null || lastVal < vrijVal) itemsHtml += vrijBlokHtml(vrijVanaf, null, urgentVak);
           }
         } else {
-          timedItems.forEach(ev => { html += renderItem(ev); });
+          timedItems.forEach(ev => { itemsHtml += renderItem(ev); });
         }
       }
 
-      if (!html) {
-        html = !isSchooldag
-          ? `<div class="dag-vrij-weekend">Vrije dag</div>`
-          : `<div class="dag-leeg">Niks gepland vandaag</div>`;
+      if (!itemsHtml && !topperHtml) {
+        itemsHtml = isSchooldag
+          ? `<div class="dag-leeg">Niks gepland vandaag</div>`
+          : `<div class="dag-vrij-weekend">Vrije dag</div>`;
       }
 
-      document.getElementById('dag-inhoud').innerHTML = html;
+      document.getElementById('dag-inhoud').innerHTML = topperHtml + itemsHtml;
     }
 
     function render() { renderWeekNav(); renderDagRij(); renderDagInhoud(); }
