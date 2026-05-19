@@ -316,7 +316,13 @@
     function verschuifNaarVrijeDag(d) {
       const werk       = JSON.parse(localStorage.getItem('werk')       || '[]');
       const trainingen = JSON.parse(localStorage.getItem('trainingen') || '[]');
+      const vm         = JSON.parse(localStorage.getItem('vrijeMomenten') || '{}');
+      function isHeleDagVrij(dag) {
+        const v = vm[dag.getDay()];
+        return !!(v && typeof v === 'object' && v.heleDag);
+      }
       function isBezet(dag) {
+        if (isHeleDagVrij(dag)) return false;
         const w = dag.getDay();
         return werk.some(e => Array.isArray(e.dagen) && e.dagen.includes(w)) ||
                trainingen.some(e => Array.isArray(e.dagen) && e.dagen.includes(w));
@@ -324,7 +330,7 @@
       const datum = new Date(d); datum.setHours(0,0,0,0);
       let verschoven = false, max = 14;
       while (isBezet(datum) && max-- > 0) { datum.setDate(datum.getDate() - 1); verschoven = true; }
-      return { datum, verschoven };
+      return { datum, verschoven, ideaal: isHeleDagVrij(datum) };
     }
 
     function getCijferAanpassing(vakNaam) {
@@ -425,11 +431,13 @@
         const extraDagen = r.drukkeWeek ? 2 : 0;
         const beginD = new Date(toets.datum + 'T00:00:00');
         beginD.setDate(beginD.getDate() - getLeerDagen(toets.type, moeilijkheid) - extraDagen - (r.vakAanpassing || 0));
-        const { datum: vrijBegin, verschoven } = verschuifNaarVrijeDag(beginD);
+        const { datum: vrijBegin, verschoven, ideaal } = verschuifNaarVrijeDag(beginD);
         const vm = JSON.parse(localStorage.getItem('vrijeMomenten') || '{}');
-        const vrijTijd = vm[vrijBegin.getDay()];
+        const vrijData = vm[vrijBegin.getDay()];
+        const vrijTijd = vrijData ? (typeof vrijData === 'string' ? vrijData : vrijData.tijd) : null;
         const tijdDeel = vrijTijd ? `, vrij vanaf ${vrijTijd}` : '';
-        advies = `<div class="kaart-advies leeradvies">Begin op ${vrijBegin.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' })}${tijdDeel}${verschoven ? ' (werkdag overgeslagen)' : ''}</div>`;
+        const ideaalDeel = ideaal ? ' — ideale leerdag' : '';
+        advies = `<div class="kaart-advies leeradvies">Begin op ${vrijBegin.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' })}${tijdDeel}${ideaalDeel}${verschoven && !ideaal ? ' (werkdag overgeslagen)' : ''}</div>`;
       }
       return `<div class="toets-kaart ${categorie}">
         ${drukBadge}

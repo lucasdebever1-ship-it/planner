@@ -262,14 +262,16 @@
       padding: 11px 14px; border-bottom: 1px solid #ebebeb; gap: 10px;
     }
     .vrij-rij:last-child { border-bottom: none; }
-    .vrij-dag { font-size: 0.88rem; font-weight: 600; color: #1a1a1a; min-width: 90px; flex-shrink: 0; }
+    .vrij-dag { font-size: 0.88rem; font-weight: 600; color: #1a1a1a; min-width: 80px; flex-shrink: 0; }
+    .vrij-midden { flex: 1; display: flex; align-items: center; gap: 6px; justify-content: flex-end; }
     .vrij-label { font-size: 0.82rem; color: #aaa; flex-shrink: 0; }
     .vrij-input {
-      flex: 1; background: transparent; border: none; outline: none;
+      background: transparent; border: none; outline: none;
       font-size: 0.88rem; color: #666; text-align: right;
       font-family: inherit; appearance: none;
     }
     .vrij-input:focus { color: #1a1a1a; }
+    .vrij-hele-label { font-size: 0.82rem; font-weight: 600; color: #2bc47e; }
 
     /* Per-dag tijden */
     .dag-tijden-container { margin: 0 0 8px; }
@@ -899,19 +901,57 @@
 
     function renderVrijeMomenten() {
       const vm = laadVrijeMomenten();
-      // Ma t/m zo (1..7, dan 0)
       const dagVolgorde = [1,2,3,4,5,6,0];
-      document.getElementById('vrije-momenten-kaart').innerHTML = dagVolgorde.map(d => `
-        <div class="vrij-rij">
+      document.getElementById('vrije-momenten-kaart').innerHTML = dagVolgorde.map(d => {
+        const v = vm[d];
+        const heleDag = !!(v && typeof v === 'object' && v.heleDag);
+        const tijd = v ? (typeof v === 'string' ? v : (v.tijd || '')) : '';
+        return `<div class="vrij-rij">
           <span class="vrij-dag">${DAG_LANG_VM[d]}</span>
-          <span class="vrij-label">vrij vanaf</span>
-          <input type="time" class="vrij-input" data-dag="${d}" value="${vm[d] || ''}" placeholder="—">
-        </div>`).join('');
+          <div class="vrij-midden">
+            <span class="vrij-label"${heleDag ? ' style="display:none"' : ''}>vrij vanaf</span>
+            <input type="time" class="vrij-input" data-dag="${d}" value="${tijd}"
+                   placeholder="—"${heleDag ? ' style="display:none"' : ''}>
+            <span class="vrij-hele-label"${!heleDag ? ' style="display:none"' : ''}>Hele dag</span>
+          </div>
+          <label class="schakelaar" style="flex-shrink:0;margin-left:4px">
+            <input type="checkbox" class="vrij-hdv-chk" data-dag="${d}"${heleDag ? ' checked' : ''}>
+            <span class="schakelaar-knop"></span>
+          </label>
+        </div>`;
+      }).join('');
+
+      document.querySelectorAll('.vrij-hdv-chk').forEach(chk => {
+        chk.addEventListener('change', () => {
+          const d = parseInt(chk.dataset.dag);
+          const vm2 = laadVrijeMomenten();
+          const rij = chk.closest('.vrij-rij');
+          const labelEl = rij.querySelector('.vrij-label');
+          const inputEl = rij.querySelector('.vrij-input');
+          const heleEl  = rij.querySelector('.vrij-hele-label');
+          if (chk.checked) {
+            labelEl.style.display = 'none';
+            inputEl.style.display = 'none';
+            heleEl.style.display  = '';
+            vm2[d] = { heleDag: true };
+          } else {
+            labelEl.style.display = '';
+            inputEl.style.display = '';
+            heleEl.style.display  = 'none';
+            const prevTijd = inputEl.value;
+            if (prevTijd) vm2[d] = { heleDag: false, tijd: prevTijd };
+            else delete vm2[d];
+          }
+          slaVrijeMomentenOp(vm2);
+        });
+      });
+
       document.querySelectorAll('.vrij-input').forEach(inp => {
         inp.addEventListener('change', () => {
           const vm2 = laadVrijeMomenten();
           const d = parseInt(inp.dataset.dag);
-          if (inp.value) vm2[d] = inp.value; else delete vm2[d];
+          if (inp.value) vm2[d] = { heleDag: false, tijd: inp.value };
+          else delete vm2[d];
           slaVrijeMomentenOp(vm2);
         });
       });

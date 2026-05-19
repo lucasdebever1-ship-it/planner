@@ -473,6 +473,22 @@
       return soonest;
     }
 
+    function vrijBlokHeleDag(urgentVak) {
+      let tipHtml = '';
+      if (urgentVak) {
+        const wanneer = urgentVak.dagsTot === 0 ? 'toets vandaag!'
+          : urgentVak.dagsTot === 1 ? 'toets morgen!'
+          : `toets over ${urgentVak.dagsTot} dagen`;
+        tipHtml = `<div class="tijdblok-vrij-tip">Ideaal moment voor <strong>${urgentVak.vak}</strong>, ${wanneer}</div>`;
+      } else {
+        tipHtml = `<div class="tijdblok-vrij-tip">Ideale dag om te leren</div>`;
+      }
+      return `<div class="tijdblok-vrij">
+        <div class="tijdblok-vrij-titel">Hele dag vrij om te leren</div>
+        ${tipHtml}
+      </div>`;
+    }
+
     function vrijBlokHtml(begin, eind, urgentVak) {
       const tijdStr = eind ? `${begin} – ${eind}` : `Vrij vanaf ${begin}`;
       let tipHtml = '';
@@ -515,7 +531,13 @@
 
       // Vrij moment voor deze dag
       const vm = JSON.parse(localStorage.getItem('vrijeMomenten') || '{}');
-      const vrijVanaf = vm[dagNr] || null;
+      const vrijData  = vm[dagNr];
+      let vrijVanaf = null, heleDagVrij = false;
+      if (vrijData) {
+        if (typeof vrijData === 'string') vrijVanaf = vrijData;
+        else if (vrijData.heleDag) heleDagVrij = true;
+        else if (vrijData.tijd) vrijVanaf = vrijData.tijd;
+      }
       const vrijVal   = tijdMinuten(vrijVanaf);
 
       // Timed events (afspraken met tijd + trainingen met vaste tijd)
@@ -580,7 +602,10 @@
       // ── Tijdlijn ──
       const heeftFlags = html.length > 0;
 
-      if (!vrijVanaf && !timedEvents.length) {
+      if (heleDagVrij) {
+        html += vrijBlokHeleDag(urgentVak);
+        timedEvents.forEach(ev => { html += eventBlokHtml(ev); });
+      } else if (!vrijVanaf && !timedEvents.length) {
         if (isWeekend && !heeftFlags) {
           html += `<div class="dag-vrij-weekend">Hele dag vrij</div>`;
         } else if (!heeftFlags) {

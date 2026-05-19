@@ -760,8 +760,11 @@
       const stemming = getCheckin();
       const vm = JSON.parse(localStorage.getItem('vrijeMomenten') || '{}');
       function vrijTipDeel(dag) {
-        const tijd = vm[dag.getDay()];
-        return tijd ? `, je bent vrij vanaf ${tijd}` : '';
+        const v = vm[dag.getDay()];
+        if (!v) return '';
+        if (typeof v === 'string') return `, je bent vrij vanaf ${v}`;
+        if (v.heleDag) return ', ideale leerdag vandaag';
+        return v.tijd ? `, je bent vrij vanaf ${v.tijd}` : '';
       }
 
       // ── 0. Stemming-override ──
@@ -816,8 +819,11 @@
           if (!t.datum) continue;
           const dagsTot = Math.round((parseDatum(t.datum) - vandaag) / 86400000);
           if (dagsTot >= 2 && dagsTot <= 7 && vm[vandaag.getDay()]) {
-            const vrijH = vm[vandaag.getDay()];
-            return `Toets <strong>${v.naam}</strong> over ${dagsTot} dagen. Je bent vandaag vrij vanaf ${vrijH}.`;
+            const vd = vm[vandaag.getDay()];
+            const vrijLabel = typeof vd === 'string' ? `vrij vanaf ${vd}`
+              : (vd.heleDag ? 'ideale leerdag vandaag'
+              : (vd.tijd ? `vrij vanaf ${vd.tijd}` : null));
+            if (vrijLabel) return `Toets <strong>${v.naam}</strong> over ${dagsTot} dagen. Je bent vandaag ${vrijLabel}.`;
           }
         }
       }

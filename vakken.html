@@ -491,7 +491,13 @@
     function verschuifNaarVrijeDag(d) {
       const werk       = JSON.parse(localStorage.getItem('werk')       || '[]');
       const trainingen = JSON.parse(localStorage.getItem('trainingen') || '[]');
+      const vm         = JSON.parse(localStorage.getItem('vrijeMomenten') || '{}');
+      function isHeleDagVrij(dag) {
+        const v = vm[dag.getDay()];
+        return !!(v && typeof v === 'object' && v.heleDag);
+      }
       function isBezet(dag) {
+        if (isHeleDagVrij(dag)) return false;
         const w = dag.getDay();
         return werk.some(e => Array.isArray(e.dagen) && e.dagen.includes(w)) ||
                trainingen.some(e => Array.isArray(e.dagen) && e.dagen.includes(w));
@@ -499,7 +505,7 @@
       const datum = new Date(d); datum.setHours(0,0,0,0);
       let verschoven = false, max = 14;
       while (isBezet(datum) && max-- > 0) { datum.setDate(datum.getDate() - 1); verschoven = true; }
-      return { datum, verschoven };
+      return { datum, verschoven, ideaal: isHeleDagVrij(datum) };
     }
 
     function getVakAanpassing(vakNaam) {
@@ -519,8 +525,10 @@
       if (dagen <= 0) return null;
       const d = new Date(datum + 'T00:00:00');
       d.setDate(d.getDate() - dagen);
-      const { datum: vrij, verschoven } = verschuifNaarVrijeDag(d);
-      return { tekst: vrij.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' }), verschoven };
+      const { datum: vrij, verschoven, ideaal } = verschuifNaarVrijeDag(d);
+      const basis = vrij.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' });
+      const extra = ideaal ? ' — ideale leerdag' : (verschoven ? ' (werkdag overgeslagen)' : '');
+      return { tekst: basis + extra, verschoven };
     }
 
     function renderToetsen(toetsen, moeilijkheid, i, vakNaam) {
