@@ -166,6 +166,24 @@
     }
     .plan-dag-actie { font-size: 0.76rem; color: #444; line-height: 1.45; }
     .plan-dag-leeg  { font-size: 0.73rem; color: #c8c8c8; line-height: 1.4; }
+    .plan-dag-kaart.plan-gedaan .plan-dag-actie { opacity: 0.4; text-decoration: line-through; }
+    .plan-check-wrap {
+      display: flex; justify-content: flex-end; margin-top: 8px;
+      cursor: pointer; -webkit-tap-highlight-color: transparent;
+    }
+    .plan-check { display: none; }
+    .plan-check-knop {
+      width: 20px; height: 20px; border-radius: 6px;
+      border: 2px solid #d8d8d8; background: #fff;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .plan-check:checked + .plan-check-knop { background: #3ddc97; border-color: #3ddc97; }
+    .plan-check:checked + .plan-check-knop::after {
+      content: ''; width: 5px; height: 9px; display: block;
+      border-right: 2.5px solid #fff; border-bottom: 2.5px solid #fff;
+      transform: rotate(45deg) translateY(-1px);
+    }
 
     /* ── Tip ── */
     .tip-kaart {
@@ -1085,17 +1103,49 @@
 
     function renderPlanWeek() {
       const DAG_KORT = ['zo','ma','di','wo','do','vr','za'];
+      const gepland = JSON.parse(localStorage.getItem('plan_gepland') || '{}');
+      const gedaan  = JSON.parse(localStorage.getItem('plan_gedaan')  || '{}');
       let html = '';
+
       for (let i = 1; i <= 3; i++) {
-        const dag = addDagen(vandaag, i);
-        const tekst = genereerDagAdvies(dag);
-        html += `<div class="plan-dag-kaart${tekst ? ' heeft-actie' : ''}">
-          <span class="plan-dag-naam">${DAG_KORT[dag.getDay()]}</span>
-          <span class="plan-dag-datum">${dag.getDate()}</span>
-          <div class="${tekst ? 'plan-dag-actie' : 'plan-dag-leeg'}">${tekst || 'Rustige dag, geen leerwerk'}</div>
-        </div>`;
+        const dag    = addDagen(vandaag, i);
+        const dagStr = toDatumStr(dag);
+        const tekst  = genereerDagAdvies(dag);
+
+        if (tekst) {
+          const toets = vindUrgentsteToets(dag);
+          if (toets) gepland[dagStr] = { vakNaam: toets.vakNaam, advies: tekst };
+          const isGedaan = !!gedaan[dagStr];
+          html += `<div class="plan-dag-kaart heeft-actie${isGedaan ? ' plan-gedaan' : ''}">
+            <span class="plan-dag-naam">${DAG_KORT[dag.getDay()]}</span>
+            <span class="plan-dag-datum">${dag.getDate()}</span>
+            <div class="plan-dag-actie">${tekst}</div>
+            <label class="plan-check-wrap">
+              <input type="checkbox" class="plan-check" data-dag="${dagStr}"${isGedaan ? ' checked' : ''}>
+              <span class="plan-check-knop"></span>
+            </label>
+          </div>`;
+        } else {
+          html += `<div class="plan-dag-kaart">
+            <span class="plan-dag-naam">${DAG_KORT[dag.getDay()]}</span>
+            <span class="plan-dag-datum">${dag.getDate()}</span>
+            <div class="plan-dag-leeg">Rustige dag, geen leerwerk</div>
+          </div>`;
+        }
       }
+
+      localStorage.setItem('plan_gepland', JSON.stringify(gepland));
       document.getElementById('plan-rij').innerHTML = html;
+
+      document.querySelectorAll('.plan-check').forEach(chk => {
+        chk.addEventListener('change', () => {
+          const ds   = chk.dataset.dag;
+          const gd2  = JSON.parse(localStorage.getItem('plan_gedaan') || '{}');
+          if (chk.checked) gd2[ds] = true; else delete gd2[ds];
+          localStorage.setItem('plan_gedaan', JSON.stringify(gd2));
+          chk.closest('.plan-dag-kaart').classList.toggle('plan-gedaan', chk.checked);
+        });
+      });
     }
 
     renderStreak(updateStreak());

@@ -348,6 +348,20 @@
       return Math.max(1, Math.round(basis * ((moeilijkheid || 5) / 5)));
     }
 
+    function getMissedPct(vakNaam) {
+      const gepland = JSON.parse(localStorage.getItem('plan_gepland') || '{}');
+      const gedaan  = JSON.parse(localStorage.getItem('plan_gedaan')  || '{}');
+      const nu = new Date(); nu.setHours(0,0,0,0);
+      function tds(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+      let n = 0, g = 0;
+      for (let i = 1; i <= 7; i++) {
+        const d = new Date(nu); d.setDate(d.getDate() - i);
+        const p = gepland[tds(d)];
+        if (p && p.vakNaam === vakNaam) { n++; if (gedaan[tds(d)]) g++; }
+      }
+      return n >= 2 ? g / n : null;
+    }
+
     function verschuifNaarVrijeDag(d) {
       const werk       = JSON.parse(localStorage.getItem('werk')       || '[]');
       const trainingen = JSON.parse(localStorage.getItem('trainingen') || '[]');
@@ -464,6 +478,9 @@
         const extraDagen = r.drukkeWeek ? 2 : 0;
         const beginD = new Date(toets.datum + 'T00:00:00');
         beginD.setDate(beginD.getDate() - getLeerDagen(toets.type, moeilijkheid) - extraDagen - (r.vakAanpassing || 0));
+        const sessieRate = getMissedPct(r.vak);
+        const sessieAanpassing = (sessieRate !== null && sessieRate < 0.5) ? 1 : 0;
+        beginD.setDate(beginD.getDate() - sessieAanpassing);
         const { datum: vrijBegin, verschoven, ideaal } = verschuifNaarVrijeDag(beginD);
         const vm = JSON.parse(localStorage.getItem('vrijeMomenten') || '{}');
         const vrijData = vm[vrijBegin.getDay()];
@@ -474,7 +491,8 @@
         const tijdDeel = isBeginSchooldag && _se ? ` na ${_se}` : (vrijTijd ? `, vrij vanaf ${vrijTijd}` : '');
         const ideaalDeel = ideaal ? ' — ideale leerdag' : '';
         const extraLabel = r.cijferAanpassing > 0 ? ' · Extra tijd ingepland op basis van je vorige cijfer.' : '';
-        advies = `<div class="kaart-advies leeradvies">Begin op ${vrijBegin.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' })}${tijdDeel}${ideaalDeel}${verschoven && !ideaal ? ' (werkdag overgeslagen)' : ''}${extraLabel}</div>`;
+        const sessieLabel = sessieAanpassing > 0 ? ' · Extra dag ingepland, vorige week miste je wat sessies.' : '';
+        advies = `<div class="kaart-advies leeradvies">Begin op ${vrijBegin.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' })}${tijdDeel}${ideaalDeel}${verschoven && !ideaal ? ' (werkdag overgeslagen)' : ''}${extraLabel}${sessieLabel}</div>`;
       }
       return `<div class="toets-kaart ${categorie}">
         ${drukBadge}

@@ -293,6 +293,17 @@
     /* ── Focus states ── */
     :focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; border-radius: 4px; }
     input:focus-visible { outline: none; }
+
+    /* ── Leertaken & weekgrafiek ── */
+    .leertaken-tekst { font-size: 0.88rem; color: #555; margin-bottom: 10px; line-height: 1.5; }
+    .voortgang-balk-wrap { height: 8px; background: #ebebeb; border-radius: 4px; overflow: hidden; }
+    .voortgang-balk-vul  { height: 100%; background: #3ddc97; border-radius: 4px; transition: width 0.4s cubic-bezier(0.4,0,0.2,1); }
+    .weekgrafiek-rijen { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+    .weekgrafiek-rij  { display: flex; align-items: center; gap: 10px; }
+    .weekgrafiek-label { font-size: 0.75rem; color: #aaa; font-weight: 600; width: 44px; flex-shrink: 0; }
+    .weekgrafiek-balk-wrap { flex: 1; height: 8px; background: #ebebeb; border-radius: 4px; overflow: hidden; }
+    .weekgrafiek-balk-vul  { height: 100%; background: #3ddc97; border-radius: 4px; }
+    .weekgrafiek-pct  { font-size: 0.75rem; color: #aaa; font-weight: 600; width: 30px; flex-shrink: 0; text-align: right; }
   </style>
 </head>
 <body>
@@ -314,6 +325,10 @@
 
   <!-- 3. Check-in patronen -->
   <div id="patronen-sectie"></div>
+
+  <!-- 4b. Leertaken + weekgrafiek -->
+  <div id="leertaken-sectie"></div>
+  <div id="weekgrafiek-sectie"></div>
 
   <!-- 4. Weekterugblik knop -->
   <button class="btn-terugblik" onclick="scrollNaarTerugblik()">
@@ -721,10 +736,75 @@
       renderCijfers();
     }
 
+    // ── Leertaken opvolgdata ──
+    function getMaandag(d) {
+      const r = normaliseer(new Date(d));
+      r.setDate(r.getDate() - (r.getDay() === 0 ? 6 : r.getDay() - 1));
+      return r;
+    }
+
+    function berekenWeekStats(maandag) {
+      const gepland = JSON.parse(localStorage.getItem('plan_gepland') || '{}');
+      const gedaan  = JSON.parse(localStorage.getItem('plan_gedaan')  || '{}');
+      const maStr   = toDatumStr(maandag);
+      const zoStr   = toDatumStr(addDagen(maandag, 6));
+      let n = 0, g = 0;
+      Object.keys(gepland).forEach(ds => {
+        if (ds >= maStr && ds <= zoStr && gepland[ds]) { n++; if (gedaan[ds]) g++; }
+      });
+      return { n, g };
+    }
+
+    function renderLeertaken() {
+      const container = document.getElementById('leertaken-sectie');
+      const ma = getMaandagVanIsoWeek(weekStr);
+      const { n, g } = berekenWeekStats(ma);
+      if (n === 0) { container.innerHTML = ''; return; }
+      const pct = Math.round(g / n * 100);
+      container.innerHTML = `<div class="voortgang-kaart">
+        <p class="sectie-label">Leersessies deze week</p>
+        <p class="leertaken-tekst">Je hebt <strong>${g} van ${n}</strong> geplande sessies gedaan.</p>
+        <div class="voortgang-balk-wrap">
+          <div class="voortgang-balk-vul" style="width:${pct}%"></div>
+        </div>
+      </div>`;
+    }
+
+    function renderWeekGrafiek() {
+      const container = document.getElementById('weekgrafiek-sectie');
+      const hMaandag = getMaandag(vandaag);
+      let heeftData = false;
+      const rijen = [];
+      for (let w = 3; w >= 0; w--) {
+        const ma = new Date(hMaandag); ma.setDate(ma.getDate() - w * 7);
+        const { n, g } = berekenWeekStats(ma);
+        const wnr = isoWeek(toDatumStr(ma)).split('-W')[1];
+        const pct = n > 0 ? Math.round(g / n * 100) : null;
+        if (n > 0) heeftData = true;
+        rijen.push({ wnr, pct });
+      }
+      if (!heeftData) { container.innerHTML = ''; return; }
+      const rijenHtml = rijen.map(r =>
+        `<div class="weekgrafiek-rij">
+          <span class="weekgrafiek-label">W${r.wnr}</span>
+          <div class="weekgrafiek-balk-wrap">
+            <div class="weekgrafiek-balk-vul" style="width:${r.pct ?? 0}%"></div>
+          </div>
+          <span class="weekgrafiek-pct">${r.pct !== null ? r.pct + '%' : '—'}</span>
+        </div>`
+      ).join('');
+      container.innerHTML = `<div class="voortgang-kaart">
+        <p class="sectie-label">Leersessies afgelopen 4 weken</p>
+        <div class="weekgrafiek-rijen">${rijenHtml}</div>
+      </div>`;
+    }
+
     // ── Init ──
     renderStreak();
     renderCijfers();
     renderPatronen();
+    renderLeertaken();
+    renderWeekGrafiek();
     renderTerugblik();
 
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js?v=6');
