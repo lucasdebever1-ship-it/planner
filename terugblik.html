@@ -145,6 +145,7 @@
     .cijfer-getal { font-size: 0.92rem; font-weight: 800; min-width: 30px; text-align: right; }
     .cijfer-getal.goed { color: #2bc47e; }
     .cijfer-getal.laag { color: #e05252; }
+    .trend-pijl { flex-shrink: 0; display: flex; align-items: center; }
 
     /* ── Leeg staat ── */
     .leeg-staat { font-size: 0.83rem; color: #bbb; margin: 0 0 4px; line-height: 1.5; }
@@ -466,6 +467,25 @@
         .sort((a, b) => b.gem - a.gem);
     }
 
+    function berekenTrend(vakNaam) {
+      const cijfers = JSON.parse(localStorage.getItem('cijfers') || '[]')
+        .filter(c => c.vakNaam === vakNaam)
+        .sort((a, b) => (a.datum < b.datum ? -1 : a.datum > b.datum ? 1 : 0));
+      if (cijfers.length < 2) return null;
+      const last = cijfers[cijfers.length - 1].cijfer;
+      const prev = cijfers[cijfers.length - 2].cijfer;
+      if (last > prev) return 'omhoog';
+      if (last < prev) return 'omlaag';
+      return 'gelijk';
+    }
+
+    function trendIconHTML(trend) {
+      if (trend === 'omhoog') return `<span class="trend-pijl"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2bc47e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg></span>`;
+      if (trend === 'omlaag') return `<span class="trend-pijl"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f0a050" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>`;
+      if (trend === 'gelijk') return `<span class="trend-pijl"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#c0c0c0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg></span>`;
+      return '';
+    }
+
     function renderCijfers() {
       const container = document.getElementById('cijfers-sectie');
       const gems = berekenGemiddelden();
@@ -480,6 +500,7 @@
       const bars = gems.map(g => {
         const klasse = g.gem >= 6 ? 'goed' : 'laag';
         const breedte = Math.min(100, Math.round(g.gem / 10 * 100));
+        const trend = berekenTrend(g.vak);
         return `
           <div class="cijfer-rij">
             <span class="cijfer-vak">${g.vak}</span>
@@ -487,6 +508,7 @@
               <div class="cijfer-bar ${klasse}" style="width:${breedte}%"></div>
             </div>
             <span class="cijfer-getal ${klasse}">${g.gem}</span>
+            ${trendIconHTML(trend)}
           </div>`;
       }).join('');
       container.innerHTML = `

@@ -113,6 +113,7 @@
     .kaart-advies { margin-top: 10px; font-size: 0.83rem; font-weight: 600; line-height: 1.45; }
     .leeradvies   { color: #2bc47e; }
     .waarschuwing { color: #d07020; }
+    .cijfer-melding { margin-top: 6px; font-size: 0.78rem; font-weight: 500; color: #c07020; }
 
     .felicitatie-banner {
       background: #edfaf3; border: 1px solid #afe8c8;
@@ -373,9 +374,7 @@
       const vakCijfers = cijfers.filter(c => c.vakNaam === vakNaam).map(c => c.cijfer);
       if (!vakCijfers.length) return 0;
       const gem = vakCijfers.reduce((s, c) => s + c, 0) / vakCijfers.length;
-      if (gem >= 6) return 0;
-      const feedback = JSON.parse(localStorage.getItem('feedback') || '[]');
-      return feedback.some(f => f.vak === vakNaam && f.antwoord === 'te-weinig') ? 2 : 0;
+      return gem < 6 ? 2 : 0;
     }
 
     function formatDatum(d) {
@@ -474,6 +473,8 @@
         const ideaalDeel = ideaal ? ' — ideale leerdag' : '';
         advies = `<div class="kaart-advies leeradvies">Begin op ${vrijBegin.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' })}${tijdDeel}${ideaalDeel}${verschoven && !ideaal ? ' (werkdag overgeslagen)' : ''}</div>`;
       }
+      const cijferMelding = r.cijferAanpassing > 0
+        ? `<div class="cijfer-melding">Extra tijd ingepland op basis van je cijfers.</div>` : '';
       return `<div class="toets-kaart ${categorie}">
         ${drukBadge}
         <div class="kaart-datumrij">
@@ -483,6 +484,7 @@
         <div class="vak-naam">${vak}</div>
         <div class="toets-type">${toets.naam}</div>
         ${advies}
+        ${cijferMelding}
       </div>`;
     }
 
@@ -501,9 +503,10 @@
           }
           if (dagsTotToets !== null && dagsTotToets < -7) return; // meer dan 7 dagen voorbij
           const vakAanpassing = getVakAanpassing(v.naam);
-          const startDagen = getLeerDagen(t.type, v.moeilijkheid) + vakAanpassing + getCijferAanpassing(v.naam);
+          const cijferAanpassing = getCijferAanpassing(v.naam);
+          const startDagen = getLeerDagen(t.type, v.moeilijkheid) + vakAanpassing + cijferAanpassing;
           const dagsTotBegin = dagsTotToets !== null ? dagsTotToets - startDagen : null;
-          items.push({ vak: v.naam, moeilijkheid: v.moeilijkheid, toets: t, dagsTotToets, dagsTotBegin, categorie: categoriseer(dagsTotToets, dagsTotBegin), vakAanpassing });
+          items.push({ vak: v.naam, moeilijkheid: v.moeilijkheid, toets: t, dagsTotToets, dagsTotBegin, categorie: categoriseer(dagsTotToets, dagsTotBegin), vakAanpassing, cijferAanpassing });
         });
       });
 
