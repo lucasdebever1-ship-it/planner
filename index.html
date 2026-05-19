@@ -11,10 +11,18 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Struct">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --bg: #ffffff;
+      --surface: #f8f8f8;
+      --primary: #3ddc97;
+      --text: #1a1a1a;
+      --text-muted: #888888;
+      --border: rgba(0,0,0,0.08);
+    }
     *, *::before, *::after { box-sizing: border-box; }
     html { -webkit-text-size-adjust: 100%; }
     body, button, input, select, textarea { font-synthesis: none; }
@@ -355,7 +363,36 @@
       from { opacity: 0; transform: translateY(8px); }
       to   { opacity: 1; transform: translateY(0); }
     }
-    .dag-kaart, .streak-blok, .tip-kaart, .week-waarschuwing, .patroon-banner, .checkin-kaart { animation: kaart-in 0.2s ease both; }
+    .dag-kaart, .streak-blok, .tip-kaart, .week-waarschuwing, .patroon-banner, .checkin-kaart { animation: kaart-in 0.3s ease-out both; }
+
+    /* ── Noise texture ── */
+    body { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); background-size: 200px 200px; }
+
+    /* ── Syne display font ── */
+    h1, h2, h3, .begroeting, .pagina-header h1, .vak-naam,
+    .hero-naam, .sam-getal, .streak-getal, .banner-titel,
+    .motivatie-tekst, .splash-naam { font-family: 'Syne', sans-serif; }
+
+    /* ── Touch targets ── */
+    .tab { min-height: 44px; }
+    .snel-knop, .btn-toon-alles, .checkin-optie { min-height: 44px; }
+
+    /* ── Focus states ── */
+    :focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; border-radius: 4px; }
+    a:focus-visible { border-radius: 6px; }
+    input:focus-visible, select:focus-visible { outline: none; }
+
+    /* ── Stagger reveal ── */
+    .dag-kaart:nth-child(2),.toets-kaart:nth-child(2),.afspraak-kaart:nth-child(2),
+    .kaart:nth-child(2),.toets-rij:nth-child(2),.tijdblok-event:nth-child(2),.tijdblok-vrij:nth-child(2) { animation-delay: 50ms; }
+    .dag-kaart:nth-child(3),.toets-kaart:nth-child(3),.afspraak-kaart:nth-child(3),
+    .kaart:nth-child(3),.toets-rij:nth-child(3),.tijdblok-event:nth-child(3),.tijdblok-vrij:nth-child(3) { animation-delay: 100ms; }
+    .dag-kaart:nth-child(4),.toets-kaart:nth-child(4),.afspraak-kaart:nth-child(4),
+    .kaart:nth-child(4),.toets-rij:nth-child(4) { animation-delay: 150ms; }
+    .dag-kaart:nth-child(5),.toets-kaart:nth-child(5),.afspraak-kaart:nth-child(5),
+    .kaart:nth-child(5),.toets-rij:nth-child(5) { animation-delay: 200ms; }
+    .dag-kaart:nth-child(6),.toets-kaart:nth-child(6),.afspraak-kaart:nth-child(6),
+    .kaart:nth-child(6),.toets-rij:nth-child(6) { animation-delay: 250ms; }
   </style>
 </head>
 <body>
