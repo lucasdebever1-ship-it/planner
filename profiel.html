@@ -348,42 +348,48 @@
     .tab.actief .icoon-filled  { display: block; }
 
     /* ── Instellingen in profiel ── */
-    .uitleg-banner-mini {
-      font-size: 0.85rem; color: #666; line-height: 1.5;
-      margin-bottom: 12px; padding: 0 1px;
-    }
-    .uitleg-banner-mini p { margin: 0; }
     .inst-kaart {
       background: #f5f5f5; border: 1px solid #ebebeb;
-      border-radius: 14px; overflow: hidden; margin-bottom: 4px;
+      border-radius: 14px; overflow: hidden; margin-bottom: 10px;
     }
-    .btn-opl-inst {
-      flex: 1; padding: 12px; background: #3ddc97; border: none;
-      border-radius: 10px; color: #fff; font-size: 1rem; font-weight: 600;
-      cursor: pointer; font-family: inherit; min-height: 48px;
-      transition: background 0.15s;
+    .inst-rij {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 13px 16px; border-bottom: 1px solid #ebebeb; gap: 12px;
     }
-    .btn-opl-inst:hover { background: #2bc47e; }
-    .btn-ann-inst {
-      padding: 12px 16px; background: #f5f5f5; border: 1px solid #e0e0e0;
-      border-radius: 10px; color: #888; font-size: 1rem;
-      cursor: pointer; font-family: inherit; min-height: 48px;
-      transition: color 0.15s;
+    .inst-rij:last-child { border-bottom: none; }
+    .inst-naam { font-size: 0.95rem; font-weight: 600; color: #1a1a1a; }
+    .inst-rij-rechts { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .inst-input {
+      width: 64px; height: 40px;
+      background: #fff; border: 1px solid #e0e0e0; border-radius: 8px;
+      color: #1a1a1a; padding: 0 8px; font-size: 1rem; font-family: inherit;
+      text-align: center; outline: none; transition: border-color 0.15s;
+      -moz-appearance: textfield; appearance: textfield;
     }
-    .btn-ann-inst:hover { color: #1a1a1a; }
-    .inst-feedback {
-      font-size: 0.85rem; color: #2bc47e; text-align: center;
-      margin-top: 10px; min-height: 18px; opacity: 0; transition: opacity 0.3s;
+    .inst-input::-webkit-outer-spin-button,
+    .inst-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .inst-input:focus { border-color: #3ddc97; }
+    .inst-dagen { font-size: 0.85rem; color: #aaa; }
+    .btn-standaard {
+      padding: 10px 16px; background: #f5f5f5; border: 1px solid #e0e0e0;
+      border-radius: 10px; color: #888; font-size: 0.9rem;
+      cursor: pointer; font-family: inherit;
+      transition: color 0.15s, border-color 0.15s;
     }
-    .inst-feedback.zichtbaar { opacity: 1; }
-    .inst-kaart .veld-rij { border-bottom: 1px solid #ebebeb; }
-    .inst-kaart .veld-rij:last-child { border-bottom: none; }
+    .btn-standaard:hover { color: #1a1a1a; border-color: #bbb; }
     .notif-status-mini {
       font-size: 0.83rem; border-radius: 10px;
       padding: 10px 14px; margin-bottom: 10px; font-weight: 500;
     }
     .notif-ok  { background: #f0fbf5; color: #2bc47e; border: 1px solid #b8efd3; }
     .notif-err { background: #fff5f5; color: #e05252; border: 1px solid #ffd0d0; }
+    .btn-opl-inst {
+      padding: 12px 20px; background: #3ddc97; border: none;
+      border-radius: 10px; color: #fff; font-size: 1rem; font-weight: 600;
+      cursor: pointer; font-family: inherit; min-height: 48px;
+      transition: background 0.15s;
+    }
+    .btn-opl-inst:hover { background: #2bc47e; }
 
     /* ── Animaties ── */
     @keyframes kaart-in {
@@ -531,15 +537,58 @@
   <!-- Leerinstellingen -->
   <div class="sectie">
     <p class="sectie-label">Leerinstellingen</p>
-    <div class="uitleg-banner-mini">
-      <p>Hoeveel dagen van tevoren wil je beginnen met leren per toetstype?</p>
+    <div class="inst-kaart">
+      <div class="inst-rij">
+        <span class="inst-naam">Mondeling</span>
+        <div class="inst-rij-rechts">
+          <input type="number" class="inst-input" id="inst-Mondeling" min="0" max="60">
+          <span class="inst-dagen">dagen</span>
+        </div>
+      </div>
+      <div class="inst-rij">
+        <span class="inst-naam">Proefwerk</span>
+        <div class="inst-rij-rechts">
+          <input type="number" class="inst-input" id="inst-Proefwerk" min="0" max="60">
+          <span class="inst-dagen">dagen</span>
+        </div>
+      </div>
+      <div class="inst-rij">
+        <span class="inst-naam">SO</span>
+        <div class="inst-rij-rechts">
+          <input type="number" class="inst-input" id="inst-SO" min="0" max="60">
+          <span class="inst-dagen">dagen</span>
+        </div>
+      </div>
+      <div class="inst-rij">
+        <span class="inst-naam">Luistertoets</span>
+        <div class="inst-rij-rechts">
+          <input type="number" class="inst-input" id="inst-Luistertoets" min="0" max="60">
+          <span class="inst-dagen">dagen</span>
+        </div>
+      </div>
+      <div class="inst-rij">
+        <span class="inst-naam">Schrijfvaardigheid</span>
+        <div class="inst-rij-rechts">
+          <input type="number" class="inst-input" id="inst-Schrijfvaardigheid" min="0" max="60">
+          <span class="inst-dagen">dagen</span>
+        </div>
+      </div>
+      <div class="inst-rij">
+        <span class="inst-naam">PO</span>
+        <div class="inst-rij-rechts">
+          <input type="number" class="inst-input" id="inst-PO" min="0" max="60">
+          <span class="inst-dagen">dagen</span>
+        </div>
+      </div>
+      <div class="inst-rij">
+        <span class="inst-naam">Anders</span>
+        <div class="inst-rij-rechts">
+          <input type="number" class="inst-input" id="inst-Anders" min="0" max="60">
+          <span class="inst-dagen">dagen</span>
+        </div>
+      </div>
     </div>
-    <div class="inst-kaart" id="instellingen-kaart-p"></div>
-    <div class="acties-rij" style="display:flex;gap:10px;margin-top:10px">
-      <button class="btn-opl-inst" onclick="slaInstellingenOp()">Opslaan</button>
-      <button class="btn-ann-inst" onclick="herstelStandaardInst()">Standaard</button>
-    </div>
-    <div class="inst-feedback" id="inst-feedback">Opgeslagen</div>
+    <button class="btn-standaard" onclick="herstelStandaardInst()">Standaard herstellen</button>
   </div>
 
   <!-- Meldingen -->
@@ -1037,36 +1086,37 @@
 
     // ── Leerinstellingen ──
     const INST_STANDAARD = { Mondeling:7, Proefwerk:4, SO:1, Luistertoets:0, Schrijfvaardigheid:2, PO:14, Anders:3 };
-    function laadInstellingen() {
-      const op = JSON.parse(localStorage.getItem('instellingen') || '{}');
-      return Object.fromEntries(Object.keys(INST_STANDAARD).map(k => [k, op[k] !== undefined ? op[k] : INST_STANDAARD[k]]));
-    }
-    function renderInstKaart(w) {
-      document.getElementById('instellingen-kaart-p').innerHTML = Object.entries(w).map(([type, dagen]) => `
-        <div class="veld-rij">
-          <span class="veld-naam">${type}</span>
-          <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
-            <input type="number" id="inst-${type}" value="${dagen}" min="0" max="60"
-              style="width:64px;background:#fff;border:1px solid #e0e0e0;border-radius:8px;color:#1a1a1a;padding:8px 10px;font-size:1rem;text-align:center;outline:none;min-height:48px">
-            <span style="font-size:0.85rem;color:#aaa">dagen</span>
-          </div>
-        </div>`).join('');
-    }
-    function slaInstellingenOp() {
+
+    function slaInstOp() {
       const w = {};
       Object.keys(INST_STANDAARD).forEach(type => {
-        const input = document.getElementById('inst-' + type);
-        const val = parseInt(input.value);
-        w[type] = isNaN(val) || val < 0 ? INST_STANDAARD[type] : val;
-        input.value = w[type];
+        const inp = document.getElementById('inst-' + type);
+        if (!inp) return;
+        const val = parseInt(inp.value);
+        w[type] = isNaN(val) || val < 0 ? INST_STANDAARD[type] : Math.min(60, val);
       });
       localStorage.setItem('instellingen', JSON.stringify(w));
-      const fb = document.getElementById('inst-feedback');
-      fb.classList.add('zichtbaar');
-      setTimeout(() => fb.classList.remove('zichtbaar'), 2000);
     }
-    function herstelStandaardInst() { localStorage.removeItem('instellingen'); renderInstKaart(INST_STANDAARD); }
-    renderInstKaart(laadInstellingen());
+
+    function initInstInputs() {
+      const opgeslagen = JSON.parse(localStorage.getItem('instellingen') || '{}');
+      Object.keys(INST_STANDAARD).forEach(type => {
+        const inp = document.getElementById('inst-' + type);
+        if (!inp) return;
+        inp.value = opgeslagen[type] !== undefined ? opgeslagen[type] : INST_STANDAARD[type];
+        inp.addEventListener('input', slaInstOp);
+      });
+    }
+
+    function herstelStandaardInst() {
+      localStorage.removeItem('instellingen');
+      Object.entries(INST_STANDAARD).forEach(([type, val]) => {
+        const inp = document.getElementById('inst-' + type);
+        if (inp) inp.value = val;
+      });
+    }
+
+    initInstInputs();
 
     // ── Meldingen ──
     function laadNotif() { return JSON.parse(localStorage.getItem('notificaties') || '{}'); }
