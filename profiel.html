@@ -557,6 +557,27 @@
   <!-- Mijn schema -->
   <div class="sectie">
     <p class="sectie-label">Mijn schema</p>
+
+    <!-- Schoolrooster -->
+    <div class="veld-kaart" style="margin-bottom:10px">
+      <div class="veld-rij" style="flex-direction:column; align-items:flex-start; gap:8px">
+        <span class="veld-naam">Schooldagen</span>
+        <div class="dag-pills-mini" style="margin-bottom:0">
+          <input type="checkbox" id="sd-1" value="1" class="dag-check-mini sd-dag"><label for="sd-1" class="dag-label-mini">ma</label>
+          <input type="checkbox" id="sd-2" value="2" class="dag-check-mini sd-dag"><label for="sd-2" class="dag-label-mini">di</label>
+          <input type="checkbox" id="sd-3" value="3" class="dag-check-mini sd-dag"><label for="sd-3" class="dag-label-mini">wo</label>
+          <input type="checkbox" id="sd-4" value="4" class="dag-check-mini sd-dag"><label for="sd-4" class="dag-label-mini">do</label>
+          <input type="checkbox" id="sd-5" value="5" class="dag-check-mini sd-dag"><label for="sd-5" class="dag-label-mini">vr</label>
+          <input type="checkbox" id="sd-6" value="6" class="dag-check-mini sd-dag"><label for="sd-6" class="dag-label-mini">za</label>
+          <input type="checkbox" id="sd-0" value="0" class="dag-check-mini sd-dag"><label for="sd-0" class="dag-label-mini">zo</label>
+        </div>
+      </div>
+      <div class="veld-rij">
+        <span class="veld-naam">School klaar om</span>
+        <input type="time" id="school-einde" class="vrij-input" style="margin-left:auto">
+      </div>
+    </div>
+
     <div class="schema-kaart">
 
       <!-- Sport -->
@@ -782,6 +803,16 @@
       document.getElementById('naam').value   = p.naam   || '';
       document.getElementById('niveau').value = p.niveau || '';
       document.getElementById('stad').value   = p.stad   || '';
+
+      // Schoolrooster
+      const schooldagen = JSON.parse(localStorage.getItem('schooldagen') || 'null');
+      if (schooldagen) {
+        schooldagen.forEach(d => {
+          const el = document.getElementById('sd-' + d);
+          if (el) el.checked = true;
+        });
+      }
+      document.getElementById('school-einde').value = localStorage.getItem('schoolEinde') || '';
 
       // Schema toggles
       if (p.sportAan) {
@@ -1113,6 +1144,18 @@
     }
 
     renderVrijeMomenten();
+
+    // ── Schoolrooster opslaan ──
+    document.querySelectorAll('.sd-dag').forEach(chk => {
+      chk.addEventListener('change', () => {
+        const dagen = [...document.querySelectorAll('.sd-dag:checked')].map(c => parseInt(c.value));
+        localStorage.setItem('schooldagen', JSON.stringify(dagen));
+      });
+    });
+    document.getElementById('school-einde').addEventListener('change', function() {
+      if (this.value) localStorage.setItem('schoolEinde', this.value);
+      else localStorage.removeItem('schoolEinde');
+    });
 
     // ── Mijn patronen ──
     function analyseerPatroonProfiel(dagNr) {
