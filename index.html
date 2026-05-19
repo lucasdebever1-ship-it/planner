@@ -1164,7 +1164,7 @@
       renderWeekRij();
     }
 
-    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js?v=4');
 
     // ── Notificaties ──
     function notifInst() { return JSON.parse(localStorage.getItem('notificaties') || '{}'); }

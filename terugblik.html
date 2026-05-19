@@ -703,7 +703,7 @@
     renderStreak();
     renderPatronen();
     render();
-    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js?v=4');
 
     // ── Tab-overgangen ──
     document.querySelectorAll('a.tab').forEach(function(tab) {
