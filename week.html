@@ -89,46 +89,54 @@
     /* Dag inhoud */
     .dag-inhoud { display: flex; flex-direction: column; gap: 10px; }
 
-    /* Kaarten */
-    .kaart {
-      border-radius: 14px; padding: 14px 16px;
-      display: flex; flex-direction: column; gap: 3px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    /* Unified item card */
+    .item-kaart {
+      border-radius: 12px;
+      padding: 12px 14px 12px 16px;
+      background: #fff;
+      border: 1px solid #efefef;
+      border-left: 4px solid #ccc;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .item-kaart-label {
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 2px;
+    }
+    .item-kaart-tijd {
+      font-size: 0.75rem;
+      color: #aaa;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    .item-kaart-titel {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      line-height: 1.3;
+    }
+    .item-kaart-sub {
+      font-size: 0.8rem;
+      color: #999;
+      margin-top: 2px;
+      line-height: 1.4;
     }
 
-    .kaart-toets    { background: #fff5f5; border: 1px solid #ffd0d0; }
-    .kaart-huiswerk { background: #f0f5ff; border: 1px solid #c8d8ff; }
-    .kaart-start    { background: #f0fbf5; border: 1px solid #b8efd3; }
-    .kaart-bezig    { background: #f5f5f5; border: 1px solid #e8e8e8; }
-    .kaart-afspraak { background: #fafafa; border: 1px solid #ebebeb; border-left-width: 4px; }
-    .kaart-training { background: #f0fbf5; border: 1px solid #b8efd3; }
-    .kaart-werk     { background: #fff8f0; border: 1px solid #ffd8a8; }
-
-    .kaart-vak  { font-size: 0.98rem; font-weight: 800; color: #1a1a1a; }
-    .kaart-naam { font-size: 0.8rem; color: #888; margin-top: 1px; }
-    .kaart-status { font-size: 0.85rem; font-weight: 600; margin-top: 4px; }
-
-    .kaart-toets    .kaart-status { color: #e05252; }
-    .kaart-huiswerk .kaart-status { color: #3a6edc; }
-    .kaart-start    .kaart-status { color: #2bc47e; }
-    .kaart-bezig    .kaart-status { color: #888; font-weight: 400; }
-
-    /* Toetsbanner (toets vandaag op de dag zelf) */
-    .toets-banner {
-      background: #fff8f0; border: 2px solid #f0c060;
-      border-radius: 12px; padding: 18px 16px; text-align: center;
-      box-shadow: 0 4px 16px rgba(240,192,64,0.15);
+    /* Lege dag */
+    .dag-leeg {
+      text-align: center;
+      color: #ccc;
+      font-size: 0.82rem;
+      font-weight: 500;
+      padding: 28px 0 12px;
     }
-    .banner-emoji { font-size: 2rem; line-height: 1; margin-bottom: 6px; }
-    .banner-titel { font-size: 1.1rem; font-weight: 800; color: #c07820; letter-spacing: 0.02em; }
-    .banner-vak   { font-size: 0.82rem; color: #b09060; margin-top: 5px; }
 
-    /* Leeg */
-    .leeg { text-align: center; color: #d0d0d0; padding: 32px 0 16px; font-size: 0.85rem; font-weight: 500; }
-
-    /* ── Tijdblokken ── */
-    .tijdlijn { display: flex; flex-direction: column; gap: 8px; }
-
+    /* Tijdblokken vrij */
     .tijdblok-vrij {
       background: linear-gradient(135deg, #edfaf3, #e2f7ea);
       border: 1px solid #afe8c8; border-radius: 14px;
@@ -141,19 +149,6 @@
     }
     .tijdblok-vrij-titel { font-size: 0.92rem; font-weight: 700; color: #111; }
     .tijdblok-vrij-tip { font-size: 0.8rem; color: #2a5a40; margin-top: 5px; line-height: 1.45; }
-
-    .tijdblok-event {
-      border-radius: 14px; padding: 12px 15px;
-      border: 1px solid #e8e8e8; border-left: 3.5px solid #e8e8e8;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-    }
-    .tijdblok-training { background: #f0fbf5; border-color: #b4eed0; border-left-color: #2bc47e; }
-    .tijdblok-event-tijd {
-      font-size: 0.71rem; font-weight: 800; color: #b0b0b0;
-      letter-spacing: 0.04em; margin-bottom: 2px;
-    }
-    .tijdblok-event-naam { font-size: 0.92rem; font-weight: 700; color: #111; }
-    .tijdblok-event-cat { font-size: 0.75rem; color: #aaa; margin-top: 2px; }
 
     .dag-vrij-weekend {
       text-align: center; padding: 22px 16px;
@@ -235,27 +230,13 @@
       to   { opacity: 1; }
     }
     body { animation: pagina-in 0.15s ease both; }
-    .kaart, .tijdblok-vrij, .tijdblok-event, .dag-vrij-weekend { animation: kaart-in 0.3s ease-out both; }
-
-    /* ── Agenda sub-nav ── */
-    .sub-nav {
-      display: flex; background: #f0f0f0; border-radius: 10px;
-      padding: 3px; margin-bottom: 20px; gap: 0;
-    }
-    .sub-tab {
-      flex: 1; text-align: center; padding: 8px 4px;
-      border-radius: 8px; font-size: 0.88rem; font-weight: 600;
-      color: #999; text-decoration: none;
-      transition: background 0.15s, color 0.15s;
-    }
-    .sub-tab.actief { background: #fff; color: #1a1a1a; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+    .item-kaart, .tijdblok-vrij, .dag-vrij-weekend { animation: kaart-in 0.3s ease-out both; }
 
     /* ── Noise texture ── */
     body { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); background-size: 200px 200px; }
 
     /* ── Touch targets ── */
     .tab { min-height: 44px; }
-    .snel-knop, .btn-toon-alles, .checkin-optie { min-height: 44px; }
 
     /* ── Focus states ── */
     :focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; border-radius: 4px; }
@@ -263,16 +244,11 @@
     input:focus-visible, select:focus-visible { outline: none; }
 
     /* ── Stagger reveal ── */
-    .dag-kaart:nth-child(2),.toets-kaart:nth-child(2),.afspraak-kaart:nth-child(2),
-    .kaart:nth-child(2),.toets-rij:nth-child(2),.tijdblok-event:nth-child(2),.tijdblok-vrij:nth-child(2) { animation-delay: 50ms; }
-    .dag-kaart:nth-child(3),.toets-kaart:nth-child(3),.afspraak-kaart:nth-child(3),
-    .kaart:nth-child(3),.toets-rij:nth-child(3),.tijdblok-event:nth-child(3),.tijdblok-vrij:nth-child(3) { animation-delay: 100ms; }
-    .dag-kaart:nth-child(4),.toets-kaart:nth-child(4),.afspraak-kaart:nth-child(4),
-    .kaart:nth-child(4),.toets-rij:nth-child(4) { animation-delay: 150ms; }
-    .dag-kaart:nth-child(5),.toets-kaart:nth-child(5),.afspraak-kaart:nth-child(5),
-    .kaart:nth-child(5),.toets-rij:nth-child(5) { animation-delay: 200ms; }
-    .dag-kaart:nth-child(6),.toets-kaart:nth-child(6),.afspraak-kaart:nth-child(6),
-    .kaart:nth-child(6),.toets-rij:nth-child(6) { animation-delay: 250ms; }
+    .item-kaart:nth-child(2),.tijdblok-vrij:nth-child(2) { animation-delay: 50ms; }
+    .item-kaart:nth-child(3),.tijdblok-vrij:nth-child(3) { animation-delay: 100ms; }
+    .item-kaart:nth-child(4),.tijdblok-vrij:nth-child(4) { animation-delay: 150ms; }
+    .item-kaart:nth-child(5),.tijdblok-vrij:nth-child(5) { animation-delay: 200ms; }
+    .item-kaart:nth-child(6),.tijdblok-vrij:nth-child(6) { animation-delay: 250ms; }
   </style>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -295,11 +271,6 @@
     <button class="btn-week" id="btn-volgende">›</button>
   </div>
 
-  <div class="sub-nav">
-    <a href="week.html"      class="sub-tab actief">Week</a>
-    <a href="overzicht.html" class="sub-tab">Toetsen</a>
-    <a href="afspraken.html" class="sub-tab">Afspraken</a>
-  </div>
   <div class="dag-rij" id="dag-rij"></div>
   <div class="dag-inhoud" id="dag-inhoud"></div>
 
@@ -339,7 +310,6 @@
   </nav>
 
   <script>
-    // Navigatie
     document.getElementById('hamburger').addEventListener('click', () => {
       document.getElementById('menu-overlay').classList.toggle('open');
     });
@@ -351,13 +321,11 @@
       }
     }
 
-    const DAG_LETTERS  = ['zo','ma','di','wo','do','vr','za'];
-    const MAAND_NAMEN  = ['januari','februari','maart','april','mei','juni','juli',
-                          'augustus','september','oktober','november','december'];
+    const DAG_LETTERS = ['zo','ma','di','wo','do','vr','za'];
+    const MAAND_NAMEN = ['januari','februari','maart','april','mei','juni','juli',
+                         'augustus','september','oktober','november','december'];
     const STANDAARD_DAGEN = { Mondeling:7, Proefwerk:4, SO:1, Luistertoets:0,
                                Schrijfvaardigheid:2, PO:14, Anders:3 };
-    const CAT_KLEUREN = { sociaal:'#9b59b6', sport:'#3498db', werk:'#e67e22', gezondheid:'#e74c3c', overig:'#888' };
-    const CAT_LABELS  = { sociaal:'Sociaal', sport:'Sport/Hobby', werk:'Werk', gezondheid:'Gezondheid', overig:'Overig' };
 
     function normaliseer(d) { const r = new Date(d); r.setHours(0,0,0,0); return r; }
     function addDagen(d, n) { const r = new Date(d); r.setDate(r.getDate()+n); r.setHours(0,0,0,0); return r; }
@@ -423,35 +391,7 @@
         });
       });
 
-      const afspraken = JSON.parse(localStorage.getItem('afspraken') || '[]');
-      const dagStr = toDatumStr(dag);
-      const afspraakKaarten = afspraken.filter(a => {
-        if (a.afgerond) return false;
-        if (a.herhaling === 'wekelijks') {
-          return parseDatum(a.datum).getDay() === dag.getDay() && a.datum <= dagStr;
-        }
-        if (a.einddatum) return a.datum <= dagStr && dagStr <= a.einddatum;
-        return a.datum === dagStr;
-      });
-
-      const trainingen = JSON.parse(localStorage.getItem('trainingen') || '[]');
-      const trainingKaarten = trainingen
-        .filter(t => {
-          if (!Array.isArray(t.dagen) || !t.dagen.includes(dag.getDay())) return false;
-          const ti = t.tijden && t.tijden[dag.getDay()];
-          return ti && !ti.wisselend;
-        })
-        .map(t => {
-          const ti = t.tijden[dag.getDay()];
-          return { naam: t.naam, begin: ti.begin || '', eind: ti.eind || '' };
-        });
-
-      const werk = JSON.parse(localStorage.getItem('werk') || '[]');
-      const werkKaarten = werk.filter(w =>
-        Array.isArray(w.dagen) && w.dagen.includes(dag.getDay())
-      );
-
-      return { toetsKaarten, hwKaarten, startKaarten, bezigKaarten, afspraakKaarten, trainingKaarten, werkKaarten };
+      return { toetsKaarten, hwKaarten, startKaarten, bezigKaarten };
     }
 
     // ── State ──
@@ -485,7 +425,6 @@
       document.getElementById('dag-rij').innerHTML = html;
     }
 
-    // ── Tijdlijn helpers ──
     function tijdMinuten(t) {
       if (!t) return -1;
       const [h, m] = t.split(':').map(Number);
@@ -540,45 +479,70 @@
       </div>`;
     }
 
-    function eventBlokHtml(ev) {
-      const tijdStr = ev.begin ? (ev.eind ? `${ev.begin} – ${ev.eind}` : ev.begin) : '';
-      if (ev.type === 'training') {
-        return `<div class="tijdblok-event tijdblok-training">
-          ${tijdStr ? `<div class="tijdblok-event-tijd">${tijdStr}</div>` : ''}
-          <div class="tijdblok-event-naam">${ev.naam}</div>
-        </div>`;
+    function renderItem(item) {
+      const KLEUREN = { toets:'#e05252', huiswerk:'#3a6edc', start:'#888888', bezig:'#888888', afspraak:'#9b59b6', training:'#3ddc97' };
+      const LABELS  = { toets:'Toets', huiswerk:'Huiswerk', start:'Leren', bezig:'Leren', afspraak:'Afspraak', training:'Training' };
+      const kleur = KLEUREN[item.soort] || '#888';
+      const label = LABELS[item.soort] || '';
+
+      let tijdHtml = '';
+      if (item.begin) {
+        const tijdStr = item.eind ? `${item.begin} – ${item.eind}` : item.begin;
+        tijdHtml = `<div class="item-kaart-tijd">${tijdStr}</div>`;
       }
-      // afspraak
-      return `<div class="tijdblok-event" style="border-left-color:${ev.kleur};background:#fafafa">
-        ${tijdStr ? `<div class="tijdblok-event-tijd">${tijdStr}</div>` : ''}
-        <div class="tijdblok-event-naam">${ev.naam}</div>
-        ${ev.catLabel ? `<div class="tijdblok-event-cat">${ev.catLabel}</div>` : ''}
+
+      let titel = '', sub = '';
+      if (item.soort === 'toets') {
+        titel = item.vak;
+        sub = item.naam ? (item.type ? `${item.naam} · ${item.type}` : item.naam) : '';
+      } else if (item.soort === 'huiswerk') {
+        titel = item.vak;
+        sub = item.omschrijving || '';
+      } else if (item.soort === 'start') {
+        titel = item.vak;
+        const over = item.dagenTot === 1 ? '1 dag' : `${item.dagenTot} dagen`;
+        sub = `Begin met leren · toets over ${over}`;
+      } else if (item.soort === 'bezig') {
+        titel = item.vak;
+        const nog = item.dagenTot === 1 ? '1 dag' : `${item.dagenTot} dagen`;
+        sub = `Nog ${nog} tot de toets`;
+      } else if (item.soort === 'training') {
+        titel = item.naam;
+      } else if (item.soort === 'afspraak') {
+        titel = item.naam;
+      }
+
+      return `<div class="item-kaart" style="border-left-color:${kleur}">
+        <div class="item-kaart-label" style="color:${kleur}">${label}</div>
+        ${tijdHtml}
+        <div class="item-kaart-titel">${titel}</div>
+        ${sub ? `<div class="item-kaart-sub">${sub}</div>` : ''}
       </div>`;
     }
 
     function renderDagInhoud() {
-      const isVandaag = gekozenDag.getTime() === vandaag.getTime();
-      const dagNr = gekozenDag.getDay();
+      const dagNr    = gekozenDag.getDay();
       const isWeekend = dagNr === 0 || dagNr === 6;
-      const dagStr = toDatumStr(gekozenDag);
+      const dagStr   = toDatumStr(gekozenDag);
 
       const { toetsKaarten, hwKaarten, startKaarten, bezigKaarten } = berekenKaarten(gekozenDag);
 
-      // Vrij moment voor deze dag
       const vm = JSON.parse(localStorage.getItem('vrijeMomenten') || '{}');
-      const vrijData  = vm[dagNr];
+      const vrijData = vm[dagNr];
       let vrijVanaf = null, heleDagVrij = false;
       if (vrijData) {
         if (typeof vrijData === 'string') vrijVanaf = vrijData;
         else if (vrijData.heleDag) heleDagVrij = true;
         else if (vrijData.tijd) vrijVanaf = vrijData.tijd;
       }
-      const vrijVal   = tijdMinuten(vrijVanaf);
 
-      // Timed events (afspraken met tijd + trainingen met vaste tijd)
-      const timedEvents = [];
-      // Untimed afspraken (geen begin-tijd → toon als kaart)
-      const untimedAfspraken = [];
+      // Bouw uniforme itemlijst
+      const items = [];
+
+      toetsKaarten.forEach(k => items.push({ soort: 'toets',    ...k, sortTime: -1 }));
+      hwKaarten.forEach(k    => items.push({ soort: 'huiswerk', ...k, sortTime: -1 }));
+      startKaarten.forEach(k => items.push({ soort: 'start',    ...k, sortTime: -1 }));
+      bezigKaarten.forEach(k => items.push({ soort: 'bezig',    ...k, sortTime: -1 }));
 
       const afspraken = JSON.parse(localStorage.getItem('afspraken') || '[]');
       afspraken.forEach(a => {
@@ -587,13 +551,8 @@
           ? parseDatum(a.datum).getDay() === dagNr && a.datum <= dagStr
           : a.einddatum ? a.datum <= dagStr && dagStr <= a.einddatum : a.datum === dagStr;
         if (!match) return;
-        const kleur    = CAT_KLEUREN[a.categorie] || '#888';
-        const catLabel = a.einddatum ? 'Meerdaagse afspraak' : (CAT_LABELS[a.categorie] || 'Overig');
-        if (a.tijd) {
-          timedEvents.push({ type: 'afspraak', naam: a.titel, begin: a.tijd, eind: a.eindtijd || null, kleur, catLabel });
-        } else {
-          untimedAfspraken.push({ kleur, catLabel, ...a });
-        }
+        items.push({ soort: 'afspraak', naam: a.titel, begin: a.tijd || null, eind: a.eindtijd || null,
+                     sortTime: a.tijd ? tijdMinuten(a.tijd) : -1 });
       });
 
       const trainingen = JSON.parse(localStorage.getItem('trainingen') || '[]');
@@ -601,92 +560,70 @@
         if (!Array.isArray(t.dagen) || !t.dagen.includes(dagNr)) return;
         const ti = t.tijden && t.tijden[dagNr];
         if (!ti || ti.wisselend) return;
-        timedEvents.push({ type: 'training', naam: t.naam, begin: ti.begin || null, eind: ti.eind || null });
+        items.push({ soort: 'training', naam: t.naam, begin: ti.begin || null, eind: ti.eind || null,
+                     sortTime: ti.begin ? tijdMinuten(ti.begin) : -1 });
       });
 
-      timedEvents.sort((a, b) => tijdMinuten(a.begin) - tijdMinuten(b.begin));
+      // Sorteer: ongetimed eerst, dan op tijd
+      items.sort((a, b) => {
+        if (a.sortTime < 0 && b.sortTime < 0) return 0;
+        if (a.sortTime < 0) return -1;
+        if (b.sortTime < 0) return 1;
+        return a.sortTime - b.sortTime;
+      });
 
-      const urgentVak = urgentsteVak(gekozenDag);
+      const urgentVak    = urgentsteVak(gekozenDag);
+      const untimedItems = items.filter(i => i.sortTime < 0);
+      const timedItems   = items.filter(i => i.sortTime >= 0);
+
       let html = '';
-
-      // ── Vaste kaarten bovenaan (geen tijd) ──
-      toetsKaarten.forEach(k => {
-        html += isVandaag
-          ? `<div class="toets-banner"><div class="banner-titel">Toets vandaag</div><div class="banner-vak">${k.vak} · ${k.naam}</div></div>`
-          : `<div class="kaart kaart-toets"><div class="kaart-vak">${k.vak}</div>${k.naam ? `<div class="kaart-naam">${k.naam}${k.type ? ` · ${k.type}` : ''}</div>` : ''}<div class="kaart-status">Toets</div></div>`;
-      });
-
-      hwKaarten.forEach(k => {
-        html += `<div class="kaart kaart-huiswerk"><div class="kaart-vak">${k.vak}</div><div class="kaart-naam">${k.omschrijving}</div><div class="kaart-status">Inleveren</div></div>`;
-      });
-
-      startKaarten.forEach(k => {
-        const over = k.dagenTot === 1 ? '1 dag' : `${k.dagenTot} dagen`;
-        html += `<div class="kaart kaart-start"><div class="kaart-vak">${k.vak}</div>${k.naam ? `<div class="kaart-naam">${k.naam}</div>` : ''}<div class="kaart-status">Begin met leren · toets over ${over}</div></div>`;
-      });
-
-      bezigKaarten.forEach(k => {
-        const nog = k.dagenTot === 1 ? '1 dag' : `${k.dagenTot} dagen`;
-        html += `<div class="kaart kaart-bezig"><div class="kaart-vak">${k.vak}</div>${k.naam ? `<div class="kaart-naam">${k.naam}</div>` : ''}<div class="kaart-status">Leren, nog ${nog} tot de toets</div></div>`;
-      });
-
-      untimedAfspraken.forEach(a => {
-        html += `<div class="kaart kaart-afspraak" style="border-left-color:${a.kleur}"><div class="kaart-vak">${a.titel}</div><div class="kaart-naam">${a.catLabel}</div></div>`;
-      });
-
-      // ── Tijdlijn ──
-      const heeftFlags = html.length > 0;
 
       if (heleDagVrij) {
         html += vrijBlokHeleDag(urgentVak);
-        timedEvents.forEach(ev => { html += eventBlokHtml(ev); });
-      } else if (!vrijVanaf && !timedEvents.length) {
-        if (isWeekend && !heeftFlags) {
-          html += `<div class="dag-vrij-weekend">Hele dag vrij</div>`;
-        } else if (!heeftFlags) {
-          html += `<div class="leeg">Niets gepland</div>`;
-        }
+        timedItems.forEach(ev => { html += renderItem(ev); });
       } else {
-        let lastEnd = null;
-        let vrijGetoond = false;
+        untimedItems.forEach(i => { html += renderItem(i); });
 
-        timedEvents.forEach(ev => {
-          const evVal   = tijdMinuten(ev.begin);
-          const lastVal = tijdMinuten(lastEnd);
+        if (vrijVanaf) {
+          const vrijVal = tijdMinuten(vrijVanaf);
+          let lastEnd = null;
+          let vrijGetoond = false;
 
-          if (vrijVanaf) {
+          timedItems.forEach(ev => {
+            const evVal   = tijdMinuten(ev.begin);
+            const lastVal = tijdMinuten(lastEnd);
+
             if (lastEnd === null) {
-              // Eerste event — vrij blok ervoor?
               if (evVal > vrijVal) {
                 html += vrijBlokHtml(vrijVanaf, ev.begin, urgentVak);
                 vrijGetoond = true;
               }
             } else if (lastVal >= vrijVal && evVal > lastVal) {
-              // Gat tussen events, na vrijVanaf
               html += vrijBlokHtml(lastEnd, ev.begin, urgentVak);
               vrijGetoond = true;
             }
+
+            html += renderItem(ev);
+            lastEnd = ev.eind || ev.begin;
+          });
+
+          if (!vrijGetoond) {
+            const lastVal = tijdMinuten(lastEnd);
+            if (lastEnd === null || lastVal < vrijVal) {
+              html += vrijBlokHtml(vrijVanaf, null, urgentVak);
+            }
           }
-
-          html += eventBlokHtml(ev);
-          lastEnd = ev.eind || ev.begin;
-        });
-
-        // Geen timed events of alle events vóór vrijVanaf: toon open vrij blok
-        if (vrijVanaf && !vrijGetoond) {
-          const lastVal = tijdMinuten(lastEnd);
-          if (lastVal < vrijVal) {
-            html += vrijBlokHtml(vrijVanaf, null, urgentVak);
-          }
-        }
-
-        // Weekend zonder tijdblokken én vrijVanaf
-        if (isWeekend && !timedEvents.length && !vrijVanaf && !heeftFlags) {
-          html += `<div class="dag-vrij-weekend">Hele dag vrij</div>`;
+        } else {
+          timedItems.forEach(ev => { html += renderItem(ev); });
         }
       }
 
-      if (!html) html = '<div class="leeg">Niets gepland</div>';
+      if (!html) {
+        html = isWeekend
+          ? `<div class="dag-vrij-weekend">Hele dag vrij</div>`
+          : `<div class="dag-leeg">Niks gepland</div>`;
+      }
+
       document.getElementById('dag-inhoud').innerHTML = html;
     }
 
@@ -696,6 +633,13 @@
       const dagInWeek = Math.round((gekozenDag - weekMaandag) / 86400000);
       weekMaandag = addDagen(weekMaandag, delta * 7);
       gekozenDag  = addDagen(weekMaandag, dagInWeek);
+      render();
+    }
+
+    function navigeerDag(delta) {
+      gekozenDag = addDagen(gekozenDag, delta);
+      if (gekozenDag < weekMaandag) weekMaandag = addDagen(weekMaandag, -7);
+      else if (gekozenDag > addDagen(weekMaandag, 6)) weekMaandag = addDagen(weekMaandag, 7);
       render();
     }
 
@@ -709,28 +653,29 @@
       renderDagRij(); renderDagInhoud();
     });
 
+    // ── Swipe-gesture: links = volgende dag, rechts = vorige dag ──
+    let _swipeX = 0, _swipeY = 0;
+    document.addEventListener('touchstart', e => {
+      _swipeX = e.touches[0].clientX;
+      _swipeY = e.touches[0].clientY;
+    }, { passive: true });
+    document.addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].clientX - _swipeX;
+      const dy = e.changedTouches[0].clientY - _swipeY;
+      if (Math.abs(dx) > Math.abs(dy) * 1.5 && Math.abs(dx) > 48) {
+        navigeerDag(dx < 0 ? 1 : -1);
+      }
+    }, { passive: true });
+
     render();
   </script>
   <script>
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js?v=6');
 
-    // ── Tab-overgangen ──
     document.querySelectorAll('a.tab').forEach(function(tab) {
       tab.addEventListener('click', function(e) {
         if (this.classList.contains('actief')) return;
         if (document.getElementById('splash')) return;
-        e.preventDefault();
-        var href = this.getAttribute('href');
-        document.body.style.transition = 'opacity 0.15s ease';
-        document.body.style.opacity = '0';
-        setTimeout(function() { location.href = href; }, 150);
-      });
-    });
-
-    // ── Sub-tab overgangen ──
-    document.querySelectorAll('a.sub-tab').forEach(function(t) {
-      t.addEventListener('click', function(e) {
-        if (this.classList.contains('actief')) return;
         e.preventDefault();
         var href = this.getAttribute('href');
         document.body.style.transition = 'opacity 0.15s ease';
