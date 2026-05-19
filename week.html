@@ -216,6 +216,18 @@
     .tab .icoon-filled  { display: none; }
     .tab.actief .icoon-outline { display: none; }
     .tab.actief .icoon-filled  { display: block; }
+
+    /* ── Animaties ── */
+    @keyframes kaart-in {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pagina-in {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    body { animation: pagina-in 0.15s ease both; }
+    .kaart, .tijdblok-vrij, .tijdblok-event, .dag-vrij-weekend { animation: kaart-in 0.2s ease both; }
   </style>
 </head>
 <body>
@@ -634,6 +646,19 @@
   </script>
   <script>
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+
+    // ── Tab-overgangen ──
+    document.querySelectorAll('a.tab').forEach(function(tab) {
+      tab.addEventListener('click', function(e) {
+        if (this.classList.contains('actief')) return;
+        if (document.getElementById('splash')) return;
+        e.preventDefault();
+        var href = this.getAttribute('href');
+        document.body.style.transition = 'opacity 0.15s ease';
+        document.body.style.opacity = '0';
+        setTimeout(function() { location.href = href; }, 150);
+      });
+    });
   </script>
 </body>
 </html>

@@ -349,6 +349,13 @@
     .tab .icoon-filled  { display: none; }
     .tab.actief .icoon-outline { display: none; }
     .tab.actief .icoon-filled  { display: block; }
+
+    /* ── Animaties ── */
+    @keyframes kaart-in {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .dag-kaart, .streak-blok, .tip-kaart, .week-waarschuwing, .patroon-banner, .checkin-kaart { animation: kaart-in 0.2s ease both; }
   </style>
 </head>
 <body>
@@ -1275,6 +1282,19 @@
       checkNotificaties();
       registreerPeriodicSync();
     }
+
+    // ── Tab-overgangen ──
+    document.querySelectorAll('a.tab').forEach(function(tab) {
+      tab.addEventListener('click', function(e) {
+        if (this.classList.contains('actief')) return;
+        if (document.getElementById('splash')) return;
+        e.preventDefault();
+        var href = this.getAttribute('href');
+        document.body.style.transition = 'opacity 0.15s ease';
+        document.body.style.opacity = '0';
+        setTimeout(function() { location.href = href; }, 150);
+      });
+    });
   </script>
 </body>
 </html>
