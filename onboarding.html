@@ -12,276 +12,482 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Struct">
   <style>
-    *, *::before, *::after { box-sizing: border-box; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #ffffff; color: #1a1a1a;
-      margin: 0; min-height: 100vh;
-      display: flex; align-items: flex-start; justify-content: center;
-      padding: 48px 20px 60px;
+      -webkit-font-smoothing: antialiased;
+      background: #fff; color: #1a1a1a;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      max-width: 480px; margin: 0 auto;
+      padding: 0 24px;
     }
 
-    .kaart { width: 100%; max-width: 420px; }
-
-    /* ── Voortgangsbalken ── */
-    .stappen { display: flex; gap: 8px; margin-bottom: 40px; }
-    .stap-balk {
-      flex: 1; height: 4px; border-radius: 2px;
-      background: #e8e8e8; transition: background 0.3s;
+    /* ── Voortgangsbalk ── */
+    .voortgang {
+      padding: 20px 0 0;
+      transition: opacity 0.25s;
     }
-    .stap-balk.actief { background: #3ddc97; }
-    .stap-balk.gedaan { background: #2bc47e; }
+    .voortgang.verborgen { opacity: 0; pointer-events: none; }
+    .voortgang-balken { display: flex; gap: 5px; }
+    .voortgang-balk {
+      flex: 1; height: 3px; border-radius: 2px;
+      background: #ebebeb; transition: background 0.4s;
+    }
+    .voortgang-balk.actief { background: #3ddc97; }
+    .voortgang-balk.gedaan { background: #3ddc97; }
 
-    .stap { display: none; }
+    /* ── Stappen ── */
+    .stap-container { flex: 1; }
+    .stap { display: none; padding: 40px 0 24px; }
     .stap.zichtbaar { display: block; }
 
+    @keyframes slide-rechts {
+      from { opacity: 0; transform: translateX(36px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes slide-links {
+      from { opacity: 0; transform: translateX(-36px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    .stap.zichtbaar.vooruit  { animation: slide-rechts 0.3s cubic-bezier(0.4,0,0.2,1) both; }
+    .stap.zichtbaar.achteruit { animation: slide-links  0.3s cubic-bezier(0.4,0,0.2,1) both; }
+
+    /* ── Typografie ── */
     .stap-label {
-      font-size: 0.78rem; color: #aaa;
-      letter-spacing: 0.06em; text-transform: uppercase; margin: 0 0 10px;
+      font-size: 0.73rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: #bbb; margin-bottom: 14px;
     }
-
-    h2 {
-      font-size: 1.55rem; font-weight: 700;
-      margin: 0 0 8px; line-height: 1.25; letter-spacing: -0.3px; color: #1a1a1a;
+    h1, h2 {
+      font-size: 1.75rem; font-weight: 800; letter-spacing: -0.4px;
+      line-height: 1.2; color: #1a1a1a; margin-bottom: 10px;
     }
+    .subtitel { font-size: 0.98rem; color: #888; line-height: 1.6; margin-bottom: 32px; }
 
-    .hint { font-size: 0.9rem; color: #888; margin: 0 0 28px; }
-
-    /* ── Invoervelden ── */
-    label { display: block; font-size: 0.85rem; color: #888; margin-bottom: 8px; }
-
-    input[type="text"], select {
-      width: 100%; background: #f5f5f5; border: 1px solid #e8e8e8;
-      border-radius: 10px; color: #1a1a1a; font-size: 1rem;
-      padding: 14px 16px; margin-bottom: 20px; appearance: none;
-      outline: none; transition: border-color 0.15s; font-family: inherit;
+    /* ── Welkomscherm ── */
+    .welkom-naam {
+      font-size: 3.8rem; font-weight: 900; letter-spacing: -3px;
+      color: #3ddc97; line-height: 1; margin-bottom: 14px;
+      margin-top: 48px;
     }
-    input[type="text"]:focus, select:focus { border-color: #3ddc97; }
+    .welkom-ondertitel {
+      font-size: 1.35rem; font-weight: 700; letter-spacing: -0.3px;
+      color: #1a1a1a; margin-bottom: 12px;
+    }
+    .welkom-tekst { font-size: 0.98rem; color: #888; line-height: 1.6; margin-bottom: 44px; }
 
-    .select-wrap { position: relative; }
+    /* ── Velden ── */
+    .veld-label {
+      display: block; font-size: 0.82rem; color: #999;
+      font-weight: 500; margin-bottom: 8px;
+    }
+    .veld-input, .veld-select {
+      width: 100%; background: #f5f5f5; border: 1.5px solid #ebebeb;
+      border-radius: 12px; color: #1a1a1a; font-size: 1rem;
+      padding: 14px 16px; margin-bottom: 20px; outline: none;
+      transition: border-color 0.15s, background 0.15s;
+      font-family: inherit; appearance: none;
+    }
+    .veld-input:focus, .veld-select:focus {
+      border-color: #3ddc97; background: #fafdf9;
+    }
+    .select-wrap { position: relative; margin-bottom: 20px; }
+    .select-wrap .veld-select { margin-bottom: 0; }
     .select-wrap::after {
-      content: '▾'; position: absolute; right: 14px; top: 50%;
-      transform: translateY(-60%); color: #aaa; pointer-events: none; font-size: 0.85rem;
+      content: '▾'; position: absolute; right: 16px; top: 50%;
+      transform: translateY(-55%); color: #aaa; pointer-events: none; font-size: 0.85rem;
     }
 
-    /* ── Knoppen ── */
-    .acties { display: flex; gap: 10px; margin-top: 4px; }
-
-    .btn {
-      flex: 1; padding: 16px; border-radius: 12px;
-      font-size: 1rem; font-weight: 600; border: none;
-      cursor: pointer; transition: background 0.15s, transform 0.1s;
-      font-family: inherit;
-    }
-    .btn:active { transform: scale(0.98); }
-
-    .btn-terug {
-      background: #f5f5f5; color: #888; border: 1px solid #e0e0e0;
-      flex: 0 0 auto; padding: 16px 20px;
-    }
-    .btn-terug:hover { background: #eeeeee; color: #1a1a1a; }
-
-    .btn-verder { background: #3ddc97; color: #fff; }
-    .btn-verder:hover { background: #2bc47e; }
-    .btn-verder:disabled { background: #e8f8f3; color: #9dd8b8; cursor: default; }
-
-    .btn-start {
-      width: 100%; background: #3ddc97; color: #0a0a0a;
-      font-size: 1.05rem; border: none;
-      padding: 17px; border-radius: 12px;
-      font-weight: 700; cursor: pointer; font-family: inherit;
-      transition: background 0.15s, transform 0.1s;
-    }
-    .btn-start:hover  { background: #2bc47e; }
-    .btn-start:active { transform: scale(0.98); }
-
-    /* ── Welkomstscherm ── */
-    .welkom-icon {
-      width: 64px; height: 64px; border-radius: 18px;
-      background: #f0fbf5; border: 1px solid #b8efd3;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.8rem; font-weight: 700; color: #3ddc97;
-      letter-spacing: -1px; margin-bottom: 28px;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    }
-    .welkom-titel {
-      font-size: 2rem; font-weight: 800; letter-spacing: -0.5px;
-      margin: 0 0 14px; line-height: 1.15; color: #1a1a1a;
-    }
-    .welkom-tekst {
-      font-size: 1rem; color: #888; line-height: 1.6;
-      margin: 0 0 36px;
-    }
-
-    /* ── Eindscherm kaarten ── */
-    .klaar-intro { font-size: 0.9rem; color: #888; margin: 0 0 20px; }
-
-    .start-kaart {
-      display: flex; align-items: center; gap: 14px;
-      background: #f5f5f5; border: 1px solid #ebebeb;
-      border-radius: 14px; padding: 16px 18px;
-      text-decoration: none; color: inherit; margin-bottom: 10px;
-      transition: background 0.15s, border-color 0.15s;
+    /* ── Leerstijl kaarten ── */
+    .stijl-kaarten { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+    .stijl-kaart {
+      border: 2px solid #ebebeb; border-radius: 14px;
+      padding: 18px 20px; cursor: pointer;
+      transition: border-color 0.15s, background 0.15s, transform 0.1s;
       -webkit-tap-highlight-color: transparent;
     }
-    .start-kaart:hover  { background: #eeeeee; border-color: #d8d8d8; }
-    .start-kaart:active { transform: scale(0.99); }
+    .stijl-kaart:active { transform: scale(0.99); }
+    .stijl-kaart.geselecteerd { border-color: #3ddc97; background: #f0fbf5; }
+    .stijl-kaart-titel { font-size: 1rem; font-weight: 700; color: #1a1a1a; margin-bottom: 3px; }
+    .stijl-kaart-sub   { font-size: 0.83rem; color: #aaa; }
+    .stijl-kaart.geselecteerd .stijl-kaart-sub { color: #2bc47e; }
 
-    .start-emoji { font-size: 1.5rem; flex-shrink: 0; line-height: 1; }
-    .start-tekst { flex: 1; min-width: 0; }
-    .start-naam  { font-size: 0.95rem; font-weight: 700; color: #1a1a1a; margin-bottom: 2px; }
-    .start-sub   { font-size: 0.8rem; color: #888; }
-    .start-pijl  { color: #bbb; font-size: 1.1rem; flex-shrink: 0; }
+    /* ── Dag pills ── */
+    .dag-pills { display: flex; gap: 7px; margin-bottom: 24px; flex-wrap: wrap; }
+    .dag-check { display: none; }
+    .dag-pill-label {
+      padding: 10px 15px; border: 2px solid #ebebeb; border-radius: 10px;
+      font-size: 0.88rem; font-weight: 700; color: #bbb;
+      cursor: pointer; user-select: none;
+      transition: border-color 0.15s, background 0.15s, color 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .dag-check:checked + .dag-pill-label {
+      border-color: #3ddc97; background: #f0fbf5; color: #1a1a1a;
+    }
+    .tijd-hint { font-size: 0.79rem; color: #c8c8c8; margin-top: -14px; margin-bottom: 24px; }
+
+    /* ── Toggles ── */
+    .toggle-kaart {
+      background: #f5f5f5; border: 1px solid #ebebeb;
+      border-radius: 14px; overflow: hidden; margin-bottom: 14px;
+    }
+    .toggle-rij {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 17px 18px; gap: 12px;
+    }
+    .toggle-rij + .toggle-rij { border-top: 1px solid #ebebeb; }
+    .toggle-naam { font-size: 0.98rem; font-weight: 700; color: #1a1a1a; }
+    .toggle-hint { font-size: 0.8rem; color: #bbb; line-height: 1.55; margin-bottom: 28px; }
+
+    .schakelaar { position: relative; display: inline-block; width: 44px; height: 26px; flex-shrink: 0; }
+    .schakelaar input { display: none; }
+    .schakelaar-knop {
+      position: absolute; inset: 0; border-radius: 13px;
+      background: #d8d8d8; transition: background 0.2s; cursor: pointer;
+    }
+    .schakelaar-knop::before {
+      content: ''; position: absolute;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: #fff; top: 2px; left: 2px;
+      transition: transform 0.2s;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    }
+    .schakelaar input:checked + .schakelaar-knop { background: #3ddc97; }
+    .schakelaar input:checked + .schakelaar-knop::before { transform: translateX(18px); }
+
+    /* ── Klaar-tips ── */
+    .klaar-intro { font-size: 0.9rem; color: #888; margin-bottom: 18px; }
+    .klaar-tip {
+      display: flex; align-items: center; gap: 14px;
+      background: #f8f8f8; border: 1px solid #efefef;
+      border-radius: 14px; padding: 16px 18px;
+      text-decoration: none; color: inherit; margin-bottom: 10px;
+      transition: background 0.15s; -webkit-tap-highlight-color: transparent;
+    }
+    .klaar-tip:hover  { background: #f0f0f0; }
+    .klaar-tip:active { transform: scale(0.99); }
+    .klaar-tip-emoji { font-size: 1.5rem; flex-shrink: 0; }
+    .klaar-tip-info  { flex: 1; min-width: 0; }
+    .klaar-tip-naam  { font-size: 0.95rem; font-weight: 700; color: #1a1a1a; margin-bottom: 2px; }
+    .klaar-tip-sub   { font-size: 0.8rem; color: #888; }
+    .klaar-tip-pijl  { color: #ccc; font-size: 1.1rem; flex-shrink: 0; }
+
+    .btn-aan-de-slag {
+      width: 100%; padding: 17px; border-radius: 14px;
+      font-size: 1.05rem; font-weight: 800; border: none;
+      cursor: pointer; background: #3ddc97; color: #0a0a0a;
+      font-family: inherit; margin-top: 8px;
+      transition: background 0.15s, transform 0.1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-aan-de-slag:hover  { background: #2bc47e; }
+    .btn-aan-de-slag:active { transform: scale(0.98); }
+
+    /* ── Navigatieknoppen ── */
+    .knop-rij { display: flex; gap: 10px; padding: 16px 0 44px; }
+    .btn {
+      flex: 1; padding: 16px; border-radius: 14px;
+      font-size: 1rem; font-weight: 700; border: none;
+      cursor: pointer; transition: background 0.15s, transform 0.1s;
+      font-family: inherit; min-height: 52px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn-terug {
+      background: #f5f5f5; color: #888; border: 1px solid #e8e8e8;
+      flex: 0 0 52px; padding: 16px 10px; font-size: 1.1rem;
+    }
+    .btn-terug:hover { background: #ebebeb; color: #1a1a1a; }
+    .btn-primair { background: #3ddc97; color: #0a0a0a; }
+    .btn-primair:hover { background: #2bc47e; }
+    .btn-primair:disabled { background: #e8f8f1; color: #a8d8be; cursor: default; transform: none; }
+
+    .btn-welkom {
+      width: 100%; padding: 18px; border-radius: 14px;
+      font-size: 1.05rem; font-weight: 800; border: none;
+      cursor: pointer; background: #3ddc97; color: #0a0a0a;
+      font-family: inherit;
+      transition: background 0.15s, transform 0.1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-welkom:hover  { background: #2bc47e; }
+    .btn-welkom:active { transform: scale(0.98); }
   </style>
 </head>
 <body>
-<div class="kaart">
 
-  <div class="stappen">
-    <div class="stap-balk" id="balk-0"></div>
-    <div class="stap-balk" id="balk-1"></div>
-  </div>
-
-  <!-- Stap 0: Welkom -->
-  <div class="stap zichtbaar" id="stap-0">
-    <div class="welkom-icon">S</div>
-    <h1 class="welkom-titel">Welkom bij Struct</h1>
-    <p class="welkom-tekst">Struct helpt je alles overzichtelijk houden — school, afspraken en meer. Ingesteld in 30 seconden.</p>
-    <button class="btn-start" onclick="naarStap(1)">Aan de slag →</button>
-  </div>
-
-  <!-- Stap 1: Naam -->
-  <div class="stap" id="stap-1">
-    <p class="stap-label">Stap 1 van 2</p>
-    <h2>Hoe heet je?</h2>
-    <p class="hint">Zo weten we hoe we je moeten aanspreken.</p>
-    <label for="naam">Voornaam</label>
-    <input type="text" id="naam" placeholder="bijv. Emma" autocomplete="given-name">
-    <div class="acties">
-      <button class="btn btn-terug" onclick="naarStap(0)">←</button>
-      <button class="btn btn-verder" id="verder-0" onclick="naarStap(2)" disabled>Verder →</button>
+  <!-- Voortgangsbalk -->
+  <div class="voortgang verborgen" id="voortgang">
+    <div class="voortgang-balken">
+      <div class="voortgang-balk" id="vb-1"></div>
+      <div class="voortgang-balk" id="vb-2"></div>
+      <div class="voortgang-balk" id="vb-3"></div>
+      <div class="voortgang-balk" id="vb-4"></div>
+      <div class="voortgang-balk" id="vb-5"></div>
     </div>
   </div>
 
-  <!-- Stap 2: Schoolniveau -->
-  <div class="stap" id="stap-2">
-    <p class="stap-label">Stap 2 van 2</p>
-    <h2>Welk niveau zit je op?</h2>
-    <p class="hint">Kies je huidige schoolniveau en leerjaar.</p>
-    <label for="niveau">Schoolniveau</label>
-    <div class="select-wrap">
-      <select id="niveau">
-        <option value="" disabled selected>Selecteer je niveau</option>
-        <optgroup label="VWO">
-          <option value="VWO 1">VWO 1</option>
-          <option value="VWO 2">VWO 2</option>
-          <option value="VWO 3">VWO 3</option>
-          <option value="VWO 4">VWO 4</option>
-          <option value="VWO 5">VWO 5</option>
-          <option value="VWO 6">VWO 6</option>
-        </optgroup>
-        <optgroup label="HAVO">
-          <option value="HAVO 1">HAVO 1</option>
-          <option value="HAVO 2">HAVO 2</option>
-          <option value="HAVO 3">HAVO 3</option>
-          <option value="HAVO 4">HAVO 4</option>
-          <option value="HAVO 5">HAVO 5</option>
-        </optgroup>
-        <optgroup label="MBO">
-          <option value="MBO 1">MBO 1</option>
-          <option value="MBO 2">MBO 2</option>
-          <option value="MBO 3">MBO 3</option>
-          <option value="MBO 4">MBO 4</option>
-        </optgroup>
-      </select>
+  <div class="stap-container">
+
+    <!-- Stap 0: Welkom -->
+    <div class="stap zichtbaar" id="stap-0">
+      <div class="welkom-naam">Struct</div>
+      <div class="welkom-ondertitel">Jouw slimme planner.</div>
+      <p class="welkom-tekst">Houd je school, sport en afspraken overzichtelijk — ingesteld in 2 minuten.</p>
+      <button class="btn-welkom" onclick="naarStap(1)">Begin →</button>
     </div>
-    <div class="acties">
-      <button class="btn btn-terug" onclick="naarStap(1)">←</button>
-      <button class="btn btn-verder" id="verder-1" onclick="naarStap(3)" disabled>Verder →</button>
+
+    <!-- Stap 1: Wie ben je? -->
+    <div class="stap" id="stap-1">
+      <p class="stap-label">Stap 1 van 5</p>
+      <h2>Wie ben je?</h2>
+      <p class="subtitel">Zo weten we hoe we je moeten aanspreken.</p>
+
+      <label class="veld-label" for="naam">Voornaam</label>
+      <input type="text" id="naam" class="veld-input" placeholder="bijv. Emma" autocomplete="given-name">
+
+      <label class="veld-label" for="niveau">Schoolniveau</label>
+      <div class="select-wrap">
+        <select id="niveau" class="veld-select">
+          <option value="" disabled selected>Selecteer je niveau</option>
+          <optgroup label="VWO">
+            <option value="VWO 1">VWO 1</option><option value="VWO 2">VWO 2</option>
+            <option value="VWO 3">VWO 3</option><option value="VWO 4">VWO 4</option>
+            <option value="VWO 5">VWO 5</option><option value="VWO 6">VWO 6</option>
+          </optgroup>
+          <optgroup label="HAVO">
+            <option value="HAVO 1">HAVO 1</option><option value="HAVO 2">HAVO 2</option>
+            <option value="HAVO 3">HAVO 3</option><option value="HAVO 4">HAVO 4</option>
+            <option value="HAVO 5">HAVO 5</option>
+          </optgroup>
+          <optgroup label="MBO">
+            <option value="MBO 1">MBO 1</option><option value="MBO 2">MBO 2</option>
+            <option value="MBO 3">MBO 3</option><option value="MBO 4">MBO 4</option>
+          </optgroup>
+        </select>
+      </div>
     </div>
+
+    <!-- Stap 2: Leerstijl -->
+    <div class="stap" id="stap-2">
+      <p class="stap-label">Stap 2 van 5</p>
+      <h2>Hoe leer jij het best?</h2>
+      <p class="subtitel">We stemmen je leerplanning hier op af.</p>
+
+      <div class="stijl-kaarten">
+        <div class="stijl-kaart" data-waarde="beetje-per-dag" onclick="kiesLeerstijl(this)">
+          <div class="stijl-kaart-titel">Beetje per dag</div>
+          <div class="stijl-kaart-sub">Verspreid over meerdere dagen</div>
+        </div>
+        <div class="stijl-kaart" data-waarde="alles-tegelijk" onclick="kiesLeerstijl(this)">
+          <div class="stijl-kaart-titel">Alles in één keer</div>
+          <div class="stijl-kaart-sub">Intensief vlak voor de toets</div>
+        </div>
+        <div class="stijl-kaart" data-waarde="per-vak" onclick="kiesLeerstijl(this)">
+          <div class="stijl-kaart-titel">Wisselt per vak</div>
+          <div class="stijl-kaart-sub">Afhankelijk van het vak en de toets</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stap 3: Schooldagen -->
+    <div class="stap" id="stap-3">
+      <p class="stap-label">Stap 3 van 5</p>
+      <h2>Hoe is jouw week normaal?</h2>
+      <p class="subtitel">We houden hier rekening mee bij je planning.</p>
+
+      <label class="veld-label">Op welke dagen heb je school?</label>
+      <div class="dag-pills">
+        <input type="checkbox" id="dag-1" value="1" class="dag-check"><label for="dag-1" class="dag-pill-label">ma</label>
+        <input type="checkbox" id="dag-2" value="2" class="dag-check"><label for="dag-2" class="dag-pill-label">di</label>
+        <input type="checkbox" id="dag-3" value="3" class="dag-check"><label for="dag-3" class="dag-pill-label">wo</label>
+        <input type="checkbox" id="dag-4" value="4" class="dag-check"><label for="dag-4" class="dag-pill-label">do</label>
+        <input type="checkbox" id="dag-5" value="5" class="dag-check"><label for="dag-5" class="dag-pill-label">vr</label>
+      </div>
+
+      <label class="veld-label" for="school-einde">Hoe laat ben je gemiddeld klaar met school?</label>
+      <input type="time" id="school-einde" class="veld-input">
+      <p class="tijd-hint">Laat leeg als dit sterk wisselt</p>
+    </div>
+
+    <!-- Stap 4: Werk of sport -->
+    <div class="stap" id="stap-4">
+      <p class="stap-label">Stap 4 van 5</p>
+      <h2>Heb je werk of sport?</h2>
+      <p class="subtitel">Zo kunnen we hier rekening mee houden.</p>
+
+      <div class="toggle-kaart">
+        <div class="toggle-rij">
+          <span class="toggle-naam">Ik werk</span>
+          <label class="schakelaar">
+            <input type="checkbox" id="werk-toggle">
+            <span class="schakelaar-knop"></span>
+          </label>
+        </div>
+        <div class="toggle-rij">
+          <span class="toggle-naam">Ik sport of train</span>
+          <label class="schakelaar">
+            <input type="checkbox" id="sport-toggle">
+            <span class="schakelaar-knop"></span>
+          </label>
+        </div>
+      </div>
+      <p class="toggle-hint">Details — zoals dagen en tijden — vul je later in via Mijn profiel.</p>
+    </div>
+
+    <!-- Stap 5: Klaar -->
+    <div class="stap" id="stap-5">
+      <p class="stap-label">Klaar!</p>
+      <h2>Je bent er klaar voor!</h2>
+      <p class="klaar-intro">Dit kun je nu als eerste doen:</p>
+
+      <a href="profiel.html" class="klaar-tip">
+        <span class="klaar-tip-emoji">📚</span>
+        <div class="klaar-tip-info">
+          <div class="klaar-tip-naam">Voeg je vakken toe via Mijn profiel</div>
+          <div class="klaar-tip-sub">Zet je toetsen en huiswerk in de app</div>
+        </div>
+        <span class="klaar-tip-pijl">›</span>
+      </a>
+      <a href="week.html" class="klaar-tip">
+        <span class="klaar-tip-emoji">📅</span>
+        <div class="klaar-tip-info">
+          <div class="klaar-tip-naam">Plan je week via Agenda</div>
+          <div class="klaar-tip-sub">Bekijk je week met alles op een rij</div>
+        </div>
+        <span class="klaar-tip-pijl">›</span>
+      </a>
+      <a href="terugblik.html" class="klaar-tip">
+        <span class="klaar-tip-emoji">📈</span>
+        <div class="klaar-tip-info">
+          <div class="klaar-tip-naam">Volg je voortgang via Voortgang</div>
+          <div class="klaar-tip-sub">Zie hoe je het doet per vak</div>
+        </div>
+        <span class="klaar-tip-pijl">›</span>
+      </a>
+
+      <button class="btn-aan-de-slag" onclick="location.replace('index.html')">Aan de slag →</button>
+    </div>
+
   </div>
 
-  <!-- Stap 3: Klaar -->
-  <div class="stap" id="stap-3">
-    <h2>Je bent er klaar voor!</h2>
-    <p class="klaar-intro">Dit kun je nu doen:</p>
-
-    <a href="profiel.html" class="start-kaart">
-      <span class="start-emoji">📚</span>
-      <div class="start-tekst">
-        <div class="start-naam">Voeg je vakken toe via Mijn profiel</div>
-        <div class="start-sub">Zet je toetsen en huiswerk in de app</div>
-      </div>
-      <span class="start-pijl">›</span>
-    </a>
-
-    <a href="week.html" class="start-kaart">
-      <span class="start-emoji">📅</span>
-      <div class="start-tekst">
-        <div class="start-naam">Plan je week via Agenda</div>
-        <div class="start-sub">Bekijk je week met alles op een rij</div>
-      </div>
-      <span class="start-pijl">›</span>
-    </a>
-
-    <a href="terugblik.html" class="start-kaart">
-      <span class="start-emoji">📈</span>
-      <div class="start-tekst">
-        <div class="start-naam">Volg je voortgang via Voortgang</div>
-        <div class="start-sub">Zie hoe je het doet per vak</div>
-      </div>
-      <span class="start-pijl">›</span>
-    </a>
+  <!-- Navigatieknoppen (verborgen op stap 0 en 5) -->
+  <div class="knop-rij" id="knop-rij" style="display:none">
+    <button class="btn btn-terug" id="btn-terug" onclick="naarStap(huidig - 1)">←</button>
+    <button class="btn btn-primair" id="btn-verder" onclick="stapVooruit()" disabled>Verder →</button>
   </div>
 
-</div>
+  <script>
+    if (localStorage.getItem('profiel')) location.replace('index.html');
 
-<script>
-  if (localStorage.getItem('profiel')) location.replace('index.html');
+    let huidig = 0;
+    let gekozenLeerstijl = localStorage.getItem('leerstijl') || null;
 
-  let huidigeStap = 0;
-
-  function naarStap(stap) {
-    if (stap === 3) {
-      localStorage.setItem('profiel', JSON.stringify({
-        naam:   document.getElementById('naam').value.trim(),
-        niveau: document.getElementById('niveau').value,
-      }));
+    // Herstel leerstijl-selectie als de gebruiker terugkomt
+    if (gekozenLeerstijl) {
+      const el = document.querySelector(`.stijl-kaart[data-waarde="${gekozenLeerstijl}"]`);
+      if (el) el.classList.add('geselecteerd');
     }
-    document.getElementById('stap-' + huidigeStap).classList.remove('zichtbaar');
-    huidigeStap = stap;
-    document.getElementById('stap-' + huidigeStap).classList.add('zichtbaar');
-    updateBalken();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    if (stap === 1) setTimeout(() => document.getElementById('naam').focus(), 60);
-  }
 
-  function updateBalken() {
-    for (let i = 0; i < 2; i++) {
-      const b = document.getElementById('balk-' + i);
-      b.className = 'stap-balk';
-      const dataStap = huidigeStap - 1;
-      if (huidigeStap === 3 || i < dataStap) b.classList.add('gedaan');
-      if (huidigeStap < 3 && i === dataStap) b.classList.add('actief');
+    function updateVoortgang() {
+      const voortgangEl = document.getElementById('voortgang');
+      const knopRij     = document.getElementById('knop-rij');
+      const btnVerder   = document.getElementById('btn-verder');
+
+      if (huidig === 0 || huidig === 5) {
+        voortgangEl.classList.add('verborgen');
+        knopRij.style.display = 'none';
+        return;
+      }
+
+      voortgangEl.classList.remove('verborgen');
+      knopRij.style.display = 'flex';
+
+      for (let i = 1; i <= 5; i++) {
+        const b = document.getElementById('vb-' + i);
+        b.className = 'voortgang-balk';
+        if (i < huidig)       b.classList.add('gedaan');
+        else if (i === huidig) b.classList.add('actief');
+      }
+
+      btnVerder.disabled = !stapGeldig();
     }
-  }
 
-  // Stap 1: naam
-  document.getElementById('naam').addEventListener('input', function() {
-    document.getElementById('verder-0').disabled = this.value.trim() === '';
-  });
-  document.getElementById('naam').addEventListener('keydown', e => {
-    if (e.key === 'Enter' && document.getElementById('naam').value.trim()) naarStap(2);
-  });
+    function stapGeldig() {
+      if (huidig === 1) return document.getElementById('naam').value.trim() !== '';
+      if (huidig === 2) return !!gekozenLeerstijl;
+      return true;
+    }
 
-  // Stap 2: niveau
-  document.getElementById('niveau').addEventListener('change', () => {
-    document.getElementById('verder-1').disabled = false;
-  });
+    function naarStap(nieuwIdx) {
+      if (nieuwIdx < 0 || nieuwIdx > 5) return;
 
-  updateBalken();
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js?v=6');
-</script>
+      slaStapOp(huidig);
+
+      const huidigEl = document.getElementById('stap-' + huidig);
+      const nieuwEl  = document.getElementById('stap-' + nieuwIdx);
+      const vooruit  = nieuwIdx > huidig;
+
+      huidigEl.classList.remove('zichtbaar', 'vooruit', 'achteruit');
+
+      void nieuwEl.offsetWidth;
+      nieuwEl.classList.add('zichtbaar', vooruit ? 'vooruit' : 'achteruit');
+
+      huidig = nieuwIdx;
+      updateVoortgang();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      if (huidig === 1) setTimeout(() => document.getElementById('naam').focus(), 80);
+    }
+
+    function stapVooruit() {
+      if (!stapGeldig()) return;
+      naarStap(huidig + 1);
+    }
+
+    function slaStapOp(stap) {
+      if (stap === 2 && gekozenLeerstijl) {
+        localStorage.setItem('leerstijl', gekozenLeerstijl);
+      }
+      if (stap === 3) {
+        const dagen = [...document.querySelectorAll('.dag-check:checked')].map(c => parseInt(c.value));
+        localStorage.setItem('schooldagen', JSON.stringify(dagen));
+        const einde = document.getElementById('school-einde').value;
+        if (einde) localStorage.setItem('schoolEinde', einde);
+        else       localStorage.removeItem('schoolEinde');
+      }
+      if (stap === 4) {
+        // profiel wordt aangemaakt bij stap 5
+        const naam   = document.getElementById('naam').value.trim();
+        const niveau = document.getElementById('niveau').value;
+        const profiel = {
+          naam, niveau,
+          werkAan:  document.getElementById('werk-toggle').checked,
+          sportAan: document.getElementById('sport-toggle').checked,
+        };
+        localStorage.setItem('profiel', JSON.stringify(profiel));
+      }
+    }
+
+    function kiesLeerstijl(el) {
+      document.querySelectorAll('.stijl-kaart').forEach(k => k.classList.remove('geselecteerd'));
+      el.classList.add('geselecteerd');
+      gekozenLeerstijl = el.dataset.waarde;
+      localStorage.setItem('leerstijl', gekozenLeerstijl);
+      updateVoortgang();
+      setTimeout(() => { if (huidig === 2) naarStap(3); }, 320);
+    }
+
+    document.getElementById('naam').addEventListener('input', updateVoortgang);
+    document.getElementById('naam').addEventListener('keydown', e => {
+      if (e.key === 'Enter' && stapGeldig()) stapVooruit();
+    });
+
+    updateVoortgang();
+
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js?v=6');
+  </script>
 </body>
 </html>
