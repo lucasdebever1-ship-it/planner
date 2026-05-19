@@ -144,6 +144,29 @@
     .wdag-stippen { display: flex; gap: 3px; align-items: center; min-height: 6px; }
     .wdag-stip { width: 5px; height: 5px; border-radius: 50%; }
 
+    /* ── Plan voor deze week ── */
+    .plan-rij { display: flex; gap: 8px; margin-bottom: 28px; }
+    .plan-dag-kaart {
+      flex: 1; min-width: 0;
+      background: #f8f8f8; border: 1px solid #ebebeb;
+      border-radius: 12px; padding: 12px 10px;
+      display: flex; flex-direction: column; gap: 2px;
+    }
+    .plan-dag-kaart.heeft-actie {
+      background: #fff; border-color: #e0e0e0;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+    }
+    .plan-dag-naam {
+      font-size: 0.62rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.07em; color: #bbb;
+    }
+    .plan-dag-datum {
+      font-size: 0.88rem; font-weight: 700; color: #1a1a1a;
+      line-height: 1; margin-bottom: 4px;
+    }
+    .plan-dag-actie { font-size: 0.76rem; color: #444; line-height: 1.45; }
+    .plan-dag-leeg  { font-size: 0.73rem; color: #c8c8c8; line-height: 1.4; }
+
     /* ── Tip ── */
     .tip-kaart {
       background: linear-gradient(135deg, #edfaf3, #e2f7ea);
@@ -444,6 +467,9 @@
       </div>
       <div id="snel-form-wrap"></div>
     </div>
+
+    <p class="sectie-label sectie-label-mt">Plan voor deze week</p>
+    <div class="plan-rij" id="plan-rij"></div>
 
     <p class="sectie-label sectie-label-mt">Komende week</p>
     <div class="week-rij" id="week-rij"></div>
@@ -981,11 +1007,103 @@
         </a>`;
     }
 
+    // ── Plan voor deze week ──
+    function vindUrgentsteToets(dag) {
+      const inst = JSON.parse(localStorage.getItem('instellingen') || '{}');
+      const STAND = { Mondeling:7, Proefwerk:4, SO:1, Luistertoets:0, Schrijfvaardigheid:2, PO:14, Anders:3 };
+      function getLeerDgn(type, moeilijkheid) {
+        const key = type || 'Anders';
+        const basis = inst[key] !== undefined ? inst[key] : (STAND[key] !== undefined ? STAND[key] : STAND.Anders);
+        return basis > 0 ? Math.max(1, Math.round(basis * ((moeilijkheid || 5) / 5))) : 0;
+      }
+      const dagMs = dag.getTime();
+      let best = null;
+      vakken.forEach(v => {
+        const toetsen = v.toetsen || (v.toetsdatum ? [{ datum: v.toetsdatum, type: 'Anders' }] : []);
+        toetsen.forEach(t => {
+          if (!t.datum) return;
+          const toetsMs = parseDatum(t.datum).getTime();
+          if (toetsMs < dagMs) return;
+          const dgn = getLeerDgn(t.type, v.moeilijkheid);
+          if (dgn === 0) return;
+          const beginMs = toetsMs - dgn * 86400000;
+          if (dagMs >= beginMs && dagMs <= toetsMs) {
+            if (!best || toetsMs < best.toetsMs) {
+              best = { vakNaam: v.naam, toetsMs, dagenTot: Math.round((toetsMs - dagMs) / 86400000) };
+            }
+          }
+        });
+      });
+      return best;
+    }
+
+    function genereerDagAdvies(dag) {
+      const dagNr = dag.getDay();
+      const dagStr = toDatumStr(dag);
+      const sd = JSON.parse(localStorage.getItem('schooldagen') || 'null');
+      const se = localStorage.getItem('schoolEinde') || null;
+      const isSchooldag = !sd || sd.includes(dagNr);
+
+      const vm = JSON.parse(localStorage.getItem('vrijeMomenten') || '{}');
+      const vrijData = vm[dagNr];
+      const heleDagVrij = !!(vrijData && typeof vrijData === 'object' && vrijData.heleDag);
+      const vrijVanaf = vrijData ? (typeof vrijData === 'string' ? vrijData : (vrijData.tijd || null)) : null;
+
+      const allTr = JSON.parse(localStorage.getItem('trainingen') || '[]');
+      const dagTr = allTr
+        .filter(t => Array.isArray(t.dagen) && t.dagen.includes(dagNr)
+                  && t.tijden && t.tijden[dagNr] && !t.tijden[dagNr].wisselend)
+        .map(t => ({ naam: t.naam, begin: t.tijden[dagNr].begin || null }))
+        .sort((a, b) => !a.begin ? 1 : !b.begin ? -1 : a.begin.localeCompare(b.begin));
+
+      const allAf = JSON.parse(localStorage.getItem('afspraken') || '[]');
+      const dagAf = allAf.filter(a => {
+        if (a.afgerond) return false;
+        return a.herhaling === 'wekelijks'
+          ? parseDatum(a.datum).getDay() === dagNr && a.datum <= dagStr
+          : a.einddatum ? a.datum <= dagStr && dagStr <= a.einddatum : a.datum === dagStr;
+      });
+
+      const aantalBezet = dagTr.length + dagAf.length + (isSchooldag ? 1 : 0);
+      const urgentToets = vindUrgentsteToets(dag);
+
+      if (!urgentToets) return null;
+
+      // Te druk: 3+ blokkerende items én meer dan 1 dag tot toets
+      if (aantalBezet >= 3 && urgentToets.dagenTot > 1) return null;
+
+      const vakNaam = urgentToets.vakNaam;
+      const eersteT = dagTr[0];
+
+      if (eersteT && eersteT.begin) return `${eersteT.naam} om ${eersteT.begin}, leer ${vakNaam} eerst`;
+      if (!isSchooldag && heleDagVrij) return `Vrije dag, ideaal voor ${vakNaam}`;
+      if (!isSchooldag && vrijVanaf)   return `Vrij van ${vrijVanaf}, ideaal voor ${vakNaam}`;
+      if (isSchooldag && se)           return `Leer ${vakNaam} na ${se}`;
+      if (vrijVanaf)                   return `Leer ${vakNaam} vanaf ${vrijVanaf}`;
+      return `Leer ${vakNaam}`;
+    }
+
+    function renderPlanWeek() {
+      const DAG_KORT = ['zo','ma','di','wo','do','vr','za'];
+      let html = '';
+      for (let i = 1; i <= 3; i++) {
+        const dag = addDagen(vandaag, i);
+        const tekst = genereerDagAdvies(dag);
+        html += `<div class="plan-dag-kaart${tekst ? ' heeft-actie' : ''}">
+          <span class="plan-dag-naam">${DAG_KORT[dag.getDay()]}</span>
+          <span class="plan-dag-datum">${dag.getDate()}</span>
+          <div class="${tekst ? 'plan-dag-actie' : 'plan-dag-leeg'}">${tekst || 'Rustige dag, geen leerwerk'}</div>
+        </div>`;
+      }
+      document.getElementById('plan-rij').innerHTML = html;
+    }
+
     renderStreak(updateStreak());
     renderTerugblikKaart();
     initCheckin();
     renderWeekWaarschuwing();
     renderVandaag();
+    renderPlanWeek();
     renderWeekRij();
     renderTip();
 
