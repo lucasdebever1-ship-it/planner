@@ -1,4 +1,4 @@
-const CACHE = 'struct-cache-v5';
+const CACHE = 'struct-cache-v6';
 const ASSETS = [
   '/',
   '/index.html',
