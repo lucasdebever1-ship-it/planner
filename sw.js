@@ -1,4 +1,4 @@
-const CACHE = 'struct-v4';
+const CACHE = 'struct-cache-v3';
 const ASSETS = [
   '/',
   '/index.html',
