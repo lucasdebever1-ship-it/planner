@@ -113,7 +113,6 @@
     .kaart-advies { margin-top: 10px; font-size: 0.83rem; font-weight: 600; line-height: 1.45; }
     .leeradvies   { color: #2bc47e; }
     .waarschuwing { color: #d07020; }
-    .cijfer-melding { margin-top: 6px; font-size: 0.78rem; font-weight: 500; color: #c07020; }
 
     .felicitatie-banner {
       background: #edfaf3; border: 1px solid #afe8c8;
@@ -370,11 +369,11 @@
     }
 
     function getCijferAanpassing(vakNaam) {
-      const cijfers = JSON.parse(localStorage.getItem('cijfers') || '[]');
-      const vakCijfers = cijfers.filter(c => c.vakNaam === vakNaam).map(c => c.cijfer);
-      if (!vakCijfers.length) return 0;
-      const gem = vakCijfers.reduce((s, c) => s + c, 0) / vakCijfers.length;
-      return gem < 6 ? 2 : 0;
+      const cijfers = JSON.parse(localStorage.getItem('cijfers') || '[]')
+        .filter(c => c.vakNaam === vakNaam)
+        .sort((a, b) => (a.datum < b.datum ? -1 : a.datum > b.datum ? 1 : 0));
+      if (!cijfers.length) return 0;
+      return cijfers[cijfers.length - 1].cijfer <= 6 ? 2 : 0;
     }
 
     function formatDatum(d) {
@@ -471,10 +470,9 @@
         const vrijTijd = vrijData ? (typeof vrijData === 'string' ? vrijData : vrijData.tijd) : null;
         const tijdDeel = vrijTijd ? `, vrij vanaf ${vrijTijd}` : '';
         const ideaalDeel = ideaal ? ' — ideale leerdag' : '';
-        advies = `<div class="kaart-advies leeradvies">Begin op ${vrijBegin.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' })}${tijdDeel}${ideaalDeel}${verschoven && !ideaal ? ' (werkdag overgeslagen)' : ''}</div>`;
+        const extraLabel = r.cijferAanpassing > 0 ? ' · Extra tijd ingepland op basis van je vorige cijfer.' : '';
+        advies = `<div class="kaart-advies leeradvies">Begin op ${vrijBegin.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' })}${tijdDeel}${ideaalDeel}${verschoven && !ideaal ? ' (werkdag overgeslagen)' : ''}${extraLabel}</div>`;
       }
-      const cijferMelding = r.cijferAanpassing > 0
-        ? `<div class="cijfer-melding">Extra tijd ingepland op basis van je cijfers.</div>` : '';
       return `<div class="toets-kaart ${categorie}">
         ${drukBadge}
         <div class="kaart-datumrij">
@@ -484,7 +482,6 @@
         <div class="vak-naam">${vak}</div>
         <div class="toets-type">${toets.naam}</div>
         ${advies}
-        ${cijferMelding}
       </div>`;
     }
 
