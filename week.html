@@ -127,6 +127,12 @@
       line-height: 1.4;
     }
 
+    /* Dag samenvatting */
+    .dag-samenvatting {
+      font-size: 0.78rem; color: #c8c8c8; font-weight: 500;
+      margin-bottom: 12px; min-height: 16px;
+    }
+
     /* Lege dag */
     .dag-leeg {
       text-align: center;
@@ -135,6 +141,9 @@
       font-weight: 500;
       padding: 28px 0 12px;
     }
+
+    /* Vrije dag in dag-rij */
+    .dag-pill.vrije-dag:not(.geselecteerd):not(.vandaag) { color: #d8d8d8; }
 
     /* Tijdblokken vrij */
     .tijdblok-vrij {
@@ -272,6 +281,7 @@
   </div>
 
   <div class="dag-rij" id="dag-rij"></div>
+  <div class="dag-samenvatting" id="dag-samenvatting"></div>
   <div class="dag-inhoud" id="dag-inhoud"></div>
 
   <!-- Menu -->
@@ -411,12 +421,18 @@
     }
 
     function renderDagRij() {
+      const schooldagen = JSON.parse(localStorage.getItem('schooldagen') || 'null');
       let html = '';
       for (let i = 0; i < 7; i++) {
         const dag = addDagen(weekMaandag, i);
         const isVandaag      = dag.getTime() === vandaag.getTime();
         const isGeselecteerd = dag.getTime() === gekozenDag.getTime();
-        const klassen = ['dag-pill', isGeselecteerd ? 'geselecteerd' : '', isVandaag ? 'vandaag' : ''].filter(Boolean).join(' ');
+        const isSchooldag    = !schooldagen || schooldagen.includes(dag.getDay());
+        const klassen = ['dag-pill',
+          isGeselecteerd ? 'geselecteerd' : '',
+          isVandaag      ? 'vandaag'      : '',
+          !isSchooldag   ? 'vrije-dag'    : '',
+        ].filter(Boolean).join(' ');
         html += `<button class="${klassen}" data-dag="${toDatumStr(dag)}">
           <span class="dag-letter">${DAG_LETTERS[dag.getDay()]}</span>
           <span class="dag-getal">${dag.getDate()}</span>
@@ -480,10 +496,24 @@
     }
 
     function renderItem(item) {
-      const KLEUREN = { toets:'#e05252', huiswerk:'#3a6edc', start:'#888888', bezig:'#888888', afspraak:'#9b59b6', training:'#3ddc97' };
-      const LABELS  = { toets:'Toets', huiswerk:'Huiswerk', start:'Leren', bezig:'Leren', afspraak:'Afspraak', training:'Training' };
+      const KLEUREN = {
+        toets:    '#e05252',
+        huiswerk: '#3a6edc',
+        start:    '#f0a050',
+        bezig:    '#888888',
+        afspraak: '#9b59b6',
+        training: '#3ddc97',
+      };
+      const LABELS = {
+        toets:    'Toets',
+        huiswerk: 'Huiswerk',
+        start:    'Leren starten',
+        bezig:    'Leren',
+        afspraak: 'Afspraak',
+        training: 'Training',
+      };
       const kleur = KLEUREN[item.soort] || '#888';
-      const label = LABELS[item.soort] || '';
+      const label = LABELS[item.soort]  || '';
 
       let tijdHtml = '';
       if (item.begin) {
@@ -494,18 +524,18 @@
       let titel = '', sub = '';
       if (item.soort === 'toets') {
         titel = item.vak;
-        sub = item.naam ? (item.type ? `${item.naam} · ${item.type}` : item.naam) : '';
+        sub   = item.naam ? (item.type ? `${item.naam} · ${item.type}` : item.naam) : '';
       } else if (item.soort === 'huiswerk') {
         titel = item.vak;
-        sub = item.omschrijving || '';
+        sub   = item.omschrijving || '';
       } else if (item.soort === 'start') {
         titel = item.vak;
         const over = item.dagenTot === 1 ? '1 dag' : `${item.dagenTot} dagen`;
-        sub = `Begin met leren · toets over ${over}`;
+        sub   = `Toets over ${over}`;
       } else if (item.soort === 'bezig') {
         titel = item.vak;
         const nog = item.dagenTot === 1 ? '1 dag' : `${item.dagenTot} dagen`;
-        sub = `Nog ${nog} tot de toets`;
+        sub   = `Nog ${nog} tot de toets`;
       } else if (item.soort === 'training') {
         titel = item.naam;
       } else if (item.soort === 'afspraak') {
@@ -514,16 +544,17 @@
 
       return `<div class="item-kaart" style="border-left-color:${kleur}">
         <div class="item-kaart-label" style="color:${kleur}">${label}</div>
-        ${tijdHtml}
         <div class="item-kaart-titel">${titel}</div>
+        ${tijdHtml}
         ${sub ? `<div class="item-kaart-sub">${sub}</div>` : ''}
       </div>`;
     }
 
     function renderDagInhoud() {
-      const dagNr    = gekozenDag.getDay();
-      const isWeekend = dagNr === 0 || dagNr === 6;
-      const dagStr   = toDatumStr(gekozenDag);
+      const dagNr     = gekozenDag.getDay();
+      const dagStr    = toDatumStr(gekozenDag);
+      const schooldagen = JSON.parse(localStorage.getItem('schooldagen') || 'null');
+      const isSchooldag = !schooldagen || schooldagen.includes(dagNr);
 
       const { toetsKaarten, hwKaarten, startKaarten, bezigKaarten } = berekenKaarten(gekozenDag);
 
@@ -576,6 +607,13 @@
       const untimedItems = items.filter(i => i.sortTime < 0);
       const timedItems   = items.filter(i => i.sortTime >= 0);
 
+      // Samenvatting
+      const samEl = document.getElementById('dag-samenvatting');
+      if (samEl) {
+        const n = items.length;
+        samEl.textContent = n === 0 ? '' : n === 1 ? '1 ding vandaag' : `${n} dingen vandaag`;
+      }
+
       let html = '';
 
       if (heleDagVrij) {
@@ -619,9 +657,9 @@
       }
 
       if (!html) {
-        html = isWeekend
-          ? `<div class="dag-vrij-weekend">Hele dag vrij</div>`
-          : `<div class="dag-leeg">Niks gepland</div>`;
+        html = !isSchooldag
+          ? `<div class="dag-vrij-weekend">Vrije dag</div>`
+          : `<div class="dag-leeg">Niks gepland vandaag</div>`;
       }
 
       document.getElementById('dag-inhoud').innerHTML = html;
