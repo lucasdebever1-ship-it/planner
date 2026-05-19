@@ -38,6 +38,16 @@
       margin-bottom: 24px;
     }
     .pagina-header h1 { margin: 0; font-size: 1.4rem; font-weight: 700; letter-spacing: -0.3px; color: #1a1a1a; }
+    .btn-afspraken-hdr {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 0.82rem; font-weight: 600; color: #666;
+      text-decoration: none; padding: 6px 11px;
+      border-radius: 8px; border: 1px solid #e0e0e0;
+      background: #f8f8f8;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-afspraken-hdr:hover { background: #f0fbf5; border-color: #3ddc97; color: #2bc47e; }
 
     /* Week navigatie */
     .week-nav {
@@ -274,6 +284,10 @@
 
   <div class="pagina-header">
     <h1>Agenda</h1>
+    <a href="afspraken.html" class="btn-afspraken-hdr">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Afspraken
+    </a>
     <button class="hamburger-btn" id="hamburger" aria-label="Menu">
       <span class="hamburger-streep"></span>
       <span class="hamburger-streep"></span>
@@ -295,6 +309,10 @@
   <div class="menu-overlay" id="menu-overlay">
     <div class="menu-achtergrond" onclick="sluitMenu()"></div>
     <div class="menu-kaart">
+      <a href="afspraken.html" class="menu-item" onclick="sluitMenu()">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Afspraken
+      </a>
       <button class="menu-item rood" onclick="resetProfiel()">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.75"/></svg>
         Onboarding resetten
