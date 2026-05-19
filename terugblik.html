@@ -11,6 +11,9 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Struct">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #ffffff;
@@ -21,20 +24,35 @@
       --border: rgba(0,0,0,0.08);
     }
     *, *::before, *::after { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       -webkit-font-smoothing: antialiased;
       background: #ffffff; color: #1a1a1a;
-      max-width: 480px; margin: 0 auto;
-      padding: 40px 20px 90px;
+      margin: 0; max-width: 480px; margin: 0 auto;
+      padding: 0 20px 100px;
+      min-height: 100vh;
     }
 
+    /* ── Noise texture ── */
+    body { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); background-size: 200px 200px; }
+
+    /* ── Animaties ── */
+    @keyframes pagina-in { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes kaart-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    body { animation: pagina-in 0.15s ease both; }
+    .voortgang-kaart { animation: kaart-in 0.3s ease-out both; }
+    .voortgang-kaart:nth-child(2) { animation-delay: 50ms; }
+    .voortgang-kaart:nth-child(3) { animation-delay: 100ms; }
+    .voortgang-kaart:nth-child(4) { animation-delay: 150ms; }
+
+    /* ── Header ── */
     .pagina-header {
       display: flex; justify-content: space-between;
-      align-items: center; margin-bottom: 6px;
+      align-items: center; padding: 28px 0 20px;
     }
-    .pagina-header h1 { margin: 0; font-size: 1.4rem; font-weight: 700; letter-spacing: -0.3px; }
+    .pagina-header h1 { margin: 0; font-size: 1.75rem; font-weight: 800; letter-spacing: -0.6px; color: #111; }
 
     /* ── Hamburger ── */
     .hamburger-btn {
@@ -67,71 +85,131 @@
     .menu-item:hover { background: #f5f5f5; }
     .menu-item.rood { color: #e05252; }
 
-    /* ── Streak ── */
-    .streak-blok {
-      background: linear-gradient(135deg, #edfaf3, #e2f7ea);
-      border: 1px solid #afe8c8; border-radius: 16px;
-      padding: 15px 18px; display: flex; align-items: center; gap: 13px;
-      margin-bottom: 22px; box-shadow: 0 2px 10px rgba(61,220,151,0.14);
-    }
-    .streak-vlam  { font-size: 1.9rem; line-height: 1; flex-shrink: 0; }
-    .streak-getal { font-size: 2.8rem; font-weight: 800; color: #111; line-height: 1; letter-spacing: -2.5px; }
-    .streak-label { font-size: 0.87rem; font-weight: 700; color: #2bc47e; }
-    .streak-start { font-size: 0.85rem; color: #999; font-weight: 500; }
-    .streak-best  { font-size: 0.78rem; color: #aaa; margin-top: 2px; }
-
-    /* ── Patronen ── */
-    .patroon-rij { padding: 13px 16px; border-bottom: 1px solid #ebebeb; }
-    .patroon-rij:last-child { border-bottom: none; }
-    .patroon-rij-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-    .patroon-dag-naam { font-size: 0.9rem; font-weight: 700; color: #1a1a1a; }
-    .patroon-label { font-size: 0.72rem; font-weight: 700; border-radius: 20px; padding: 2px 10px; letter-spacing: 0.04em; }
-    .patroon-label.productief { background: #edfaf3; color: #2bc47e; }
-    .patroon-label.rustig     { background: #fdf5ff; color: #9b59b6; }
-    .patroon-label.gemengd    { background: #f5f5f5; color: #888; }
-    .patroon-label.weinig     { background: #f5f5f5; color: #c0c0c0; }
-    .patroon-bar-wrap { display: flex; height: 6px; border-radius: 4px; overflow: hidden; background: #f0f0f0; margin-bottom: 6px; }
-    .patroon-bar-klaar      { background: #3ddc97; }
-    .patroon-bar-gaat-wel   { background: #f0a050; }
-    .patroon-bar-geen-energ { background: #9b59b6; }
-    .patroon-leeg { font-size: 0.82rem; color: #bbb; padding: 14px 16px; text-align: center; }
-
-    .kaart-blok {
-      background: #f5f5f5; border: 1px solid #ebebeb;
-      border-radius: 14px; overflow: hidden; margin-bottom: 22px;
-    }
-
-    .week-bereik { font-size: 0.85rem; color: #bbb; margin-bottom: 28px; font-weight: 500; }
-
+    /* ── Sectie label ── */
     .sectie-label {
-      font-size: 0.72rem; font-weight: 700;
-      letter-spacing: 0.3px;
-      color: #aaa; margin: 0 0 12px;
+      font-size: 0.68rem; font-weight: 800;
+      letter-spacing: 0.4px; text-transform: uppercase;
+      color: #b0b0b0; margin: 0 0 12px;
     }
-    .sectie-mt { margin-top: 28px; }
 
-    /* Samenvatting */
-    .samenvatting-kaart {
-      background: linear-gradient(135deg, #f0fbf5, #e8f8ef);
-      border: 1px solid #b8efd3; border-radius: 14px;
-      padding: 16px 18px; margin-bottom: 28px;
-      display: flex; gap: 28px;
+    /* ── Voortgang kaart (basis) ── */
+    .voortgang-kaart {
+      background: #f8f8f8; border: 1px solid #ebebeb;
+      border-radius: 18px; padding: 18px 18px 16px;
+      margin-bottom: 14px;
     }
-    .sam-blok { display: flex; flex-direction: column; }
-    .sam-getal { font-size: 2.2rem; font-weight: 800; color: #1a1a1a; letter-spacing: -1.5px; line-height: 1; }
-    .sam-label { font-size: 0.78rem; color: #2bc47e; font-weight: 600; margin-top: 3px; }
 
-    /* Toets rijen */
+    /* ── Streak ── */
+    .streak-top {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 16px;
+    }
+    .streak-vlam { font-size: 1.5rem; line-height: 1; }
+    .streak-getal { font-size: 2rem; font-weight: 800; color: #111; letter-spacing: -1.5px; line-height: 1; }
+    .streak-tekst { font-size: 0.85rem; color: #999; font-weight: 500; }
+    .streak-leeg-tekst { font-size: 0.85rem; color: #bbb; margin: 0 0 14px; }
+
+    .dag-cirkels { display: flex; gap: 6px; }
+    .dag-cirkel-wrap {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; gap: 5px;
+    }
+    .dag-cirkel {
+      width: 34px; height: 34px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .dag-cirkel.actief { background: #3ddc97; }
+    .dag-cirkel.gemist { background: #ebebeb; }
+    .dag-cirkel.vandaag.gemist { background: #ebebeb; box-shadow: 0 0 0 2px #d0d0d0; }
+    .dag-cirkel.vandaag.actief { box-shadow: 0 0 0 2px #2bc47e; }
+    .dag-letter { font-size: 0.6rem; font-weight: 700; color: #c0c0c0; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    /* ── Cijfers ── */
+    .cijfers-lijst { display: flex; flex-direction: column; }
+    .cijfer-rij {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 0; border-bottom: 1px solid #f0f0f0;
+    }
+    .cijfer-rij:last-child { border-bottom: none; }
+    .cijfer-vak {
+      font-size: 0.83rem; font-weight: 600; color: #333;
+      width: 90px; flex-shrink: 0;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .cijfer-bar-wrap {
+      flex: 1; background: #e8e8e8; border-radius: 5px; height: 8px;
+    }
+    .cijfer-bar { height: 8px; border-radius: 5px; background: #3ddc97; transition: width 0.6s ease; }
+    .cijfer-bar.laag { background: #e05252; }
+    .cijfer-getal { font-size: 0.92rem; font-weight: 800; min-width: 30px; text-align: right; }
+    .cijfer-getal.goed { color: #2bc47e; }
+    .cijfer-getal.laag { color: #e05252; }
+
+    /* ── Leeg staat ── */
+    .leeg-staat { font-size: 0.83rem; color: #bbb; margin: 0 0 4px; line-height: 1.5; }
+
+    /* ── Check-in patronen ── */
+    .mood-cirkels {
+      display: flex; justify-content: space-between; gap: 4px;
+      margin-bottom: 12px;
+    }
+    .mood-cirkel-wrap {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; gap: 5px;
+    }
+    .mood-cirkel {
+      width: 34px; height: 34px; border-radius: 50%;
+    }
+    .mood-cirkel.klaar      { background: #3ddc97; }
+    .mood-cirkel.gaat-wel   { background: #f0a050; }
+    .mood-cirkel.geen-data  { background: #e8e8e8; }
+    .mood-dag-letter { font-size: 0.6rem; font-weight: 700; color: #c0c0c0; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    .mood-legenda {
+      display: flex; gap: 14px; flex-wrap: wrap;
+    }
+    .legenda-item {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 0.72rem; color: #aaa; font-weight: 500;
+    }
+    .legenda-stip {
+      width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0;
+    }
+    .legenda-stip.klaar    { background: #3ddc97; }
+    .legenda-stip.gaat-wel { background: #f0a050; }
+    .legenda-stip.geen-data { background: #e8e8e8; }
+
+    /* ── Terugblik knop ── */
+    .btn-terugblik {
+      width: 100%; padding: 17px; background: #3ddc97; border: none;
+      border-radius: 16px; color: #fff; font-size: 1rem; font-weight: 700;
+      cursor: pointer; font-family: inherit; margin: 8px 0 28px;
+      transition: background 0.15s; min-height: 54px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-terugblik:hover { background: #2bc47e; }
+    .btn-terugblik:active { transform: scale(0.98); }
+
+    /* ── Weekterugblik sectie ── */
+    .terugblik-sectie-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .terugblik-weeklabel { font-size: 0.82rem; color: #bbb; font-weight: 500; }
+
     .toets-rij {
-      background: #f8f8f8; border: 1px solid #ebebeb; border-radius: 12px;
+      background: #fff; border: 1px solid #ebebeb; border-radius: 12px;
       padding: 12px 14px; margin-bottom: 9px;
       display: flex; align-items: center; gap: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     }
     .toets-rij-info { flex: 1; min-width: 0; }
     .toets-rij-vak { font-size: 0.9rem; font-weight: 700; color: #1a1a1a; }
-    .toets-rij-sub { font-size: 0.77rem; color: #aaa; margin-top: 1px; }
+    .toets-rij-sub { font-size: 0.77rem; color: #aaa; margin-top: 2px; }
     .cijfer-input {
-      width: 58px; background: #fff; border: 1.5px solid #e0e0e0;
+      width: 58px; background: #f8f8f8; border: 1.5px solid #e0e0e0;
       border-radius: 9px; color: #1a1a1a; font-size: 1rem; font-weight: 700;
       padding: 8px 6px; text-align: center; outline: none;
       font-family: inherit; transition: border-color 0.15s, background 0.15s;
@@ -139,71 +217,48 @@
     }
     .cijfer-input::-webkit-outer-spin-button,
     .cijfer-input::-webkit-inner-spin-button { -webkit-appearance: none; }
-    .cijfer-input:focus { border-color: #3ddc97; }
+    .cijfer-input:focus { border-color: #3ddc97; background: #fff; }
     .cijfer-input.goed { border-color: #3ddc97; background: #f0fbf5; color: #2bc47e; }
     .cijfer-input.laag { border-color: #e05252; background: #fff5f5; color: #e05252; }
 
-    /* Weekbeoordeling */
     .week-opties { display: flex; gap: 8px; margin-bottom: 4px; }
     .week-optie {
       flex: 1; padding: 13px 6px; text-align: center;
       background: #f5f5f5; border: 1.5px solid #e8e8e8; border-radius: 12px;
-      cursor: pointer; font-size: 1rem; font-weight: 600; color: #888;
+      cursor: pointer; font-size: 0.95rem; font-weight: 600; color: #888;
       transition: all 0.15s; -webkit-tap-highlight-color: transparent;
       font-family: inherit; min-height: 48px;
     }
     .week-optie.actief { background: #f0fbf5; border-color: #3ddc97; color: #1a1a1a; }
+    .week-optie:disabled { opacity: 0.5; cursor: default; }
 
-    /* Gemiddelden */
-    .gem-kaart {
-      background: #f8f8f8; border: 1px solid #ebebeb;
-      border-radius: 12px; padding: 4px 14px;
+    .al-ingevuld-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #f0fbf5; border: 1px solid #b8efd3; border-radius: 8px;
+      padding: 7px 12px; font-size: 0.83rem; color: #2bc47e;
+      font-weight: 600; margin-bottom: 16px;
     }
-    .gem-rij {
-      display: flex; align-items: center; gap: 10px;
-      padding: 11px 0; border-bottom: 1px solid #f0f0f0;
-    }
-    .gem-rij:last-child { border-bottom: none; }
-    .gem-vak { font-size: 0.88rem; font-weight: 600; flex: 1; min-width: 0;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .gem-bar-wrap { width: 70px; background: #ebebeb; border-radius: 4px; height: 5px; flex-shrink: 0; }
-    .gem-bar { height: 5px; border-radius: 4px; }
-    .gem-bar.goed { background: #3ddc97; }
-    .gem-bar.laag { background: #e05252; }
-    .gem-getal { font-size: 0.95rem; font-weight: 800; min-width: 28px; text-align: right; }
-    .gem-getal.goed { color: #2bc47e; }
-    .gem-getal.laag { color: #e05252; }
 
-    /* Opslaan */
     .btn-opslaan {
       width: 100%; padding: 14px; background: #3ddc97; border: none;
       border-radius: 12px; color: #fff; font-size: 1rem; font-weight: 700;
-      cursor: pointer; font-family: inherit; margin-top: 28px;
+      cursor: pointer; font-family: inherit; margin-top: 20px;
       transition: background 0.15s; min-height: 48px;
     }
     .btn-opslaan:hover { background: #2bc47e; }
     .btn-opslaan:disabled { background: #c0e8d4; cursor: default; }
 
-    /* Motivatie */
     .motivatie-kaart {
       background: linear-gradient(135deg, #f0fbf5, #e8f8ef);
       border: 1px solid #b8efd3; border-radius: 16px;
-      padding: 24px 20px; text-align: center; margin-top: 28px;
+      padding: 20px 18px; margin-top: 16px; text-align: center;
     }
-    .motivatie-emoji { font-size: 2.6rem; line-height: 1; margin-bottom: 12px; }
-    .motivatie-tekst { font-size: 1.05rem; font-weight: 800; color: #1a1a1a; line-height: 1.4; margin-bottom: 6px; }
+    .motivatie-tekst { font-size: 1rem; font-weight: 800; color: #1a1a1a; line-height: 1.4; margin-bottom: 5px; }
     .motivatie-sub { font-size: 0.85rem; color: #2bc47e; font-weight: 600; }
 
-    .al-ingevuld {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: #f0fbf5; border: 1px solid #b8efd3; border-radius: 8px;
-      padding: 7px 12px; font-size: 0.83rem; color: #2bc47e;
-      font-weight: 600; margin-bottom: 20px;
-    }
+    .leeg-toetsen { font-size: 0.87rem; color: #aaa; text-align: center; padding: 18px 0; }
 
-    .leeg { text-align: center; color: #bbb; padding: 48px 0 20px; font-size: 0.9rem; }
-
-    /* Tabbar */
+    /* ── Tabbar ── */
     .tabbar {
       position: fixed; bottom: 0; left: 0; right: 0;
       background: rgba(255,255,255,0.95);
@@ -217,7 +272,7 @@
       flex: 1; display: flex; flex-direction: column; position: relative;
       align-items: center; gap: 3px; padding: 11px 4px 13px;
       text-decoration: none; color: #c0c0c0; font-size: 0.75rem; font-weight: 700;
-      letter-spacing: 0.01em;
+      letter-spacing: 0.01em; min-height: 44px;
       -webkit-tap-highlight-color: transparent; transition: color 0.18s;
     }
     .tab:active { opacity: 0.6; }
@@ -234,45 +289,10 @@
     .tab.actief .icoon-outline { display: none; }
     .tab.actief .icoon-filled  { display: block; }
 
-    /* ── Animaties ── */
-    @keyframes kaart-in {
-      from { opacity: 0; transform: translateY(8px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes pagina-in {
-      from { opacity: 0; }
-      to   { opacity: 1; }
-    }
-    body { animation: pagina-in 0.15s ease both; }
-    .samenvatting-kaart, .toets-rij, .motivatie-kaart, .gem-kaart { animation: kaart-in 0.3s ease-out both; }
-
-    /* ── Noise texture ── */
-    body { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); background-size: 200px 200px; }
-
-    /* ── Touch targets ── */
-    .tab { min-height: 44px; }
-    .snel-knop, .btn-toon-alles, .checkin-optie { min-height: 44px; }
-
     /* ── Focus states ── */
     :focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; border-radius: 4px; }
-    a:focus-visible { border-radius: 6px; }
-    input:focus-visible, select:focus-visible { outline: none; }
-
-    /* ── Stagger reveal ── */
-    .dag-kaart:nth-child(2),.toets-kaart:nth-child(2),.afspraak-kaart:nth-child(2),
-    .kaart:nth-child(2),.toets-rij:nth-child(2),.tijdblok-event:nth-child(2),.tijdblok-vrij:nth-child(2) { animation-delay: 50ms; }
-    .dag-kaart:nth-child(3),.toets-kaart:nth-child(3),.afspraak-kaart:nth-child(3),
-    .kaart:nth-child(3),.toets-rij:nth-child(3),.tijdblok-event:nth-child(3),.tijdblok-vrij:nth-child(3) { animation-delay: 100ms; }
-    .dag-kaart:nth-child(4),.toets-kaart:nth-child(4),.afspraak-kaart:nth-child(4),
-    .kaart:nth-child(4),.toets-rij:nth-child(4) { animation-delay: 150ms; }
-    .dag-kaart:nth-child(5),.toets-kaart:nth-child(5),.afspraak-kaart:nth-child(5),
-    .kaart:nth-child(5),.toets-rij:nth-child(5) { animation-delay: 200ms; }
-    .dag-kaart:nth-child(6),.toets-kaart:nth-child(6),.afspraak-kaart:nth-child(6),
-    .kaart:nth-child(6),.toets-rij:nth-child(6) { animation-delay: 250ms; }
+    input:focus-visible { outline: none; }
   </style>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -285,16 +305,26 @@
     </button>
   </div>
 
-  <div id="streak-blok" class="streak-blok"></div>
+  <!-- 1. Streak -->
+  <div id="streak-sectie"></div>
 
-  <p class="sectie-label">Dagpatronen</p>
-  <div class="kaart-blok" id="patronen-kaart"></div>
+  <!-- 2. Cijfers -->
+  <div id="cijfers-sectie"></div>
 
-  <p class="sectie-label sectie-mt">Terugblik</p>
-  <div class="week-bereik" id="week-bereik"></div>
-  <div id="inhoud"></div>
+  <!-- 3. Check-in patronen -->
+  <div id="patronen-sectie"></div>
 
-  <!-- Menu -->
+  <!-- 4. Weekterugblik knop -->
+  <button class="btn-terugblik" onclick="scrollNaarTerugblik()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+    Weekterugblik invullen
+  </button>
+
+  <!-- Weekterugblik sectie -->
+  <div id="terugblik-anker"></div>
+  <div id="terugblik-sectie"></div>
+
+  <!-- Menu overlay -->
   <div class="menu-overlay" id="menu-overlay">
     <div class="menu-achtergrond" onclick="sluitMenu()"></div>
     <div class="menu-kaart">
@@ -330,7 +360,7 @@
   </nav>
 
   <script>
-    // ── Navigatie ──
+    // ── Menu ──
     document.getElementById('hamburger').addEventListener('click', () => {
       document.getElementById('menu-overlay').classList.toggle('open');
     });
@@ -342,92 +372,21 @@
       }
     }
 
-    // ── Streak display ──
-    function renderStreak() {
-      const huidig = parseInt(localStorage.getItem('streak_huidig') || '0');
-      const langste = parseInt(localStorage.getItem('streak_langste') || '0');
-      const blok = document.getElementById('streak-blok');
-      if (huidig === 0) {
-        blok.style.cssText = 'background:none;border:none;padding:0 0 8px';
-        blok.innerHTML = '<span class="streak-start">Nog geen streak gestart</span>';
-      } else {
-        const mv = huidig === 1 ? 'dag' : 'dagen';
-        blok.innerHTML = `
-          <span class="streak-vlam">🔥</span>
-          <div>
-            <div style="display:flex;align-items:baseline;gap:6px">
-              <span class="streak-getal">${huidig}</span>
-              <span class="streak-label">${mv} op rij</span>
-            </div>
-            ${langste > huidig ? `<div class="streak-best">Langste: ${langste} dagen</div>` : ''}
-          </div>`;
-      }
-    }
-
-    // ── Patronen display ──
-    const DAG_LANG_P = ['Zondag','Maandag','Dinsdag','Woensdag','Donderdag','Vrijdag','Zaterdag'];
-    function analyseerPatroon(dagNr) {
-      const keuzes = (JSON.parse(localStorage.getItem('checkinPatronen') || '{}'))[dagNr] || [];
-      if (!keuzes.length) return null;
-      const totaal = keuzes.length;
-      const pctKlaar = keuzes.filter(k => k === 'klaar').length / totaal;
-      const pctLicht = keuzes.filter(k => k === 'gaat-wel' || k === 'geen-energie').length / totaal;
-      if (keuzes.length < 3) return 'weinig';
-      if (pctKlaar > 0.6) return 'productief';
-      if (pctLicht > 0.6) return 'rustig';
-      return 'gemengd';
-    }
-    function renderPatronen() {
-      const patronen = JSON.parse(localStorage.getItem('checkinPatronen') || '{}');
-      const container = document.getElementById('patronen-kaart');
-      const dagVolgorde = [1,2,3,4,5,6,0];
-      const heeftData = dagVolgorde.some(d => (patronen[d] || []).length > 0);
-      if (!heeftData) {
-        container.innerHTML = '<p class="patroon-leeg">Nog geen data. Vul elke dag je check-in in om patronen te zien.</p>';
-        return;
-      }
-      const LABEL_MAP = { productief:'Productief', rustig:'Rustig', gemengd:'Gemengd', weinig:'Te weinig data' };
-      container.innerHTML = dagVolgorde
-        .filter(d => (patronen[d] || []).length > 0)
-        .map(d => {
-          const keuzes = patronen[d] || [];
-          const totaal = keuzes.length;
-          const nKlaar = keuzes.filter(k => k === 'klaar').length;
-          const nGaatWel = keuzes.filter(k => k === 'gaat-wel').length;
-          const label = analyseerPatroon(d) || 'weinig';
-          const brK = Math.round(nKlaar / totaal * 100);
-          const brG = Math.round(nGaatWel / totaal * 100);
-          const brE = 100 - brK - brG;
-          return `<div class="patroon-rij">
-            <div class="patroon-rij-header">
-              <span class="patroon-dag-naam">${DAG_LANG_P[d]}</span>
-              <span class="patroon-label ${label}">${LABEL_MAP[label]}</span>
-            </div>
-            <div class="patroon-bar-wrap">
-              <div class="patroon-bar-klaar" style="width:${brK}%"></div>
-              <div class="patroon-bar-gaat-wel" style="width:${brG}%"></div>
-              <div class="patroon-bar-geen-energ" style="width:${brE}%"></div>
-            </div>
-          </div>`;
-        }).join('');
-    }
-
     // ── Helpers ──
     function normaliseer(d) { const r = new Date(d); r.setHours(0,0,0,0); return r; }
     function toDatumStr(d) {
       return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     }
     function parseDatum(s) { return normaliseer(new Date(s + 'T00:00:00')); }
-
+    function addDagen(d, n) { const r = new Date(d); r.setDate(r.getDate() + n); return r; }
     function isoWeek(datumStr) {
       const d = new Date(datumStr + 'T00:00:00');
-      d.setHours(0, 0, 0, 0);
+      d.setHours(0,0,0,0);
       d.setDate(d.getDate() + 3 - (d.getDay() + 6) % 7);
       const week1 = new Date(d.getFullYear(), 0, 4);
       return d.getFullYear() + '-W' +
         String(1 + Math.round(((d - week1) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7)).padStart(2, '0');
     }
-
     function getMaandagVanIsoWeek(isoStr) {
       const [jaarStr, weekStr] = isoStr.split('-W');
       const jaar = parseInt(jaarStr), week = parseInt(weekStr);
@@ -435,97 +394,70 @@
       const jan4Dag = (jan4.getDay() + 6) % 7;
       const ma = new Date(jan4);
       ma.setDate(jan4.getDate() - jan4Dag + (week - 1) * 7);
-      ma.setHours(0, 0, 0, 0);
+      ma.setHours(0,0,0,0);
       return ma;
     }
-
     const MAANDEN = ['januari','februari','maart','april','mei','juni',
                      'juli','augustus','september','oktober','november','december'];
+    function formatDatumKort(d) { return `${d.getDate()} ${MAANDEN[d.getMonth()]}`; }
 
-    function formatDatumKort(d) {
-      return `${d.getDate()} ${MAANDEN[d.getMonth()]}`;
-    }
-
-    // ── Week bepalen ──
     const vandaag = normaliseer(new Date());
-    let weekStr = sessionStorage.getItem('terugblik_week');
-    sessionStorage.removeItem('terugblik_week');
-    if (!weekStr) {
-      // Meest recente voltooide week: de week waarvan de zondag <= vandaag
-      const refDag = vandaag.getDay() === 0 ? vandaag : (() => {
-        const d = new Date(vandaag);
-        d.setDate(d.getDate() - d.getDay()); // vorige zondag
-        return d;
-      })();
-      weekStr = isoWeek(toDatumStr(refDag));
+    const vandaagStr = toDatumStr(vandaag);
+
+    // ── 1. Streak ──
+    function renderStreak() {
+      const huidig = parseInt(localStorage.getItem('streak_huidig') || '0');
+      const dagNamen = ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo'];
+
+      let cirkels = '';
+      for (let i = 6; i >= 0; i--) {
+        const dag = addDagen(vandaag, -i);
+        const dagStr = toDatumStr(dag);
+        const actief = !!localStorage.getItem('checkin_' + dagStr);
+        const isVandaag = i === 0;
+        const dagNaam = dagNamen[(dag.getDay() + 6) % 7];
+        const checkmark = actief
+          ? `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`
+          : '';
+        cirkels += `
+          <div class="dag-cirkel-wrap">
+            <div class="dag-cirkel ${actief ? 'actief' : 'gemist'}${isVandaag ? ' vandaag' : ''}">${checkmark}</div>
+            <span class="dag-letter">${dagNaam}</span>
+          </div>`;
+      }
+
+      const container = document.getElementById('streak-sectie');
+      if (huidig === 0) {
+        container.innerHTML = `
+          <div class="voortgang-kaart">
+            <p class="sectie-label">Streak</p>
+            <p class="streak-leeg-tekst">Begin vandaag je streak door de check-in in te vullen.</p>
+            <div class="dag-cirkels">${cirkels}</div>
+          </div>`;
+      } else {
+        const mv = huidig === 1 ? 'dag' : 'dagen';
+        container.innerHTML = `
+          <div class="voortgang-kaart">
+            <p class="sectie-label">Streak</p>
+            <div class="streak-top">
+              <span class="streak-vlam">🔥</span>
+              <span class="streak-getal">${huidig}</span>
+              <span class="streak-tekst">${mv} actief</span>
+            </div>
+            <div class="dag-cirkels">${cirkels}</div>
+          </div>`;
+      }
     }
 
-    const weekMaandag = getMaandagVanIsoWeek(weekStr);
-    const weekZondag  = new Date(weekMaandag); weekZondag.setDate(weekMaandag.getDate() + 6);
-
-    const weekNr = weekStr.split('-W')[1];
-    document.getElementById('pagina-titel').textContent = `Terugblik week ${weekNr}`;
-    document.getElementById('week-bereik').textContent =
-      `${formatDatumKort(weekMaandag)} – ${formatDatumKort(weekZondag)} ${weekZondag.getFullYear()}`;
-
-    // ── Data laden ──
-    const vakken    = JSON.parse(localStorage.getItem('vakken')    || '[]');
-    const afspraken = JSON.parse(localStorage.getItem('afspraken') || '[]');
-    const maStr     = toDatumStr(weekMaandag);
-    const zoStr     = toDatumStr(weekZondag);
-
-    function inWeek(datumStr) { return datumStr >= maStr && datumStr <= zoStr; }
-
-    // Verzamel toetsen in de week
-    const toetsenInWeek = [];
-    vakken.forEach(v => {
-      const toetsen = v.toetsen || (v.toetsdatum ? [{ naam: 'Toets', datum: v.toetsdatum, type: '' }] : []);
-      toetsen.forEach(t => {
-        if (t.datum && inWeek(t.datum)) {
-          toetsenInWeek.push({ vakNaam: v.naam, toetsNaam: t.naam || 'Toets', datum: t.datum });
-        }
-      });
-    });
-
-    // Gepland / gedaan tellen
-    let gepland = 0, gedaan = 0;
-    // Toetsen: altijd gepland en gedaan (ze hebben plaatsgevonden)
-    gepland += toetsenInWeek.length; gedaan += toetsenInWeek.length;
-    // Huiswerk
-    vakken.forEach(v => {
-      (v.huiswerk || []).forEach(h => {
-        if (!h.inleverdatum || !inWeek(h.inleverdatum.slice(0,10))) return;
-        gepland++;
-        if (h.gedaan) gedaan++;
-      });
-    });
-    // Afspraken (alleen eenmalige)
-    afspraken.forEach(a => {
-      if (a.herhaling === 'wekelijks') return;
-      if (!a.datum || !inWeek(a.datum)) return;
-      gepland++;
-      if (a.afgerond) gedaan++;
-    });
-
-    // ── Terugblik data ──
-    const tbKey = 'terugblik_' + weekStr;
-    const opgeslagenTb = JSON.parse(localStorage.getItem(tbKey) || '{}');
-    const alIngevuld = !!opgeslagenTb.ingevuld;
-
-    // Cijfers
-    function laadCijfers() { return JSON.parse(localStorage.getItem('cijfers') || '[]'); }
-    function slaCijfersOp(c) { localStorage.setItem('cijfers', JSON.stringify(c)); }
-
-    // Gemiddelden per vak berekenen
+    // ── 2. Cijfers ──
     function berekenGemiddelden() {
-      const cijfers = laadCijfers();
+      const cijfers = JSON.parse(localStorage.getItem('cijfers') || '[]');
       const perVak = {};
       cijfers.forEach(c => {
         if (!perVak[c.vakNaam]) perVak[c.vakNaam] = [];
         perVak[c.vakNaam].push(c.cijfer);
       });
       return Object.entries(perVak)
-        .filter(([, arr]) => arr.length >= 1)
         .map(([vak, arr]) => ({
           vak,
           gem: Math.round((arr.reduce((s, c) => s + c, 0) / arr.length) * 10) / 10,
@@ -534,72 +466,150 @@
         .sort((a, b) => b.gem - a.gem);
     }
 
-    // ── Motivatie bepalen ──
+    function renderCijfers() {
+      const container = document.getElementById('cijfers-sectie');
+      const gems = berekenGemiddelden();
+      if (!gems.length) {
+        container.innerHTML = `
+          <div class="voortgang-kaart">
+            <p class="sectie-label">Cijfers per vak</p>
+            <p class="leeg-staat">Vul je eerste cijfer in na een toets via het Toetsen scherm.</p>
+          </div>`;
+        return;
+      }
+      const bars = gems.map(g => {
+        const klasse = g.gem >= 6 ? 'goed' : 'laag';
+        const breedte = Math.min(100, Math.round(g.gem / 10 * 100));
+        return `
+          <div class="cijfer-rij">
+            <span class="cijfer-vak">${g.vak}</span>
+            <div class="cijfer-bar-wrap">
+              <div class="cijfer-bar ${klasse}" style="width:${breedte}%"></div>
+            </div>
+            <span class="cijfer-getal ${klasse}">${g.gem}</span>
+          </div>`;
+      }).join('');
+      container.innerHTML = `
+        <div class="voortgang-kaart">
+          <p class="sectie-label">Cijfers per vak</p>
+          <div class="cijfers-lijst">${bars}</div>
+        </div>`;
+    }
+
+    // ── 3. Check-in patronen ──
+    function renderPatronen() {
+      const container = document.getElementById('patronen-sectie');
+      const patronen = JSON.parse(localStorage.getItem('checkinPatronen') || '{}');
+      const dagNamen = ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo'];
+      const dagVolgorde = [1, 2, 3, 4, 5, 6, 0]; // Ma t/m Zo
+
+      const cirkels = dagVolgorde.map((d, i) => {
+        const keuzes = patronen[d] || [];
+        let klasse = 'geen-data';
+        if (keuzes.length > 0) {
+          const nKlaar    = keuzes.filter(k => k === 'klaar').length;
+          const nGaatWel  = keuzes.filter(k => k === 'gaat-wel').length;
+          const nGeenEn   = keuzes.filter(k => k === 'geen-energie').length;
+          if (nKlaar >= nGaatWel && nKlaar >= nGeenEn) klasse = 'klaar';
+          else if (nGaatWel >= nGeenEn) klasse = 'gaat-wel';
+          else klasse = 'geen-data';
+        }
+        return `
+          <div class="mood-cirkel-wrap">
+            <div class="mood-cirkel ${klasse}"></div>
+            <span class="mood-dag-letter">${dagNamen[i]}</span>
+          </div>`;
+      }).join('');
+
+      const heeftData = dagVolgorde.some(d => (patronen[d] || []).length > 0);
+      container.innerHTML = `
+        <div class="voortgang-kaart">
+          <p class="sectie-label">Check-in patronen</p>
+          ${!heeftData ? '<p class="leeg-staat">Vul elke dag de check-in in om patronen te zien.</p>' : ''}
+          <div class="mood-cirkels">${cirkels}</div>
+          <div class="mood-legenda">
+            <span class="legenda-item"><span class="legenda-stip klaar"></span>Klaar voor de dag</span>
+            <span class="legenda-item"><span class="legenda-stip gaat-wel"></span>Gaat wel</span>
+            <span class="legenda-item"><span class="legenda-stip geen-data"></span>Geen energie / leeg</span>
+          </div>
+        </div>`;
+    }
+
+    // ── 4. Weekterugblik ──
+    function scrollNaarTerugblik() {
+      document.getElementById('terugblik-anker').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    let gekozenStemming = null;
+    let weekStr = sessionStorage.getItem('terugblik_week');
+    sessionStorage.removeItem('terugblik_week');
+    if (!weekStr) {
+      const refDag = vandaag.getDay() === 0 ? vandaag : (() => {
+        const d = new Date(vandaag); d.setDate(d.getDate() - d.getDay()); return d;
+      })();
+      weekStr = isoWeek(toDatumStr(refDag));
+    }
+    const weekMaandag = getMaandagVanIsoWeek(weekStr);
+    const weekZondag  = new Date(weekMaandag); weekZondag.setDate(weekMaandag.getDate() + 6);
+    const weekNr = weekStr.split('-W')[1];
+    const maStr  = toDatumStr(weekMaandag);
+    const zoStr  = toDatumStr(weekZondag);
+
+    const vakken = JSON.parse(localStorage.getItem('vakken') || '[]');
+    const tbKey  = 'terugblik_' + weekStr;
+    const opgeslagenTb = JSON.parse(localStorage.getItem(tbKey) || '{}');
+    const alIngevuld   = !!opgeslagenTb.ingevuld;
+    gekozenStemming    = opgeslagenTb.stemming || null;
+
+    function inWeek(d) { return d >= maStr && d <= zoStr; }
+    function laadCijfers() { return JSON.parse(localStorage.getItem('cijfers') || '[]'); }
+    function slaCijfersOp(c) { localStorage.setItem('cijfers', JSON.stringify(c)); }
+
+    const toetsenInWeek = [];
+    vakken.forEach(v => {
+      const toetsen = v.toetsen || (v.toetsdatum ? [{ naam: 'Toets', datum: v.toetsdatum }] : []);
+      toetsen.forEach(t => {
+        if (t.datum && inWeek(t.datum))
+          toetsenInWeek.push({ vakNaam: v.naam, toetsNaam: t.naam || 'Toets', datum: t.datum });
+      });
+    });
+
     function bepaalMotivatie(stemming, ingevoerdeCijfers) {
       const gem = ingevoerdeCijfers.length
         ? ingevoerdeCijfers.reduce((s, c) => s + c, 0) / ingevoerdeCijfers.length : null;
       if (stemming === 'goed') {
         if (gem === null || gem >= 7.5) return { tekst: 'Geweldige week!', sub: 'Sterk bezig, blijf zo doorgaan.' };
-        if (gem >= 6)  return { tekst: 'Solide week!', sub: 'Goed op weg. Volgende week kun je er nog een schepje bovenop.' };
+        if (gem >= 6) return { tekst: 'Solide week!', sub: 'Goed op weg. Volgende week een schepje bovenop.' };
         return { tekst: 'Week voelde goed, maar de cijfers kunnen omhoog.', sub: 'Het leeradvies wordt aangepast voor de volgende toets.' };
       }
       if (stemming === 'oké') {
         if (gem !== null && gem >= 7) return { tekst: 'Oké week, maar je cijfers liegen er niet om!', sub: 'Kleine stapjes elke dag maken het verschil.' };
         return { tekst: 'Een normale week, dat telt ook mee.', sub: 'Consistentie is belangrijker dan perfectie.' };
       }
-      if (stemming === 'zwaar') {
-        return { tekst: 'Zware week gehad, dat is helemaal oké.', sub: 'Gun jezelf rust. Morgen begin je fris.' };
-      }
+      if (stemming === 'zwaar') return { tekst: 'Zware week gehad, dat is helemaal oké.', sub: 'Gun jezelf rust. Morgen begin je fris.' };
       return { tekst: 'Terugblik opgeslagen!', sub: 'Goed bezig met je voortgang bijhouden.' };
     }
 
-    // ── Render ──
-    let gekozenStemming = opgeslagenTb.stemming || null;
+    function renderTerugblik() {
+      const container = document.getElementById('terugblik-sectie');
+      const bereikTekst = `${formatDatumKort(weekMaandag)} – ${formatDatumKort(weekZondag)} ${weekZondag.getFullYear()}`;
+      const cijfers = laadCijfers();
 
-    function renderGemiddelden() {
-      const gems = berekenGemiddelden().filter(g => g.aantal >= 2);
-      if (!gems.length) return '';
-      return `<p class="sectie-label sectie-mt">Gemiddelde cijfers</p>
-        <div class="gem-kaart">
-          ${gems.map(g => {
-            const klasse = g.gem >= 6 ? 'goed' : 'laag';
-            const breedte = Math.min(100, Math.round(g.gem / 10 * 100));
-            return `<div class="gem-rij">
-              <span class="gem-vak">${g.vak}</span>
-              <div class="gem-bar-wrap"><div class="gem-bar ${klasse}" style="width:${breedte}%"></div></div>
-              <span class="gem-getal ${klasse}">${g.gem}</span>
-            </div>`;
-          }).join('')}
-        </div>`;
-    }
-
-    function render() {
-      const container = document.getElementById('inhoud');
-
-      // Samenvatting
       let html = `
-        <div class="samenvatting-kaart">
-          <div class="sam-blok">
-            <span class="sam-getal">${gepland}</span>
-            <span class="sam-label">gepland</span>
-          </div>
-          <div class="sam-blok">
-            <span class="sam-getal">${gedaan}</span>
-            <span class="sam-label">gedaan</span>
-          </div>
+        <div class="terugblik-sectie-header">
+          <p class="sectie-label" style="margin-bottom:0">Weekterugblik week ${weekNr}</p>
+          <span class="terugblik-weeklabel">${bereikTekst}</span>
         </div>`;
 
       if (alIngevuld) {
-        html += `<div class="al-ingevuld">
+        html += `<div class="al-ingevuld-badge">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          Terugblik al ingevuld
+          Al ingevuld deze week
         </div>`;
       }
 
-      // Toetsresultaten
       if (toetsenInWeek.length) {
-        html += `<p class="sectie-label">Toetsresultaten</p>`;
-        const cijfers = laadCijfers();
+        html += `<p class="sectie-label" style="margin-top:14px">Toetsresultaten</p>`;
         toetsenInWeek.forEach((t, idx) => {
           const bestaand = cijfers.find(c => c.vakNaam === t.vakNaam && c.datum === t.datum);
           const val = bestaand ? bestaand.cijfer : '';
@@ -615,27 +625,21 @@
           </div>`;
         });
       } else {
-        html += `<div class="leeg">Geen toetsen deze week</div>`;
+        html += `<p class="leeg-toetsen">Geen toetsen in week ${weekNr}.</p>`;
       }
 
-      // Gemiddelden
-      html += renderGemiddelden();
-
-      // Weekbeoordeling
-      html += `<p class="sectie-label sectie-mt">Hoe was je week?</p>
+      html += `<p class="sectie-label" style="margin-top:20px">Hoe was je week?</p>
         <div class="week-opties">
-          <button class="week-optie${gekozenStemming === 'goed'  ? ' actief' : ''}" onclick="kiesStemming('goed')"  ${alIngevuld ? 'disabled' : ''}>Goed</button>
-          <button class="week-optie${gekozenStemming === 'oké'   ? ' actief' : ''}" onclick="kiesStemming('oké')"   ${alIngevuld ? 'disabled' : ''}>Oké</button>
-          <button class="week-optie${gekozenStemming === 'zwaar' ? ' actief' : ''}" onclick="kiesStemming('zwaar')" ${alIngevuld ? 'disabled' : ''}>Zwaar</button>
+          <button class="week-optie${gekozenStemming === 'goed'  ? ' actief' : ''}" onclick="kiesStemming(this,'goed')"  ${alIngevuld ? 'disabled' : ''}>😊 Goed</button>
+          <button class="week-optie${gekozenStemming === 'oké'   ? ' actief' : ''}" onclick="kiesStemming(this,'oké')"   ${alIngevuld ? 'disabled' : ''}>😐 Oké</button>
+          <button class="week-optie${gekozenStemming === 'zwaar' ? ' actief' : ''}" onclick="kiesStemming(this,'zwaar')" ${alIngevuld ? 'disabled' : ''}>😓 Zwaar</button>
         </div>`;
 
       if (!alIngevuld) {
-        html += `<button class="btn-opslaan" onclick="slaOp()">Terugblik opslaan</button>`;
+        html += `<button class="btn-opslaan" id="btn-opslaan" onclick="slaOp()">Terugblik opslaan</button>`;
       }
 
-      // Motivatie (als al ingevuld)
       if (alIngevuld && opgeslagenTb.stemming) {
-        const cijfers = laadCijfers();
         const weekCijfers = toetsenInWeek
           .map(t => cijfers.find(c => c.vakNaam === t.vakNaam && c.datum === t.datum)?.cijfer)
           .filter(c => c !== undefined);
@@ -648,7 +652,6 @@
 
       container.innerHTML = html;
 
-      // Cijfer-input colorering on change
       if (!alIngevuld) {
         toetsenInWeek.forEach((_, idx) => {
           const inp = document.getElementById('cijfer-' + idx);
@@ -661,14 +664,13 @@
       }
     }
 
-    function kiesStemming(s) {
+    function kiesStemming(btn, s) {
       gekozenStemming = s;
       document.querySelectorAll('.week-optie').forEach(b => b.classList.remove('actief'));
-      event.currentTarget.classList.add('actief');
+      btn.classList.add('actief');
     }
 
     function slaOp() {
-      // Cijfers opslaan
       const cijfers = laadCijfers().filter(c =>
         !toetsenInWeek.some(t => t.vakNaam === c.vakNaam && c.datum === t.datum)
       );
@@ -682,34 +684,33 @@
         }
       });
       slaCijfersOp(cijfers);
+      localStorage.setItem(tbKey, JSON.stringify({ ingevuld: true, stemming: gekozenStemming }));
 
-      // Terugblik opslaan
-      const tb = { ingevuld: true, stemming: gekozenStemming, gepland, gedaan };
-      localStorage.setItem(tbKey, JSON.stringify(tb));
-
-      // Motivatie tonen
       const m = bepaalMotivatie(gekozenStemming, ingevoerd);
-      const container = document.getElementById('inhoud');
-      container.insertAdjacentHTML('beforeend', `
+      const opsl = document.getElementById('btn-opslaan');
+      if (opsl) { opsl.disabled = true; opsl.textContent = 'Opgeslagen ✓'; }
+      document.getElementById('terugblik-sectie').insertAdjacentHTML('beforeend', `
         <div class="motivatie-kaart">
           <div class="motivatie-tekst">${m.tekst}</div>
           <div class="motivatie-sub">${m.sub}</div>
         </div>`);
 
-      document.querySelector('.btn-opslaan').disabled = true;
-      document.querySelector('.btn-opslaan').textContent = 'Opgeslagen ✓';
+      // Herrender cijfersgrafiek met nieuwe data
+      renderCijfers();
     }
 
+    // ── Init ──
     renderStreak();
+    renderCijfers();
     renderPatronen();
-    render();
+    renderTerugblik();
+
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js?v=5');
 
     // ── Tab-overgangen ──
     document.querySelectorAll('a.tab').forEach(function(tab) {
       tab.addEventListener('click', function(e) {
         if (this.classList.contains('actief')) return;
-        if (document.getElementById('splash')) return;
         e.preventDefault();
         var href = this.getAttribute('href');
         document.body.style.transition = 'opacity 0.15s ease';
