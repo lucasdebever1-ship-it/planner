@@ -651,25 +651,27 @@
         });
       });
 
-      afspraken.forEach(a => {
-        if (a.afgerond) return;
-        const match = a.herhaling === 'wekelijks'
+      const dagAfspraken = afspraken.filter(a => {
+        if (a.afgerond) return false;
+        return a.herhaling === 'wekelijks'
           ? parseDatum(a.datum).getDay() === dag.getDay() && a.datum <= str
           : a.einddatum ? a.datum <= str && str <= a.einddatum : a.datum === str;
-        if (match) {
-          const tijdStr = a.tijd ? (a.eindtijd ? `${a.tijd} – ${a.eindtijd}` : a.tijd) : '';
-          items.push({ type: 'afspraak', titel: a.titel, sub: tijdStr, sortTijd: a.tijd || null });
-        }
+      });
+      dagAfspraken.forEach(a => {
+        const tijdStr = a.tijd ? (a.eindtijd ? `${a.tijd} – ${a.eindtijd}` : a.tijd) : '';
+        items.push({ type: 'afspraak', titel: a.titel, sub: tijdStr, sortTijd: a.tijd || null });
       });
 
       const trainingen = JSON.parse(localStorage.getItem('trainingen') || '[]');
-      trainingen.forEach(t => {
-        if (!Array.isArray(t.dagen) || !t.dagen.includes(dag.getDay())) return;
-        const ti = t.tijden && t.tijden[dag.getDay()];
-        if (!ti || ti.wisselend) return;
-        const tijdStr = ti.begin ? `${ti.begin}${ti.eind ? `–${ti.eind}` : ''}` : '';
-        items.push({ type: 'training', titel: t.naam, sub: tijdStr, sortTijd: ti.begin || null });
-      });
+      if (!dagAfspraken.some(isHeleDagAfspraak)) {
+        trainingen.forEach(t => {
+          if (!Array.isArray(t.dagen) || !t.dagen.includes(dag.getDay())) return;
+          const ti = t.tijden && t.tijden[dag.getDay()];
+          if (!ti || ti.wisselend) return;
+          const tijdStr = ti.begin ? `${ti.begin}${ti.eind ? `–${ti.eind}` : ''}` : '';
+          items.push({ type: 'training', titel: t.naam, sub: tijdStr, sortTijd: ti.begin || null });
+        });
+      }
 
       // Items met tijd sorteren op tijd, daarna op type
       const typePrio = { toets: 0, huiswerk: 1, afspraak: 2, training: 3 };
@@ -746,28 +748,34 @@
         vrijVanafMin = eindMin;
       }
 
-      // Trainingen
-      const trainingen = JSON.parse(localStorage.getItem('trainingen') || '[]');
-      trainingen.forEach(t => {
-        if (!Array.isArray(t.dagen) || !t.dagen.includes(dagNr)) return;
-        const ti = t.tijden && t.tijden[dagNr];
-        if (!ti || ti.wisselend || !ti.begin) return;
-        const bMin = tijdNaarMinuten(ti.begin);
-        if (vrijVanafMin !== null && bMin < vrijVanafMin) return;
-        const eMin = ti.eind ? tijdNaarMinuten(ti.eind) : null;
-        events.push({ type: 'training', label: t.naam,
-          tijdLabel: ti.eind ? `${ti.begin} – ${ti.eind}` : ti.begin,
-          beginMin: bMin, eindMin: eMin });
-      });
-
-      // Afspraken met tijd
       const allAf = JSON.parse(localStorage.getItem('afspraken') || '[]');
-      allAf.forEach(a => {
-        if (a.afgerond || !a.tijd) return;
-        const match = a.herhaling === 'wekelijks'
+      const dagAfsprBouw = allAf.filter(a => {
+        if (a.afgerond) return false;
+        return a.herhaling === 'wekelijks'
           ? parseDatum(a.datum).getDay() === dagNr && a.datum <= vandaagStr
           : a.einddatum ? a.datum <= vandaagStr && vandaagStr <= a.einddatum : a.datum === vandaagStr;
-        if (!match) return;
+      });
+      const heleDagBouw = dagAfsprBouw.some(isHeleDagAfspraak);
+
+      // Trainingen (verborgen bij hele-dag afspraak)
+      const trainingen = JSON.parse(localStorage.getItem('trainingen') || '[]');
+      if (!heleDagBouw) {
+        trainingen.forEach(t => {
+          if (!Array.isArray(t.dagen) || !t.dagen.includes(dagNr)) return;
+          const ti = t.tijden && t.tijden[dagNr];
+          if (!ti || ti.wisselend || !ti.begin) return;
+          const bMin = tijdNaarMinuten(ti.begin);
+          if (vrijVanafMin !== null && bMin < vrijVanafMin) return;
+          const eMin = ti.eind ? tijdNaarMinuten(ti.eind) : null;
+          events.push({ type: 'training', label: t.naam,
+            tijdLabel: ti.eind ? `${ti.begin} – ${ti.eind}` : ti.begin,
+            beginMin: bMin, eindMin: eMin });
+        });
+      }
+
+      // Afspraken met tijd
+      dagAfsprBouw.forEach(a => {
+        if (!a.tijd) return;
         const bMin = tijdNaarMinuten(a.tijd);
         if (vrijVanafMin !== null && bMin < vrijVanafMin) return;
         const eMin = a.eindtijd ? tijdNaarMinuten(a.eindtijd) : null;

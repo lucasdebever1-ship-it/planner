@@ -34,6 +34,11 @@ function getMaandagVanIsoWeek(isoWeekStr) {
 }
 
 // ── Planningshulpfuncties ──
+function isHeleDagAfspraak(a) {
+  if (!a.tijd) return true;
+  return a.tijd < '09:00' && !!a.eindtijd && a.eindtijd > '20:00';
+}
+
 function getLeerDagen(type, moeilijkheid) {
   const inst = JSON.parse(localStorage.getItem('instellingen') || '{}');
   const key = type || 'Anders';

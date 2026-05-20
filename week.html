@@ -535,25 +535,28 @@
       startKaarten.forEach(k => items.push({ soort: 'start',    ...k, sortTime: -1 }));
       bezigKaarten.forEach(k => items.push({ soort: 'bezig',    ...k, sortTime: -1 }));
 
-      const afspraken = JSON.parse(localStorage.getItem('afspraken') || '[]');
-      afspraken.forEach(a => {
-        if (a.afgerond) return;
-        const match = a.herhaling === 'wekelijks'
+      const alleAfspraken = JSON.parse(localStorage.getItem('afspraken') || '[]');
+      const dagAfspraken = alleAfspraken.filter(a => {
+        if (a.afgerond) return false;
+        return a.herhaling === 'wekelijks'
           ? parseDatum(a.datum).getDay() === dagNr && a.datum <= dagStr
           : a.einddatum ? a.datum <= dagStr && dagStr <= a.einddatum : a.datum === dagStr;
-        if (!match) return;
+      });
+      dagAfspraken.forEach(a => {
         items.push({ soort: 'afspraak', naam: a.titel, begin: a.tijd || null, eind: a.eindtijd || null,
                      sortTime: a.tijd ? tijdMinuten(a.tijd) : -1 });
       });
 
       const trainingen = JSON.parse(localStorage.getItem('trainingen') || '[]');
-      trainingen.forEach(t => {
-        if (!Array.isArray(t.dagen) || !t.dagen.includes(dagNr)) return;
-        const ti = t.tijden && t.tijden[dagNr];
-        if (!ti || ti.wisselend) return;
-        items.push({ soort: 'training', naam: t.naam, begin: ti.begin || null, eind: ti.eind || null,
-                     sortTime: ti.begin ? tijdMinuten(ti.begin) : -1 });
-      });
+      if (!dagAfspraken.some(isHeleDagAfspraak)) {
+        trainingen.forEach(t => {
+          if (!Array.isArray(t.dagen) || !t.dagen.includes(dagNr)) return;
+          const ti = t.tijden && t.tijden[dagNr];
+          if (!ti || ti.wisselend) return;
+          items.push({ soort: 'training', naam: t.naam, begin: ti.begin || null, eind: ti.eind || null,
+                       sortTime: ti.begin ? tijdMinuten(ti.begin) : -1 });
+        });
+      }
 
       items.sort((a, b) => {
         if (a.sortTime < 0 && b.sortTime < 0) return 0;
