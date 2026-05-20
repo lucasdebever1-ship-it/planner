@@ -320,6 +320,21 @@
     .patroon-rustig     { background: #fdf5ff; border: 1px solid #e8d0f8; color: #6a3090; }
     .patroon-productief { background: #edfaf3; border: 1px solid #afe8c8; color: #1a5a35; }
 
+    /* ── Dagplan tijdlijn ── */
+    .dagplan-tijdlijn { margin: 0 0 12px; }
+    .dagplan-blok {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 8px 12px; border-radius: 10px;
+      margin-bottom: 5px; border-left: 3px solid transparent;
+    }
+    .dagplan-school   { background: #f0f4ff; border-color: #3a6edc; }
+    .dagplan-training { background: #f0fbf5; border-color: #2bc47e; }
+    .dagplan-afspraak { background: #f8f0fd; border-color: #9b59b6; }
+    .dagplan-vrij     { background: #fffbf0; border-color: #f0c040; }
+    .dagplan-tijd { font-size: 0.72rem; font-weight: 700; color: #999; min-width: 88px; flex-shrink: 0; padding-top: 2px; }
+    .dagplan-naam { font-size: 0.88rem; font-weight: 700; color: #1a1a1a; }
+    .dagplan-leer { font-size: 0.78rem; color: #7a6010; margin-top: 1px; }
+
     /* ── Hamburger + menu ── */
     .hamburger-btn {
       background: none; border: none; cursor: pointer;
@@ -473,6 +488,7 @@
     <div id="week-waarschuwing"></div>
     <p class="sectie-label">Vandaag</p>
     <div id="patroon-banner-wrap"></div>
+    <div id="dagplan-tijdlijn"></div>
     <div id="vandaag-lijst"></div>
     <div class="snel-wrap">
       <div class="snel-bar">
@@ -585,6 +601,14 @@
     function parseDatum(s) { return normaliseer(new Date(s + 'T00:00:00')); }
     function toDatumStr(d) {
       return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+    function tijdNaarMinuten(t) {
+      if (!t) return null;
+      const [h, m] = t.split(':').map(Number);
+      return h * 60 + (m || 0);
+    }
+    function minutenNaarTijd(m) {
+      return `${String(Math.floor(m / 60)).padStart(2,'0')}:${String(m % 60).padStart(2,'0')}`;
     }
     function getMaandag(d) {
       const r = normaliseer(d);
@@ -716,7 +740,108 @@
       document.getElementById('checkin-wrap').style.display = 'none';
       renderStreak(updateStreak());
       renderVandaag();
+      renderDagplanTijdlijn();
       renderTip();
+    }
+
+    // ── Dagplan tijdlijn ──
+    function bouwDagplanBlokken() {
+      const dagNr = vandaag.getDay();
+      const sd = JSON.parse(localStorage.getItem('schooldagen') || 'null');
+      const se = localStorage.getItem('schoolEinde') || null;
+      const isSchooldag = !sd || sd.includes(dagNr);
+      const vm = JSON.parse(localStorage.getItem('vrijeMomenten') || '{}');
+      const vrijData = vm[dagNr];
+      const heleDagVrij = !!(vrijData && typeof vrijData === 'object' && vrijData.heleDag);
+      const vrijVanaf = vrijData
+        ? (typeof vrijData === 'string' ? vrijData : (vrijData.tijd || null))
+        : null;
+
+      const events = [];
+      let vrijVanafMin = null;
+
+      // School block
+      if (isSchooldag && !heleDagVrij && se) {
+        const eindMin = tijdNaarMinuten(se);
+        events.push({ type: 'school', label: 'School', tijdLabel: `tot ${se}`, beginMin: 0, eindMin });
+        vrijVanafMin = eindMin;
+      }
+      if (vrijVanafMin === null && vrijVanaf) vrijVanafMin = tijdNaarMinuten(vrijVanaf);
+
+      // Trainingen
+      const trainingen = JSON.parse(localStorage.getItem('trainingen') || '[]');
+      trainingen.forEach(t => {
+        if (!Array.isArray(t.dagen) || !t.dagen.includes(dagNr)) return;
+        const ti = t.tijden && t.tijden[dagNr];
+        if (!ti || ti.wisselend || !ti.begin) return;
+        const bMin = tijdNaarMinuten(ti.begin);
+        if (vrijVanafMin !== null && bMin < vrijVanafMin) return;
+        const eMin = ti.eind ? tijdNaarMinuten(ti.eind) : null;
+        events.push({ type: 'training', label: t.naam,
+          tijdLabel: ti.eind ? `${ti.begin} – ${ti.eind}` : ti.begin,
+          beginMin: bMin, eindMin: eMin });
+      });
+
+      // Afspraken met tijd
+      const allAf = JSON.parse(localStorage.getItem('afspraken') || '[]');
+      allAf.forEach(a => {
+        if (a.afgerond || !a.tijd) return;
+        const match = a.herhaling === 'wekelijks'
+          ? parseDatum(a.datum).getDay() === dagNr && a.datum <= vandaagStr
+          : a.einddatum ? a.datum <= vandaagStr && vandaagStr <= a.einddatum : a.datum === vandaagStr;
+        if (!match) return;
+        const bMin = tijdNaarMinuten(a.tijd);
+        if (vrijVanafMin !== null && bMin < vrijVanafMin) return;
+        const eMin = a.eindtijd ? tijdNaarMinuten(a.eindtijd) : null;
+        events.push({ type: 'afspraak', label: a.titel,
+          tijdLabel: a.eindtijd ? `${a.tijd} – ${a.eindtijd}` : a.tijd,
+          beginMin: bMin, eindMin: eMin });
+      });
+
+      // Sorteer: school eerst, daarna op begin-tijd
+      events.sort((a, b) => {
+        if (a.type === 'school') return -1;
+        if (b.type === 'school') return 1;
+        return a.beginMin - b.beginMin;
+      });
+
+      // Voeg vrije blokken in tussen events
+      const blokken = [];
+      let vorigeEind = null;
+      events.forEach(ev => {
+        if (vorigeEind !== null && ev.beginMin > vorigeEind + 14) {
+          blokken.push({ type: 'vrij', beginMin: vorigeEind, eindMin: ev.beginMin,
+            duurMin: ev.beginMin - vorigeEind });
+        }
+        blokken.push(ev);
+        const e = ev.eindMin ?? ev.beginMin;
+        if (e > (vorigeEind ?? 0)) vorigeEind = e;
+      });
+      return blokken;
+    }
+
+    function renderDagplanTijdlijn() {
+      const container = document.getElementById('dagplan-tijdlijn');
+      if (!container) return;
+      const blokken = bouwDagplanBlokken();
+      if (!blokken.length) { container.innerHTML = ''; return; }
+      const urgentToets = vindUrgentsteToets(vandaag);
+      container.innerHTML = blokken.map(blok => {
+        if (blok.type === 'vrij') {
+          const u = Math.floor(blok.duurMin / 60), r = blok.duurMin % 60;
+          const duurStr = u && r ? `${u}u ${r}m vrij` : u ? `${u} uur vrij` : `${r} min vrij`;
+          const leer = urgentToets
+            ? `<div class="dagplan-leer">Leer ${urgentToets.vakNaam}</div>` : '';
+          return `<div class="dagplan-blok dagplan-vrij">
+            <div class="dagplan-tijd">${minutenNaarTijd(blok.beginMin)} – ${minutenNaarTijd(blok.eindMin)}</div>
+            <div><div class="dagplan-naam">${duurStr}</div>${leer}</div>
+          </div>`;
+        }
+        return `<div class="dagplan-blok dagplan-${blok.type}">
+          <div class="dagplan-tijd">${blok.tijdLabel}</div>
+          <div><div class="dagplan-naam">${blok.label}</div></div>
+        </div>`;
+      }).join('');
     }
 
     // ── Sectie Vandaag ──
@@ -849,6 +974,19 @@
           return `Geen energie? Doe alleen wat echt niet kan wachten: <strong>${vast[0].titel}</strong>.`;
         }
         return 'Geen energie? Dat is oké. Neem gewoon rust.';
+      }
+
+      // ── 0b. Tijdlijn-tip ──
+      const tlBlokken = bouwDagplanBlokken();
+      const vrijBlok = tlBlokken.find(b => b.type === 'vrij' && b.duurMin >= 45);
+      if (vrijBlok) {
+        const urgentT = vindUrgentsteToets(vandaag);
+        if (urgentT) {
+          const u = Math.floor(vrijBlok.duurMin / 60), r = vrijBlok.duurMin % 60;
+          const duurStr = u && r ? `${u} uur en ${r} minuten` : u ? `${u} uur` : `${r} minuten`;
+          const b = minutenNaarTijd(vrijBlok.beginMin), e = minutenNaarTijd(vrijBlok.eindMin);
+          return `Je hebt vandaag <strong>${duurStr} vrij</strong> tussen ${b} en ${e} — gebruik dat voor <strong>${urgentT.vakNaam}</strong>.`;
+        }
       }
 
       // ── 1. Toets morgen? ──
@@ -1158,6 +1296,7 @@
     initCheckin();
     renderWeekWaarschuwing();
     renderVandaag();
+    renderDagplanTijdlijn();
     renderPlanWeek();
     renderWeekRij();
     renderTip();
