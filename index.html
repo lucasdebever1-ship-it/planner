@@ -552,6 +552,7 @@
       </span>Afspraken</a>
   </nav>
 
+  <script src="planning.js"></script>
   <script>
     // ── Navigatie ──
     document.getElementById('hamburger').addEventListener('click', () => {
@@ -596,12 +597,6 @@
     }
 
     // ── Hulpfuncties ──
-    function normaliseer(d) { const r = new Date(d); r.setHours(0,0,0,0); return r; }
-    function addDagen(d, n) { const r = new Date(d); r.setDate(r.getDate()+n); r.setHours(0,0,0,0); return r; }
-    function parseDatum(s) { return normaliseer(new Date(s + 'T00:00:00')); }
-    function toDatumStr(d) {
-      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    }
     function tijdNaarMinuten(t) {
       if (!t) return null;
       const [h, m] = t.split(':').map(Number);
@@ -617,26 +612,10 @@
       if (!isSchooldag) return { heleDag: true, tijd: null };
       return { heleDag: false, tijd: se };
     }
-    function getMaandag(d) {
-      const r = normaliseer(d);
-      const diff = r.getDay() === 0 ? -6 : 1 - r.getDay();
-      r.setDate(r.getDate() + diff); return r;
-    }
-
-    function isoWeek(datumStr) {
-      const d = new Date(datumStr + 'T00:00:00');
-      d.setDate(d.getDate() + 3 - (d.getDay() + 6) % 7);
-      const w1 = new Date(d.getFullYear(), 0, 4);
-      return d.getFullYear() + '-W' +
-        String(1 + Math.round(((d - w1) / 86400000 - 3 + (w1.getDay() + 6) % 7) / 7)).padStart(2, '0');
-    }
-
     const MAANDEN = ['januari','februari','maart','april','mei','juni',
                      'juli','augustus','september','oktober','november','december'];
     const DAGEN_LANG  = ['zondag','maandag','dinsdag','woensdag','donderdag','vrijdag','zaterdag'];
     const DAGEN_KORT  = ['ma','di','wo','do','vr'];
-    const STANDAARD_DAGEN_LEREN = { Mondeling:7, Proefwerk:4, SO:1, Luistertoets:0,
-                                     Schrijfvaardigheid:2, PO:14, Anders:3 };
 
     const vandaag    = normaliseer(new Date());
     const vandaagStr = toDatumStr(vandaag);
@@ -1039,42 +1018,13 @@
     }
 
     // ── Weekdruk-waarschuwing ──
-    function berekenWeekScore(weekMaandag) {
-      const weekEinde = addDagen(weekMaandag, 7);
-      const maStr = toDatumStr(weekMaandag);
-      const zoStr = toDatumStr(addDagen(weekMaandag, 6));
-      let score = 0;
-      // Toetsen
-      vakken.forEach(v => {
-        const toetsen = v.toetsen || (v.toetsdatum ? [{ datum: v.toetsdatum }] : []);
-        toetsen.forEach(t => {
-          if (!t.datum) return;
-          const d = parseDatum(t.datum);
-          if (d >= weekMaandag && d < weekEinde) score++;
-        });
-        // Huiswerk deadlines
-        (v.huiswerk || []).forEach(h => {
-          if (!h.inleverdatum || h.gedaan) return;
-          const ds = h.inleverdatum.slice(0,10);
-          if (ds >= maStr && ds <= zoStr) score++;
-        });
-      });
-      // Eenmalige afspraken (geen wekelijks)
-      const afspr = JSON.parse(localStorage.getItem('afspraken') || '[]');
-      afspr.forEach(a => {
-        if (a.afgerond || a.herhaling === 'wekelijks' || !a.datum) return;
-        if (a.datum >= maStr && a.datum <= zoStr) score++;
-      });
-      return score;
-    }
-
     function renderWeekWaarschuwing() {
       const maandag = getMaandag(vandaag);
       let banner = '';
       for (let w = 0; w < 4; w++) {
         const wMaandag = addDagen(maandag, w * 7);
-        if (addDagen(wMaandag, 6).getTime() < vandaag.getTime()) continue; // week al voorbij
-        if (berekenWeekScore(wMaandag) >= 3) {
+        if (addDagen(wMaandag, 6).getTime() < vandaag.getTime()) continue;
+        if (berekenDrukkeDagen(wMaandag, vakken, afspraken, []) >= 3) {
           const datumStr = wMaandag.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' });
           banner = `<div class="week-waarschuwing">Drukke week van ${datumStr}, begin alvast eerder.</div>`;
           break;
@@ -1160,13 +1110,6 @@
 
     // ── Plan voor deze week ──
     function vindUrgentsteToets(dag) {
-      const inst = JSON.parse(localStorage.getItem('instellingen') || '{}');
-      const STAND = { Mondeling:7, Proefwerk:4, SO:1, Luistertoets:0, Schrijfvaardigheid:2, PO:14, Anders:3 };
-      function getLeerDgn(type, moeilijkheid) {
-        const key = type || 'Anders';
-        const basis = inst[key] !== undefined ? inst[key] : (STAND[key] !== undefined ? STAND[key] : STAND.Anders);
-        return basis > 0 ? Math.max(1, Math.round(basis * ((moeilijkheid || 5) / 5))) : 0;
-      }
       const dagMs = dag.getTime();
       let best = null;
       vakken.forEach(v => {
@@ -1175,7 +1118,7 @@
           if (!t.datum) return;
           const toetsMs = parseDatum(t.datum).getTime();
           if (toetsMs < dagMs) return;
-          const dgn = getLeerDgn(t.type, v.moeilijkheid);
+          const dgn = getLeerDagen(t.type, v.moeilijkheid);
           if (dgn === 0) return;
           const beginMs = toetsMs - dgn * 86400000;
           if (dagMs >= beginMs && dagMs <= toetsMs) {
@@ -1188,55 +1131,23 @@
       return best;
     }
 
-    function genereerDagAdvies(dag) {
-      const dagNr = dag.getDay();
-      const dagStr = toDatumStr(dag);
-      const sd = JSON.parse(localStorage.getItem('schooldagen') || 'null');
-      const se = localStorage.getItem('schoolEinde') || null;
-      const isSchooldag = !sd || sd.includes(dagNr);
-
-      const allTr = JSON.parse(localStorage.getItem('trainingen') || '[]');
-      const dagTr = allTr
-        .filter(t => Array.isArray(t.dagen) && t.dagen.includes(dagNr)
-                  && t.tijden && t.tijden[dagNr] && !t.tijden[dagNr].wisselend)
-        .map(t => ({ naam: t.naam, begin: t.tijden[dagNr].begin || null }))
-        .sort((a, b) => !a.begin ? 1 : !b.begin ? -1 : a.begin.localeCompare(b.begin));
-
-      const allAf = JSON.parse(localStorage.getItem('afspraken') || '[]');
-      const dagAf = allAf.filter(a => {
-        if (a.afgerond) return false;
-        return a.herhaling === 'wekelijks'
-          ? parseDatum(a.datum).getDay() === dagNr && a.datum <= dagStr
-          : a.einddatum ? a.datum <= dagStr && dagStr <= a.einddatum : a.datum === dagStr;
-      });
-
-      const aantalBezet = dagTr.length + dagAf.length + (isSchooldag ? 1 : 0);
-      const urgentToets = vindUrgentsteToets(dag);
-
-      if (!urgentToets) return null;
-
-      // Te druk: 3+ blokkerende items én meer dan 1 dag tot toets
-      if (aantalBezet >= 3 && urgentToets.dagenTot > 1) return null;
-
-      const vakNaam = urgentToets.vakNaam;
-      const eersteT = dagTr[0];
-
-      if (eersteT && eersteT.begin) return `${eersteT.naam} om ${eersteT.begin}, leer ${vakNaam} eerst`;
-      if (!isSchooldag)  return `Vrije dag, ideaal voor ${vakNaam}`;
-      if (se)           return `Leer ${vakNaam} na ${se}`;
-      return `Leer ${vakNaam}`;
-    }
-
     function renderPlanWeek() {
       const DAG_KORT = ['zo','ma','di','wo','do','vr','za'];
       const gepland = JSON.parse(localStorage.getItem('plan_gepland') || '{}');
       const gedaan  = JSON.parse(localStorage.getItem('plan_gedaan')  || '{}');
+      const alleData = {
+        vakken,
+        schooldagen: JSON.parse(localStorage.getItem('schooldagen') || 'null'),
+        schoolEinde: localStorage.getItem('schoolEinde') || null,
+        trainingen:  JSON.parse(localStorage.getItem('trainingen') || '[]'),
+        afspraken,
+      };
       let html = '';
 
       for (let i = 1; i <= 3; i++) {
         const dag    = addDagen(vandaag, i);
         const dagStr = toDatumStr(dag);
-        const tekst  = genereerDagAdvies(dag);
+        const tekst  = geefDagAdvies(dag, alleData);
 
         if (tekst) {
           const toets = vindUrgentsteToets(dag);
@@ -1479,8 +1390,6 @@
       const profiel2   = JSON.parse(localStorage.getItem('profiel')    || '{}');
       const vakken2    = JSON.parse(localStorage.getItem('vakken')     || '[]');
       const afspraken2 = JSON.parse(localStorage.getItem('afspraken')  || '[]');
-      const inst2      = JSON.parse(localStorage.getItem('instellingen') || '{}');
-      const STAND2 = { Mondeling:7, Proefwerk:4, SO:1, Luistertoets:0, Schrijfvaardigheid:2, PO:14, Anders:3 };
 
       function al(key)          { return !!localStorage.getItem('notif_' + key); }
       function markeer(key)     { localStorage.setItem('notif_' + key, '1'); }
@@ -1505,10 +1414,6 @@
       }
 
       // 2. Toets begindatum + dag-voor-toets
-      function getLeerDagenN(type, moeilijkheid) {
-        const basis = inst2[type] !== undefined ? inst2[type] : (STAND2[type] ?? STAND2.Anders);
-        return basis > 0 ? Math.max(1, Math.round(basis * ((moeilijkheid || 5) / 5))) : 0;
-      }
       for (const v of vakken2) {
         const toetsen = v.toetsen || (v.toetsdatum ? [{ datum: v.toetsdatum, naam: 'Toets', type: 'Anders' }] : []);
         for (const t of toetsen) {
@@ -1517,7 +1422,7 @@
           if (dagsTot < 0) continue;
 
           if (s.toets_start !== false) {
-            const startDagen = getLeerDagenN(t.type || 'Anders', v.moeilijkheid);
+            const startDagen = getLeerDagen(t.type || 'Anders', v.moeilijkheid);
             if (startDagen > 0 && dagsTot === startDagen) {
               const key = `toets_start_${t.datum}_${v.naam}`;
               if (!al(key)) { markeer(key); toon(v.naam, 'Begin vandaag met leren.', key); }

@@ -320,28 +320,11 @@
       </span>Afspraken</a>
   </nav>
 
+  <script src="planning.js"></script>
   <script>
     const DAG_LETTERS = ['zo','ma','di','wo','do','vr','za'];
     const MAAND_NAMEN = ['januari','februari','maart','april','mei','juni','juli',
                          'augustus','september','oktober','november','december'];
-    const STANDAARD_DAGEN = { Mondeling:7, Proefwerk:4, SO:1, Luistertoets:0,
-                               Schrijfvaardigheid:2, PO:14, Anders:3 };
-
-    function normaliseer(d) { const r = new Date(d); r.setHours(0,0,0,0); return r; }
-    function addDagen(d, n) { const r = new Date(d); r.setDate(r.getDate()+n); r.setHours(0,0,0,0); return r; }
-
-    function getMaandag(datum) {
-      const d = normaliseer(datum);
-      const diff = d.getDay() === 0 ? -6 : 1 - d.getDay();
-      return addDagen(d, diff);
-    }
-
-    function toDatumStr(d) {
-      const y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), dd = String(d.getDate()).padStart(2,'0');
-      return `${y}-${m}-${dd}`;
-    }
-
-    function parseDatum(str) { return normaliseer(new Date(str + 'T00:00:00')); }
 
     function weekBereikTekst(maandag) {
       const zondag = addDagen(maandag, 6);
@@ -352,17 +335,11 @@
       return `${maandag.getDate()} ${MAAND_NAMEN[maandag.getMonth()]} – ${zondag.getDate()} ${MAAND_NAMEN[zondag.getMonth()]} ${jaar}`;
     }
 
-    function getLeerDagen(type, moeilijkheid) {
-      const inst = JSON.parse(localStorage.getItem('instellingen') || '{}');
-      const key  = type || 'Anders';
-      const basis = inst[key] !== undefined ? inst[key]
-        : (STANDAARD_DAGEN[key] !== undefined ? STANDAARD_DAGEN[key] : STANDAARD_DAGEN.Anders);
-      if (basis === 0) return 0;
-      return Math.max(1, Math.round(basis * ((moeilijkheid || 5) / 5)));
-    }
-
     function berekenKaarten(dag) {
-      const vakken = JSON.parse(localStorage.getItem('vakken') || '[]');
+      const vakken     = JSON.parse(localStorage.getItem('vakken')     || '[]');
+      const schooldagen = JSON.parse(localStorage.getItem('schooldagen') || 'null');
+      const trainingen  = JSON.parse(localStorage.getItem('trainingen')  || '[]');
+      const cijfers     = JSON.parse(localStorage.getItem('cijfers')     || '[]');
       const dagMs  = dag.getTime();
       const toetsKaarten = [], hwKaarten = [], startKaarten = [], bezigKaarten = [];
 
@@ -371,8 +348,8 @@
         toetsen.forEach(t => {
           if (!t.datum) return;
           const toetsDatum = parseDatum(t.datum);
-          const leerDagen  = getLeerDagen(t.type, v.moeilijkheid);
-          const beginDatum = leerDagen > 0 ? addDagen(toetsDatum, -leerDagen) : null;
+          const begin      = berekenBegindatum(t, v, schooldagen, trainingen, cijfers);
+          const beginDatum = begin ? begin.datum : null;
           const dagenTot   = Math.round((toetsDatum - dag) / 86400000);
           if (toetsDatum.getTime() === dagMs) {
             toetsKaarten.push({ vak: v.naam, naam: t.naam, type: t.type });
