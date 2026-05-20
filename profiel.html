@@ -264,55 +264,6 @@
     .patroon-btn.actief.auto       { background: #f0f0f0; border-color: #bbb; color: #555; }
     .patroon-leeg { font-size: 0.82rem; color: #bbb; padding: 14px 0 4px; text-align: center; }
 
-    /* ── Vrije momenten ── */
-    .vrij-rij {
-      padding: 12px 14px; border-bottom: 1px solid #ebebeb;
-    }
-    .vrij-rij:last-child { border-bottom: none; }
-    .vrij-rij-hoofd {
-      display: flex; align-items: center; justify-content: space-between; gap: 10px;
-    }
-    .vrij-dag { font-size: 0.88rem; font-weight: 600; color: #1a1a1a; }
-    .vrij-chk-label {
-      display: flex; align-items: center; gap: 7px;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .vrij-chk-tekst { font-size: 0.82rem; color: #c8c8c8; font-weight: 600; }
-    .vrij-chk-tekst.actief { color: #3ddc97; }
-    .vrij-uitklap {
-      display: flex; align-items: center; gap: 8px;
-      margin-top: 10px; padding-top: 10px;
-      border-top: 1px solid #f2f2f2; flex-wrap: wrap;
-    }
-    .vrij-vanaf-label { font-size: 0.8rem; color: #999; flex-shrink: 0; }
-    .vrij-input {
-      background: #fff; border: 1.5px solid #e8e8e8; border-radius: 8px;
-      color: #1a1a1a; font-size: 0.88rem; padding: 6px 10px;
-      outline: none; font-family: inherit; appearance: none;
-      transition: border-color 0.15s; flex-shrink: 0;
-    }
-    .vrij-input:focus { border-color: #3ddc97; }
-    .vrij-hddag-label { font-size: 0.8rem; color: #999; margin-left: auto; flex-shrink: 0; }
-
-    /* Per-dag tijden */
-    .dag-tijden-container { margin: 0 0 8px; }
-    .dag-tijd-rij { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
-    .dag-tijd-label { font-size: 0.78rem; font-weight: 700; color: #888; min-width: 24px; flex-shrink: 0; }
-    .dag-tijd-scheider { color: #bbb; font-size: 0.85rem; flex-shrink: 0; }
-    .dag-tijd-input { flex: 1; min-width: 0; margin-bottom: 0 !important; }
-    .dag-vaste-inputs { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; }
-    .dag-wisselend-check { display: none; }
-    .dag-wisselend-lbl {
-      font-size: 0.75rem; font-weight: 600; color: #ccc;
-      cursor: pointer; padding: 4px 9px; border-radius: 6px;
-      border: 1.5px solid #e8e8e8; flex-shrink: 0;
-      transition: border-color 0.15s, color 0.15s, background 0.15s;
-      user-select: none;
-    }
-    .dag-wisselend-check:checked + .dag-wisselend-lbl {
-      color: #666; border-color: #aaa; background: #f5f5f5;
-    }
-
     /* ── Menu ── */
     .menu-overlay { position: fixed; inset: 0; z-index: 200; display: none; }
     .menu-overlay.open { display: block; }
@@ -574,7 +525,7 @@
       </div>
       <div class="veld-rij">
         <span class="veld-naam">School klaar om</span>
-        <input type="time" id="school-einde" class="vrij-input" style="margin-left:auto">
+        <input type="time" id="school-einde" style="margin-left:auto; background:#fff; border:1.5px solid #e8e8e8; border-radius:8px; color:#1a1a1a; font-size:0.88rem; padding:6px 10px; outline:none; font-family:inherit; appearance:none; flex-shrink:0; transition:border-color 0.15s">
       </div>
     </div>
 
@@ -615,12 +566,6 @@
       </div>
 
     </div>
-  </div>
-
-  <!-- Vrije momenten -->
-  <div class="sectie">
-    <p class="sectie-label">Vrije momenten</p>
-    <div class="veld-kaart" id="vrije-momenten-kaart"></div>
   </div>
 
   <!-- Vakken en leren -->
@@ -1063,92 +1008,6 @@
       }).join('');
     }
 
-
-    // ── Vrije momenten ──
-    const DAG_LANG_VM = ['Zondag','Maandag','Dinsdag','Woensdag','Donderdag','Vrijdag','Zaterdag'];
-
-    function laadVrijeMomenten() { return JSON.parse(localStorage.getItem('vrijeMomenten') || '{}'); }
-    function slaVrijeMomentenOp(v) { localStorage.setItem('vrijeMomenten', JSON.stringify(v)); }
-
-    function renderVrijeMomenten() {
-      const vm = laadVrijeMomenten();
-      const dagVolgorde = [1,2,3,4,5,6,0];
-      document.getElementById('vrije-momenten-kaart').innerHTML = dagVolgorde.map(d => {
-        const v       = vm[d];
-        const isVrij  = !!v;
-        const heleDag = !!(v && typeof v === 'object' && v.heleDag);
-        const tijd    = v ? (typeof v === 'string' ? v : (v.tijd || '')) : '';
-        return `<div class="vrij-rij">
-          <div class="vrij-rij-hoofd">
-            <span class="vrij-dag">${DAG_LANG_VM[d]}</span>
-            <label class="vrij-chk-label">
-              <span class="vrij-chk-tekst${isVrij ? ' actief' : ''}">Vrij</span>
-              <label class="schakelaar">
-                <input type="checkbox" class="vrij-chk" data-dag="${d}"${isVrij ? ' checked' : ''}>
-                <span class="schakelaar-knop"></span>
-              </label>
-            </label>
-          </div>
-          <div class="vrij-uitklap"${!isVrij ? ' style="display:none"' : ''}>
-            <span class="vrij-vanaf-label">Vrij vanaf</span>
-            <input type="time" class="vrij-input" data-dag="${d}" value="${tijd}"
-                   style="${heleDag ? 'visibility:hidden' : ''}">
-            <span class="vrij-hddag-label">Hele dag</span>
-            <label class="schakelaar" style="flex-shrink:0">
-              <input type="checkbox" class="vrij-hdv-chk" data-dag="${d}"${heleDag ? ' checked' : ''}>
-              <span class="schakelaar-knop"></span>
-            </label>
-          </div>
-        </div>`;
-      }).join('');
-
-      document.querySelectorAll('.vrij-chk').forEach(chk => {
-        chk.addEventListener('change', () => {
-          const d       = parseInt(chk.dataset.dag);
-          const vm2     = laadVrijeMomenten();
-          const rij     = chk.closest('.vrij-rij');
-          const uitklap = rij.querySelector('.vrij-uitklap');
-          const tekst   = rij.querySelector('.vrij-chk-tekst');
-          if (chk.checked) {
-            vm2[d] = { heleDag: false, tijd: '' };
-            uitklap.style.display = '';
-            tekst.classList.add('actief');
-          } else {
-            delete vm2[d];
-            uitklap.style.display = 'none';
-            tekst.classList.remove('actief');
-          }
-          slaVrijeMomentenOp(vm2);
-        });
-      });
-
-      document.querySelectorAll('.vrij-hdv-chk').forEach(chk => {
-        chk.addEventListener('change', () => {
-          const d       = parseInt(chk.dataset.dag);
-          const vm2     = laadVrijeMomenten();
-          const inputEl = chk.closest('.vrij-uitklap').querySelector('.vrij-input');
-          if (chk.checked) {
-            inputEl.style.visibility = 'hidden';
-            vm2[d] = { heleDag: true };
-          } else {
-            inputEl.style.visibility = '';
-            vm2[d] = { heleDag: false, tijd: inputEl.value };
-          }
-          slaVrijeMomentenOp(vm2);
-        });
-      });
-
-      document.querySelectorAll('.vrij-input').forEach(inp => {
-        inp.addEventListener('change', () => {
-          const d   = parseInt(inp.dataset.dag);
-          const vm2 = laadVrijeMomenten();
-          if (vm2[d]) vm2[d] = { heleDag: false, tijd: inp.value };
-          slaVrijeMomentenOp(vm2);
-        });
-      });
-    }
-
-    renderVrijeMomenten();
 
     // ── Schoolrooster opslaan ──
     document.querySelectorAll('.sd-dag').forEach(chk => {

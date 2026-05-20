@@ -610,6 +610,13 @@
     function minutenNaarTijd(m) {
       return `${String(Math.floor(m / 60)).padStart(2,'0')}:${String(m % 60).padStart(2,'0')}`;
     }
+    function berekenVrijVanaf(dagNr) {
+      const sd = JSON.parse(localStorage.getItem('schooldagen') || 'null');
+      const se = localStorage.getItem('schoolEinde') || null;
+      const isSchooldag = !sd || sd.includes(dagNr);
+      if (!isSchooldag) return { heleDag: true, tijd: null };
+      return { heleDag: false, tijd: se };
+    }
     function getMaandag(d) {
       const r = normaliseer(d);
       const diff = r.getDay() === 0 ? -6 : 1 - r.getDay();
@@ -750,23 +757,15 @@
       const sd = JSON.parse(localStorage.getItem('schooldagen') || 'null');
       const se = localStorage.getItem('schoolEinde') || null;
       const isSchooldag = !sd || sd.includes(dagNr);
-      const vm = JSON.parse(localStorage.getItem('vrijeMomenten') || '{}');
-      const vrijData = vm[dagNr];
-      const heleDagVrij = !!(vrijData && typeof vrijData === 'object' && vrijData.heleDag);
-      const vrijVanaf = vrijData
-        ? (typeof vrijData === 'string' ? vrijData : (vrijData.tijd || null))
-        : null;
-
       const events = [];
       let vrijVanafMin = null;
 
       // School block
-      if (isSchooldag && !heleDagVrij && se) {
+      if (isSchooldag && se) {
         const eindMin = tijdNaarMinuten(se);
         events.push({ type: 'school', label: 'School', tijdLabel: `tot ${se}`, beginMin: 0, eindMin });
         vrijVanafMin = eindMin;
       }
-      if (vrijVanafMin === null && vrijVanaf) vrijVanafMin = tijdNaarMinuten(vrijVanaf);
 
       // Trainingen
       const trainingen = JSON.parse(localStorage.getItem('trainingen') || '[]');
@@ -951,14 +950,6 @@
 
     function bepaalTip() {
       const stemming = getCheckin();
-      const vm = JSON.parse(localStorage.getItem('vrijeMomenten') || '{}');
-      function vrijTipDeel(dag) {
-        const v = vm[dag.getDay()];
-        if (!v) return '';
-        if (typeof v === 'string') return `, je bent vrij vanaf ${v}`;
-        if (v.heleDag) return ', ideale leerdag vandaag';
-        return v.tijd ? `, je bent vrij vanaf ${v.tijd}` : '';
-      }
 
       // ── 0. Stemming-override ──
       if (stemming === 'gaat-wel') {
@@ -1014,7 +1005,9 @@
       if (trainingVandaag.length) {
         const t = trainingVandaag[0];
         const wanneer = t.sortTijd ? `om ${t.sortTijd}` : 'vandaag';
-        const vrijHier = vrijTipDeel(vandaag);
+        const vrij = berekenVrijVanaf(vandaag.getDay());
+        const vrijHier = vrij.heleDag ? ', vrije dag dus leer eerst'
+          : vrij.tijd ? `, leer voor ${vrij.tijd}` : '';
         return `${t.titel} ${wanneer}${vrijHier}. Zorg dat je op tijd klaar bent.`;
       }
 
@@ -1024,11 +1017,10 @@
         for (const t of toetsen) {
           if (!t.datum) continue;
           const dagsTot = Math.round((parseDatum(t.datum) - vandaag) / 86400000);
-          if (dagsTot >= 2 && dagsTot <= 7 && vm[vandaag.getDay()]) {
-            const vd = vm[vandaag.getDay()];
-            const vrijLabel = typeof vd === 'string' ? `vrij vanaf ${vd}`
-              : (vd.heleDag ? 'ideale leerdag vandaag'
-              : (vd.tijd ? `vrij vanaf ${vd.tijd}` : null));
+          if (dagsTot >= 2 && dagsTot <= 7) {
+            const vrij = berekenVrijVanaf(vandaag.getDay());
+            const vrijLabel = vrij.heleDag ? 'ideale leerdag vandaag'
+              : vrij.tijd ? `vrij vanaf ${vrij.tijd}` : null;
             if (vrijLabel) return `Toets <strong>${v.naam}</strong> over ${dagsTot} dagen. Je bent vandaag ${vrijLabel}.`;
           }
         }
@@ -1205,10 +1197,7 @@
       const se = localStorage.getItem('schoolEinde') || null;
       const isSchooldag = !sd || sd.includes(dagNr);
 
-      const vm = JSON.parse(localStorage.getItem('vrijeMomenten') || '{}');
-      const vrijData = vm[dagNr];
-      const heleDagVrij = !!(vrijData && typeof vrijData === 'object' && vrijData.heleDag);
-      const vrijVanaf = vrijData ? (typeof vrijData === 'string' ? vrijData : (vrijData.tijd || null)) : null;
+      const { heleDag: heleDagVrij } = berekenVrijVanaf(dagNr);
 
       const allTr = JSON.parse(localStorage.getItem('trainingen') || '[]');
       const dagTr = allTr
@@ -1237,10 +1226,8 @@
       const eersteT = dagTr[0];
 
       if (eersteT && eersteT.begin) return `${eersteT.naam} om ${eersteT.begin}, leer ${vakNaam} eerst`;
-      if (!isSchooldag && heleDagVrij) return `Vrije dag, ideaal voor ${vakNaam}`;
-      if (!isSchooldag && vrijVanaf)   return `Vrij van ${vrijVanaf}, ideaal voor ${vakNaam}`;
-      if (isSchooldag && se)           return `Leer ${vakNaam} na ${se}`;
-      if (vrijVanaf)                   return `Leer ${vakNaam} vanaf ${vrijVanaf}`;
+      if (!isSchooldag) return `Vrije dag, ideaal voor ${vakNaam}`;
+      if (se)           return `Leer ${vakNaam} na ${se}`;
       return `Leer ${vakNaam}`;
     }
 
