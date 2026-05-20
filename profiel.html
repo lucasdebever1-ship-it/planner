@@ -1184,9 +1184,10 @@
     }
 
     function renderPatronen() {
+      const container = document.getElementById('patronen-kaart');
+      if (!container) return;
       const patronen = JSON.parse(localStorage.getItem('checkinPatronen') || '{}');
       const overrides = JSON.parse(localStorage.getItem('checkinPatronenOverride') || '{}');
-      const container = document.getElementById('patronen-kaart');
       const dagVolgorde = [1,2,3,4,5,6,0];
       const heeftData = dagVolgorde.some(d => (patronen[d] || []).length > 0);
 
