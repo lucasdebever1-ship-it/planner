@@ -28,16 +28,37 @@
       -webkit-font-smoothing: antialiased;
       max-width: 480px;
       margin: 0 auto;
-      padding: 40px 20px 90px;
+      padding: 20px 20px 90px;
     }
 
-    .pagina-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
+    /* Agenda intern tabs */
+    .agenda-tabs {
+      display: flex; gap: 4px; background: #f0f0f0;
+      border-radius: 12px; padding: 4px; margin-bottom: 6px;
     }
-    .pagina-header h1 { margin: 0; font-size: 1.4rem; font-weight: 700; letter-spacing: -0.3px; color: #1a1a1a; }
+    .agenda-tab {
+      flex: 1; padding: 8px 4px; border: none; border-radius: 9px;
+      background: transparent; font-size: 0.78rem; font-weight: 700;
+      color: #888; cursor: pointer; font-family: inherit;
+      transition: background 0.15s, color 0.15s;
+      -webkit-tap-highlight-color: transparent; white-space: nowrap;
+    }
+    .agenda-tab.actief { background: #fff; color: #1a1a1a; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+    .tab-ondertitel { font-size: 0.78rem; color: #bbb; font-weight: 500; margin: 0 0 16px; }
+
+    /* Lege staat */
+    .leeg-staat {
+      text-align: center; padding: 36px 20px;
+      background: #fafafa; border: 1.5px dashed #e0e0e0; border-radius: 14px;
+    }
+    .leeg-staat-tekst { font-size: 0.9rem; color: #aaa; margin: 0 0 16px; font-weight: 500; }
+    .leeg-staat-knop {
+      display: inline-block; padding: 11px 22px; background: #3ddc97;
+      color: #fff; border-radius: 10px; font-size: 0.88rem; font-weight: 700;
+      text-decoration: none; transition: background 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .leeg-staat-knop:hover { background: #2bc47e; }
 
     /* Week navigatie */
     .week-nav {
@@ -173,38 +194,6 @@
       box-shadow: 0 1px 6px rgba(61,220,151,0.12);
     }
 
-    /* ── Navigatie ── */
-    .hamburger-btn {
-      background: none; border: none; cursor: pointer;
-      padding: 6px 8px; border-radius: 8px;
-      display: flex; flex-direction: column; gap: 5px; align-items: center;
-      transition: background 0.15s; -webkit-tap-highlight-color: transparent;
-    }
-    .hamburger-btn:hover { background: #f0f0f0; }
-    .hamburger-streep { display: block; width: 20px; height: 2px; background: #888; border-radius: 2px; }
-
-    .menu-overlay { position: fixed; inset: 0; z-index: 200; display: none; }
-    .menu-overlay.open { display: block; }
-    .menu-achtergrond { position: absolute; inset: 0; }
-    .menu-kaart {
-      position: absolute; top: 52px; right: 20px;
-      background: #ffffff; border: 1px solid #e8e8e8;
-      border-radius: 12px; min-width: 210px; overflow: hidden;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-    }
-    .menu-item {
-      display: flex; align-items: center; gap: 12px;
-      padding: 14px 18px; text-decoration: none;
-      color: #1a1a1a; font-size: 0.95rem;
-      border: none; background: none; width: 100%;
-      text-align: left; cursor: pointer;
-      border-bottom: 1px solid #f0f0f0;
-      transition: background 0.15s; font-family: inherit;
-    }
-    .menu-item:last-child { border-bottom: none; }
-    .menu-item:hover { background: #f5f5f5; }
-    .menu-item.rood { color: #e05252; }
-
     .tabbar {
       position: fixed; bottom: 0; left: 0; right: 0;
       background: rgba(255,255,255,0.95);
@@ -272,34 +261,34 @@
 </head>
 <body>
 
-  <div class="pagina-header">
-    <h1>Agenda</h1>
-    <button class="hamburger-btn" id="hamburger" aria-label="Menu">
-      <span class="hamburger-streep"></span>
-      <span class="hamburger-streep"></span>
-      <span class="hamburger-streep"></span>
-    </button>
+  <!-- Interne tabs -->
+  <div class="agenda-tabs">
+    <button class="agenda-tab actief" data-tab="week">Deze week</button>
+    <button class="agenda-tab" data-tab="toetsen">Mijn toetsen</button>
+    <button class="agenda-tab" data-tab="afspraken">Mijn afspraken</button>
   </div>
+  <p class="tab-ondertitel" id="tab-ondertitel">Alles wat deze week gepland staat</p>
 
-  <div class="week-nav">
-    <button class="btn-week" id="btn-vorige">‹</button>
-    <div class="week-bereik" id="week-bereik"></div>
-    <button class="btn-week" id="btn-volgende">›</button>
-  </div>
-
-  <div class="dag-rij" id="dag-rij"></div>
-  <div class="dag-samenvatting" id="dag-samenvatting"></div>
-  <div class="dag-inhoud" id="dag-inhoud"></div>
-
-  <!-- Menu -->
-  <div class="menu-overlay" id="menu-overlay">
-    <div class="menu-achtergrond" onclick="sluitMenu()"></div>
-    <div class="menu-kaart">
-      <button class="menu-item rood" onclick="resetProfiel()">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.75"/></svg>
-        Onboarding resetten
-      </button>
+  <!-- Week tab -->
+  <div id="tab-content-week">
+    <div class="week-nav">
+      <button class="btn-week" id="btn-vorige">‹</button>
+      <div class="week-bereik" id="week-bereik"></div>
+      <button class="btn-week" id="btn-volgende">›</button>
     </div>
+    <div class="dag-rij" id="dag-rij"></div>
+    <div class="dag-samenvatting" id="dag-samenvatting"></div>
+    <div class="dag-inhoud" id="dag-inhoud"></div>
+  </div>
+
+  <!-- Toetsen tab -->
+  <div id="tab-content-toetsen" style="display:none">
+    <div id="toetsen-lijst"></div>
+  </div>
+
+  <!-- Afspraken tab -->
+  <div id="tab-content-afspraken" style="display:none">
+    <div id="afspraken-lijst"></div>
   </div>
 
   <!-- Tabbar -->
@@ -332,17 +321,6 @@
   </nav>
 
   <script>
-    document.getElementById('hamburger').addEventListener('click', () => {
-      document.getElementById('menu-overlay').classList.toggle('open');
-    });
-    function sluitMenu() { document.getElementById('menu-overlay').classList.remove('open'); }
-    function resetProfiel() {
-      sluitMenu();
-      if (confirm('Wil je de app resetten? Alle gegevens worden verwijderd.')) {
-        localStorage.clear(); location.replace('onboarding.html');
-      }
-    }
-
     const DAG_LETTERS = ['zo','ma','di','wo','do','vr','za'];
     const MAAND_NAMEN = ['januari','februari','maart','april','mei','juni','juli',
                          'augustus','september','oktober','november','december'];
@@ -571,14 +549,8 @@
 
       const { toetsKaarten, hwKaarten, startKaarten, bezigKaarten } = berekenKaarten(gekozenDag);
 
-      const vm = JSON.parse(localStorage.getItem('vrijeMomenten') || '{}');
-      const vrijData = vm[dagNr];
-      let vrijVanaf = null, heleDagVrij = false;
-      if (vrijData) {
-        if (typeof vrijData === 'string') vrijVanaf = vrijData;
-        else if (vrijData.heleDag) heleDagVrij = true;
-        else if (vrijData.tijd) vrijVanaf = vrijData.tijd;
-      }
+      const heleDagVrij = !isSchooldag;
+      const vrijVanaf   = isSchooldag ? schoolEinde : null;
 
       const items = [];
       toetsKaarten.forEach(k => items.push({ soort: 'toets',    ...k, sortTime: -1 }));
@@ -716,6 +688,96 @@
     }, { passive: true });
 
     render();
+
+    // ── Interne tab navigatie ──
+    const TAB_ONDERTITELS = {
+      week:      'Alles wat deze week gepland staat',
+      toetsen:   'Je toetsen en wanneer je moet beginnen met leren',
+      afspraken: 'Je afspraken, sport en andere activiteiten',
+    };
+
+    function wisselTab(tab) {
+      document.querySelectorAll('.agenda-tab').forEach(b =>
+        b.classList.toggle('actief', b.dataset.tab === tab));
+      ['week','toetsen','afspraken'].forEach(t => {
+        const el = document.getElementById('tab-content-' + t);
+        if (el) el.style.display = t === tab ? '' : 'none';
+      });
+      document.getElementById('tab-ondertitel').textContent = TAB_ONDERTITELS[tab];
+      if (tab === 'toetsen')   renderToetsenTab();
+      if (tab === 'afspraken') renderAfsprakenTab();
+    }
+
+    document.querySelectorAll('.agenda-tab').forEach(btn =>
+      btn.addEventListener('click', () => wisselTab(btn.dataset.tab)));
+
+    function renderToetsenTab() {
+      const container = document.getElementById('toetsen-lijst');
+      const vakken = JSON.parse(localStorage.getItem('vakken') || '[]');
+      const nu = normaliseer(new Date());
+      const toetsen = [];
+      vakken.forEach(v => {
+        const lijst = v.toetsen || (v.toetsdatum ? [{ naam: 'Toets', datum: v.toetsdatum }] : []);
+        lijst.forEach(t => {
+          if (!t.datum) return;
+          const d = parseDatum(t.datum);
+          if (d >= nu) toetsen.push({ vak: v.naam, naam: t.naam, type: t.type, datum: d, datumStr: t.datum });
+        });
+      });
+      toetsen.sort((a, b) => a.datum - b.datum);
+      if (!toetsen.length) {
+        container.innerHTML = `<div class="leeg-staat">
+          <p class="leeg-staat-tekst">Je hebt nog geen toetsen ingepland</p>
+          <a href="vakken.html" class="leeg-staat-knop">Toets toevoegen</a>
+        </div>`;
+        return;
+      }
+      container.innerHTML = toetsen.map(t => {
+        const dagsTot = Math.round((t.datum - nu) / 86400000);
+        const wanneer = dagsTot === 0 ? 'Vandaag' : dagsTot === 1 ? 'Morgen' : `Over ${dagsTot} dagen`;
+        return `<div class="item-kaart" style="border-left-color:#e05252;margin-bottom:8px">
+          <div class="item-kaart-label" style="color:#e05252">${t.type || 'Toets'}</div>
+          <div class="item-kaart-titel">${t.vak}</div>
+          ${t.naam ? `<div class="item-kaart-sub">${t.naam}</div>` : ''}
+          <div class="item-kaart-sub">${wanneer} · ${t.datumStr}</div>
+        </div>`;
+      }).join('');
+    }
+
+    function renderAfsprakenTab() {
+      const container = document.getElementById('afspraken-lijst');
+      const nu = normaliseer(new Date());
+      const allAf = JSON.parse(localStorage.getItem('afspraken') || '[]').filter(a => !a.afgerond);
+      const allTr = JSON.parse(localStorage.getItem('trainingen') || '[]');
+      if (!allAf.length && !allTr.length) {
+        container.innerHTML = `<div class="leeg-staat">
+          <p class="leeg-staat-tekst">Nog geen afspraken of sport gepland</p>
+          <a href="afspraken.html" class="leeg-staat-knop">Afspraak toevoegen</a>
+        </div>`;
+        return;
+      }
+      const DN = ['zo','ma','di','wo','do','vr','za'];
+      let html = allTr.map(t =>
+        `<div class="item-kaart" style="border-left-color:#2bc47e;margin-bottom:8px">
+          <div class="item-kaart-label" style="color:#2bc47e">Training</div>
+          <div class="item-kaart-titel">${t.naam}</div>
+          <div class="item-kaart-sub">Elke ${(t.dagen || []).map(d => DN[d]).join(', ')}</div>
+        </div>`
+      ).join('');
+      const sortedAf = [...allAf].sort((a, b) => a.datum < b.datum ? -1 : 1);
+      html += sortedAf.map(a => {
+        const dagsTot = Math.round((parseDatum(a.datum) - nu) / 86400000);
+        const wanneer = a.herhaling === 'wekelijks' ? 'Wekelijks'
+          : dagsTot < 0 ? a.datum : dagsTot === 0 ? 'Vandaag' : dagsTot === 1 ? 'Morgen' : a.datum;
+        return `<div class="item-kaart" style="border-left-color:#9b59b6;margin-bottom:8px">
+          <div class="item-kaart-label" style="color:#9b59b6">Afspraak${a.herhaling === 'wekelijks' ? ' · wekelijks' : ''}</div>
+          <div class="item-kaart-titel">${a.titel}</div>
+          ${a.tijd ? `<div class="item-kaart-sub">${a.tijd}${a.eindtijd ? ` – ${a.eindtijd}` : ''}</div>` : ''}
+          <div class="item-kaart-sub">${wanneer}</div>
+        </div>`;
+      }).join('');
+      container.innerHTML = html;
+    }
   </script>
   <script>
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js?v=6');

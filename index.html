@@ -797,12 +797,7 @@
           beginMin: bMin, eindMin: eMin });
       });
 
-      // Sorteer: school eerst, daarna op begin-tijd
-      events.sort((a, b) => {
-        if (a.type === 'school') return -1;
-        if (b.type === 'school') return 1;
-        return a.beginMin - b.beginMin;
-      });
+      events.sort((a, b) => a.beginMin - b.beginMin);
 
       // Voeg vrije blokken in tussen events
       const blokken = [];
@@ -819,10 +814,13 @@
       return blokken;
     }
 
+    let _dagplanBlokken = null;
+
     function renderDagplanTijdlijn() {
       const container = document.getElementById('dagplan-tijdlijn');
       if (!container) return;
-      const blokken = bouwDagplanBlokken();
+      _dagplanBlokken = bouwDagplanBlokken();
+      const blokken = _dagplanBlokken;
       if (!blokken.length) { container.innerHTML = ''; return; }
       const urgentToets = vindUrgentsteToets(vandaag);
       container.innerHTML = blokken.map(blok => {
@@ -968,7 +966,7 @@
       }
 
       // ── 0b. Tijdlijn-tip ──
-      const tlBlokken = bouwDagplanBlokken();
+      const tlBlokken = _dagplanBlokken || bouwDagplanBlokken();
       const vrijBlok = tlBlokken.find(b => b.type === 'vrij' && b.duurMin >= 45);
       if (vrijBlok) {
         const urgentT = vindUrgentsteToets(vandaag);
@@ -1197,8 +1195,6 @@
       const se = localStorage.getItem('schoolEinde') || null;
       const isSchooldag = !sd || sd.includes(dagNr);
 
-      const { heleDag: heleDagVrij } = berekenVrijVanaf(dagNr);
-
       const allTr = JSON.parse(localStorage.getItem('trainingen') || '[]');
       const dagTr = allTr
         .filter(t => Array.isArray(t.dagen) && t.dagen.includes(dagNr)
@@ -1226,7 +1222,7 @@
       const eersteT = dagTr[0];
 
       if (eersteT && eersteT.begin) return `${eersteT.naam} om ${eersteT.begin}, leer ${vakNaam} eerst`;
-      if (!isSchooldag) return `Vrije dag, ideaal voor ${vakNaam}`;
+      if (!isSchooldag)  return `Vrije dag, ideaal voor ${vakNaam}`;
       if (se)           return `Leer ${vakNaam} na ${se}`;
       return `Leer ${vakNaam}`;
     }

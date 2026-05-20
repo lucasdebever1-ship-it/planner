@@ -227,6 +227,13 @@
     .btn-opl-mini:hover { background: #2bc47e; }
 
     .schema-leeg { font-size: 0.82rem; color: #bbb; padding: 2px 0 6px; }
+    .tijd-input {
+      background: #fff; border: 1.5px solid #e8e8e8; border-radius: 8px;
+      color: #1a1a1a; font-size: 0.88rem; padding: 6px 10px;
+      outline: none; font-family: inherit; appearance: none;
+      flex-shrink: 0; transition: border-color 0.15s; margin-left: auto;
+    }
+    .tijd-input:focus { border-color: #3ddc97; }
 
     /* ── Patronen ── */
     .patroon-rij {
@@ -525,7 +532,7 @@
       </div>
       <div class="veld-rij">
         <span class="veld-naam">School klaar om</span>
-        <input type="time" id="school-einde" style="margin-left:auto; background:#fff; border:1.5px solid #e8e8e8; border-radius:8px; color:#1a1a1a; font-size:0.88rem; padding:6px 10px; outline:none; font-family:inherit; appearance:none; flex-shrink:0; transition:border-color 0.15s">
+        <input type="time" id="school-einde" class="tijd-input">
       </div>
     </div>
 
