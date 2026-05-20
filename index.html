@@ -627,7 +627,11 @@
     const uur      = new Date().getHours();
     const dagdeel  = uur < 12 ? 'Goedemorgen' : uur < 18 ? 'Goedemiddag' : 'Goedenavond';
     const naamDeel = profiel.naam ? `, ${profiel.naam}` : '';
-    document.getElementById('begroeting').textContent = dagdeel + naamDeel;
+    const feestdagVandaag = getFeestdag(vandaagStr);
+    const begroetingTekst = feestdagVandaag
+      ? `${dagdeel}${naamDeel}, fijne ${feestdagVandaag}!`
+      : dagdeel + naamDeel;
+    document.getElementById('begroeting').textContent = begroetingTekst;
     document.getElementById('datum-lijn').textContent =
       `${DAGEN_LANG[vandaag.getDay()]} ${vandaag.getDate()} ${MAANDEN[vandaag.getMonth()]}`;
 

@@ -33,6 +33,51 @@ function getMaandagVanIsoWeek(isoWeekStr) {
   return maandag;
 }
 
+// ── Feestdagen ──
+function berekenPasen(jaar) {
+  const a = jaar % 19;
+  const b = Math.floor(jaar / 100);
+  const c = jaar % 100;
+  const d = Math.floor(b / 4);
+  const e = b % 4;
+  const f = Math.floor((b + 8) / 25);
+  const g = Math.floor((b - f + 1) / 3);
+  const h = (19 * a + b - d - g + 15) % 30;
+  const i = Math.floor(c / 4);
+  const k = c % 4;
+  const l = (32 + 2 * e + 2 * i - h - k) % 7;
+  const m = Math.floor((a + 11 * h + 22 * l) / 451);
+  const maand = Math.floor((h + l - 7 * m + 114) / 31);
+  const dag   = ((h + l - 7 * m + 114) % 31) + 1;
+  return new Date(jaar, maand - 1, dag);
+}
+
+function getFeestdagen(jaar) {
+  const pasen = berekenPasen(jaar);
+  // Koningsdag: 27 april, maar bij zondag → 26 april
+  const kd = new Date(jaar, 3, 27);
+  const koningsdagStr = kd.getDay() === 0 ? `${jaar}-04-26` : `${jaar}-04-27`;
+  const lijst = {
+    [`${jaar}-01-01`]:                  'Nieuwjaarsdag',
+    [toDatumStr(addDagen(pasen, -2))]:  'Goede Vrijdag',
+    [toDatumStr(pasen)]:                '1e Paasdag',
+    [toDatumStr(addDagen(pasen,  1))]:  '2e Paasdag',
+    [koningsdagStr]:                    'Koningsdag',
+    [`${jaar}-05-05`]:                  'Bevrijdingsdag',
+    [toDatumStr(addDagen(pasen, 39))]:  'Hemelvaartsdag',
+    [toDatumStr(addDagen(pasen, 49))]:  '1e Pinksterdag',
+    [toDatumStr(addDagen(pasen, 50))]:  '2e Pinksterdag',
+    [`${jaar}-12-25`]:                  '1e Kerstdag',
+    [`${jaar}-12-26`]:                  '2e Kerstdag',
+  };
+  return lijst;
+}
+
+function getFeestdag(datumStr) {
+  const jaar = parseInt(datumStr.slice(0, 4));
+  return getFeestdagen(jaar)[datumStr] || null;
+}
+
 // ── Planningshulpfuncties ──
 function isHeleDagAfspraak(a) {
   if (!a.tijd) return true;
@@ -105,6 +150,7 @@ function berekenBegindatum(toets, vakInstellingen, schooldagen, trainingen, cijf
   }
   function isDagBezet(dag) {
     if (isHeleDagVrij(dag)) return false;
+    if (getFeestdag(toDatumStr(dag))) return true;
     const w = dag.getDay();
     return werk.some(e => Array.isArray(e.dagen) && e.dagen.includes(w)) ||
            (trainingen || []).some(e => Array.isArray(e.dagen) && e.dagen.includes(w));

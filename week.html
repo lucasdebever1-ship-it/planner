@@ -154,6 +154,11 @@
       border-radius: 10px; padding: 9px 14px;
       font-size: 0.8rem; color: #aaa; font-weight: 600;
     }
+    .feestdag-banner {
+      background: #f5f5f5; border: 1px solid #e0e0e0;
+      border-radius: 10px; padding: 9px 14px;
+      font-size: 0.8rem; color: #999; font-weight: 600;
+    }
 
     /* Dag samenvatting */
     .dag-samenvatting {
@@ -572,13 +577,16 @@
         samEl.textContent = n === 0 ? '' : n === 1 ? '1 ding vandaag' : `${n} dingen vandaag`;
       }
 
-      // Bovenste blok: schoolbanner OF vrije-dag
+      // Bovenste blok: feestdag + schoolbanner OF vrije-dag
       const heeftTrainingOfAfspraak = items.some(i => i.soort === 'training' || i.soort === 'afspraak');
-      let topperHtml = '';
+      const feestdagNaam = getFeestdag(dagStr);
+      let topperHtml = feestdagNaam
+        ? `<div class="feestdag-banner">${feestdagNaam}</div>`
+        : '';
       if (isSchooldag && schoolEinde) {
-        topperHtml = `<div class="school-banner">School tot ${schoolEinde}</div>`;
-      } else if (!isSchooldag && !heeftTrainingOfAfspraak) {
-        topperHtml = `<div class="dag-vrij-weekend">Vrije dag</div>`;
+        topperHtml += `<div class="school-banner">School tot ${schoolEinde}</div>`;
+      } else if (!isSchooldag && !heeftTrainingOfAfspraak && !feestdagNaam) {
+        topperHtml += `<div class="dag-vrij-weekend">Vrije dag</div>`;
       }
 
       const urgentVak    = urgentsteVak(gekozenDag);
