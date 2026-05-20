@@ -127,6 +127,15 @@
       border-color: #3ddc97; background: #f0fbf5; color: #1a1a1a;
     }
     .tijd-hint { font-size: 0.79rem; color: #c8c8c8; margin-top: -14px; margin-bottom: 24px; }
+    .regio-keuze { display: flex; gap: 8px; margin-bottom: 20px; }
+    .regio-btn {
+      flex: 1; padding: 11px 8px; border: 2px solid #ebebeb; border-radius: 10px;
+      font-size: 0.9rem; font-weight: 700; color: #bbb; background: #fff;
+      text-align: center; cursor: pointer; user-select: none;
+      transition: border-color 0.15s, background 0.15s, color 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .regio-btn.geselecteerd { border-color: #3ddc97; background: #f0fbf5; color: #1a1a1a; }
 
     /* ── Toggles ── */
     .toggle-kaart {
@@ -310,6 +319,14 @@
       <label class="veld-label" for="school-einde">Hoe laat ben je gemiddeld klaar met school?</label>
       <input type="time" id="school-einde" class="veld-input">
       <p class="tijd-hint">Laat leeg als dit sterk wisselt</p>
+
+      <label class="veld-label">In welke regio woon je?</label>
+      <div class="regio-keuze">
+        <div class="regio-btn" data-regio="Noord" onclick="kiesRegio(this)">Noord</div>
+        <div class="regio-btn" data-regio="Midden" onclick="kiesRegio(this)">Midden</div>
+        <div class="regio-btn" data-regio="Zuid" onclick="kiesRegio(this)">Zuid</div>
+      </div>
+      <p class="tijd-hint" style="margin-top:-14px">Bepaalt je schoolvakanties</p>
     </div>
 
     <!-- Stap 4: Werk of sport -->
@@ -384,6 +401,12 @@
 
     let huidig = 0;
     let gekozenLeerstijl = localStorage.getItem('leerstijl') || null;
+    let gekozenRegio = localStorage.getItem('regio') || null;
+
+    if (gekozenRegio) {
+      const el = document.querySelector(`.regio-btn[data-regio="${gekozenRegio}"]`);
+      if (el) el.classList.add('geselecteerd');
+    }
 
     // Herstel leerstijl-selectie als de gebruiker terugkomt
     if (gekozenLeerstijl) {
@@ -457,6 +480,7 @@
         const einde = document.getElementById('school-einde').value;
         if (einde) localStorage.setItem('schoolEinde', einde);
         else       localStorage.removeItem('schoolEinde');
+        if (gekozenRegio) localStorage.setItem('regio', gekozenRegio);
       }
       if (stap === 4) {
         // profiel wordt aangemaakt bij stap 5
@@ -478,6 +502,13 @@
       localStorage.setItem('leerstijl', gekozenLeerstijl);
       updateVoortgang();
       setTimeout(() => { if (huidig === 2) naarStap(3); }, 320);
+    }
+
+    function kiesRegio(el) {
+      document.querySelectorAll('.regio-btn').forEach(b => b.classList.remove('geselecteerd'));
+      el.classList.add('geselecteerd');
+      gekozenRegio = el.dataset.regio;
+      localStorage.setItem('regio', gekozenRegio);
     }
 
     document.getElementById('naam').addEventListener('input', updateVoortgang);

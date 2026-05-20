@@ -159,6 +159,11 @@
       border-radius: 10px; padding: 9px 14px;
       font-size: 0.8rem; color: #999; font-weight: 600;
     }
+    .vakantie-banner {
+      background: #f0fbf5; border: 1px solid #b4eed0;
+      border-radius: 10px; padding: 9px 14px;
+      font-size: 0.8rem; color: #2bc47e; font-weight: 700;
+    }
 
     /* Dag samenvatting */
     .dag-samenvatting {
@@ -577,16 +582,23 @@
         samEl.textContent = n === 0 ? '' : n === 1 ? '1 ding vandaag' : `${n} dingen vandaag`;
       }
 
-      // Bovenste blok: feestdag + schoolbanner OF vrije-dag
+      // Bovenste blok: vakantie / feestdag / schoolbanner / vrije-dag
       const heeftTrainingOfAfspraak = items.some(i => i.soort === 'training' || i.soort === 'afspraak');
-      const feestdagNaam = getFeestdag(dagStr);
-      let topperHtml = feestdagNaam
-        ? `<div class="feestdag-banner">${feestdagNaam}</div>`
-        : '';
-      if (isSchooldag && schoolEinde) {
-        topperHtml += `<div class="school-banner">School tot ${schoolEinde}</div>`;
-      } else if (!isSchooldag && !heeftTrainingOfAfspraak && !feestdagNaam) {
-        topperHtml += `<div class="dag-vrij-weekend">Vrije dag</div>`;
+      const vakantieVanDag = getVakantie(dagStr);
+      const feestdagNaam   = getFeestdag(dagStr);
+      let topperHtml = '';
+      if (vakantieVanDag) {
+        topperHtml += `<div class="vakantie-banner">Vakantie</div>`;
+      }
+      if (feestdagNaam) {
+        topperHtml += `<div class="feestdag-banner">${feestdagNaam}</div>`;
+      }
+      if (!vakantieVanDag && !feestdagNaam) {
+        if (isSchooldag && schoolEinde) {
+          topperHtml += `<div class="school-banner">School tot ${schoolEinde}</div>`;
+        } else if (!isSchooldag && !heeftTrainingOfAfspraak) {
+          topperHtml += `<div class="dag-vrij-weekend">Vrije dag</div>`;
+        }
       }
 
       const urgentVak    = urgentsteVak(gekozenDag);

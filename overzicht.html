@@ -396,7 +396,10 @@
       }[categorie] || '';
       const dagenStr = dagsTotToets !== null ? dagenTekst(dagsTotToets) : null;
       const drukBadge = r.drukkeWeek ? `<div class="drukke-badge">Drukke week</div>` : '';
-      let advies = '';
+      const naVakantie = toets.datum ? isVlakNaVakantie(toets.datum) : null;
+      let advies = naVakantie
+        ? `<div class="kaart-advies waarschuwing">Let op: je toets is vlak na de vakantie</div>`
+        : '';
       if (categorie === 'urgent') {
         advies = `<div class="kaart-advies waarschuwing">Dit wil je vandaag nog oppakken.</div>`;
       } else if (categorie !== 'verlopen' && dagsTotBegin !== null) {

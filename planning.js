@@ -78,6 +78,50 @@ function getFeestdag(datumStr) {
   return getFeestdagen(jaar)[datumStr] || null;
 }
 
+// ── Vakanties 2025-2026 ──
+const VAKANTIES_2025_2026 = {
+  Noord: [
+    { naam: 'Herfstvakantie',    begin: '2025-10-18', eind: '2025-10-26' },
+    { naam: 'Kerstvakantie',     begin: '2025-12-20', eind: '2026-01-04' },
+    { naam: 'Voorjaarsvakantie', begin: '2026-02-21', eind: '2026-03-01' },
+    { naam: 'Meivakantie',       begin: '2026-04-25', eind: '2026-05-10' },
+    { naam: 'Zomervakantie',     begin: '2026-07-11', eind: '2026-08-23' },
+  ],
+  Midden: [
+    { naam: 'Herfstvakantie',    begin: '2025-10-18', eind: '2025-10-26' },
+    { naam: 'Kerstvakantie',     begin: '2025-12-20', eind: '2026-01-04' },
+    { naam: 'Voorjaarsvakantie', begin: '2026-02-28', eind: '2026-03-08' },
+    { naam: 'Meivakantie',       begin: '2026-04-25', eind: '2026-05-10' },
+    { naam: 'Zomervakantie',     begin: '2026-07-04', eind: '2026-08-16' },
+  ],
+  Zuid: [
+    { naam: 'Herfstvakantie',    begin: '2025-10-25', eind: '2025-11-02' },
+    { naam: 'Kerstvakantie',     begin: '2025-12-20', eind: '2026-01-04' },
+    { naam: 'Voorjaarsvakantie', begin: '2026-02-14', eind: '2026-02-22' },
+    { naam: 'Meivakantie',       begin: '2026-04-25', eind: '2026-05-10' },
+    { naam: 'Zomervakantie',     begin: '2026-06-27', eind: '2026-08-09' },
+  ],
+};
+
+function getVakantie(datumStr) {
+  const regio = localStorage.getItem('regio') || 'Midden';
+  const lijst = VAKANTIES_2025_2026[regio] || VAKANTIES_2025_2026.Midden;
+  return lijst.find(v => datumStr >= v.begin && datumStr <= v.eind) || null;
+}
+
+// Geeft vakantiename terug als de toets 1-4 dagen na het einde van een vakantie valt.
+function isVlakNaVakantie(toetsDatumStr) {
+  const regio = localStorage.getItem('regio') || 'Midden';
+  const lijst = VAKANTIES_2025_2026[regio] || VAKANTIES_2025_2026.Midden;
+  for (const v of lijst) {
+    const dagsTot = Math.round(
+      (new Date(toetsDatumStr + 'T00:00:00') - new Date(v.eind + 'T00:00:00')) / 86400000
+    );
+    if (dagsTot >= 1 && dagsTot <= 4) return v.naam;
+  }
+  return null;
+}
+
 // ── Planningshulpfuncties ──
 function isHeleDagAfspraak(a) {
   if (!a.tijd) return true;
@@ -150,7 +194,9 @@ function berekenBegindatum(toets, vakInstellingen, schooldagen, trainingen, cijf
   }
   function isDagBezet(dag) {
     if (isHeleDagVrij(dag)) return false;
-    if (getFeestdag(toDatumStr(dag))) return true;
+    const ds = toDatumStr(dag);
+    if (getFeestdag(ds)) return true;
+    if (getVakantie(ds)) return true;
     const w = dag.getDay();
     return werk.some(e => Array.isArray(e.dagen) && e.dagen.includes(w)) ||
            (trainingen || []).some(e => Array.isArray(e.dagen) && e.dagen.includes(w));
@@ -205,6 +251,7 @@ function berekenDrukkeDagen(weekMaandag, vakken, afspraken, trainingen) {
 // Geeft een leeradvies-tekst voor de opgegeven dag, of null als er geen actie nodig is.
 // alleData: { vakken, schooldagen, schoolEinde, trainingen, afspraken }
 function geefDagAdvies(dag, alleData) {
+  if (getVakantie(toDatumStr(dag))) return 'Geniet van je vakantie!';
   const { vakken, schooldagen, schoolEinde, trainingen, afspraken } = alleData;
   const dagNr = dag.getDay();
   const dagStr = toDatumStr(dag);
