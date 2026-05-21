@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="color-scheme" content="light">
+  <title>Aanmelden – Struct</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#3ddc97">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Struct">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #ffffff;
+      --surface: #f8f8f8;
+      --primary: #3ddc97;
+      --text: #1a1a1a;
+      --text-muted: #888888;
+      --border: rgba(0,0,0,0.08);
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body, button, input { font-synthesis: none; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f6f6f6; color: #1a1a1a;
+      margin: 0; min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: flex-start;
+      -webkit-font-smoothing: antialiased;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      background-size: 200px 200px;
+    }
+
+    .wrap {
+      width: 100%; max-width: 480px;
+      padding: 0 20px 40px;
+      background: #ffffff; min-height: 100vh;
+      display: flex; flex-direction: column;
+    }
+
+    /* ── Logo blok ── */
+    .logo-blok {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 48px 0 36px;
+      gap: 12px;
+    }
+    .logo-cirkel {
+      width: 64px; height: 64px; border-radius: 18px;
+      background: #3ddc97;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 16px rgba(61,220,151,0.35);
+    }
+    .logo-naam {
+      font-family: 'Inter', sans-serif;
+      font-size: 1.5rem; font-weight: 700;
+      color: #1a1a1a; letter-spacing: -0.3px;
+    }
+    .logo-sub {
+      font-size: 0.88rem; color: #999; margin: -4px 0 0;
+      font-weight: 500;
+    }
+
+    /* ── Tab schakelaar ── */
+    .tab-schakelaar {
+      display: flex; background: #f0f0f0;
+      border-radius: 12px; padding: 4px;
+      margin-bottom: 24px;
+    }
+    .tab-knop {
+      flex: 1; padding: 10px;
+      border: none; border-radius: 9px;
+      font-size: 0.92rem; font-weight: 600;
+      cursor: pointer; font-family: inherit;
+      color: #999; background: transparent;
+      transition: all 0.18s;
+      min-height: 44px;
+    }
+    .tab-knop.actief {
+      background: #ffffff;
+      color: #1a1a1a;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.1);
+    }
+
+    /* ── Formulier ── */
+    .formulier { display: flex; flex-direction: column; gap: 14px; }
+    .formulier.verborgen { display: none; }
+
+    .veld-groep { display: flex; flex-direction: column; gap: 6px; }
+    .veld-label {
+      font-size: 0.78rem; font-weight: 700;
+      color: #888; letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+    .veld-input {
+      width: 100%; background: #f8f8f8;
+      border: 1.5px solid #e8e8e8;
+      border-radius: 12px; color: #1a1a1a;
+      font-size: 1rem; padding: 13px 15px;
+      outline: none; font-family: inherit;
+      appearance: none;
+      transition: border-color 0.15s, background 0.15s;
+      min-height: 52px;
+    }
+    .veld-input:focus {
+      border-color: #3ddc97;
+      background: #ffffff;
+    }
+    .veld-input::placeholder { color: #bbb; }
+    .veld-input.fout { border-color: #e05252; background: #fff8f8; }
+
+    /* ── Wachtwoord wrapper ── */
+    .ww-wrap { position: relative; }
+    .ww-wrap .veld-input { padding-right: 48px; }
+    .ww-toon {
+      position: absolute; right: 14px; top: 50%;
+      transform: translateY(-50%);
+      background: none; border: none; cursor: pointer;
+      color: #bbb; padding: 4px;
+      display: flex; align-items: center;
+      transition: color 0.15s;
+    }
+    .ww-toon:hover { color: #888; }
+
+    /* ── Primaire knop ── */
+    .btn-primair {
+      width: 100%; padding: 15px;
+      background: #3ddc97; border: none;
+      border-radius: 12px; color: #fff;
+      font-size: 1rem; font-weight: 700;
+      cursor: pointer; font-family: inherit;
+      min-height: 52px; letter-spacing: 0.01em;
+      transition: background 0.15s, transform 0.1s;
+      margin-top: 4px;
+    }
+    .btn-primair:hover { background: #2bc47e; }
+    .btn-primair:active { transform: scale(0.98); }
+    .btn-primair:disabled {
+      background: #b8efd3; cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ── Feedback ── */
+    .fout-melding {
+      background: #fff5f5; border: 1px solid #fcd8d8;
+      border-radius: 10px; padding: 11px 14px;
+      font-size: 0.87rem; color: #c0392b;
+      font-weight: 500; line-height: 1.4;
+      display: none;
+    }
+    .fout-melding.zichtbaar { display: block; }
+
+    .succes-melding {
+      background: #f0fbf5; border: 1px solid #afe8c8;
+      border-radius: 10px; padding: 11px 14px;
+      font-size: 0.87rem; color: #1a7a45;
+      font-weight: 500; line-height: 1.4;
+      display: none;
+    }
+    .succes-melding.zichtbaar { display: block; }
+
+    /* ── Laad spinner ── */
+    .spinner {
+      display: inline-block; width: 18px; height: 18px;
+      border: 2.5px solid rgba(255,255,255,0.4);
+      border-top-color: #fff; border-radius: 50%;
+      animation: draaien 0.7s linear infinite;
+      vertical-align: middle; margin-right: 6px;
+    }
+    @keyframes draaien { to { transform: rotate(360deg); } }
+
+    /* ── Scheidingslijn ── */
+    .scheiding {
+      display: flex; align-items: center; gap: 12px;
+      margin: 4px 0;
+    }
+    .scheiding-lijn { flex: 1; height: 1px; background: #e8e8e8; }
+    .scheiding-tekst { font-size: 0.78rem; color: #bbb; font-weight: 500; }
+
+    /* ── Wachtwoord vergeten ── */
+    .vergeten-link {
+      text-align: right; margin-top: -6px;
+    }
+    .vergeten-link a {
+      font-size: 0.82rem; color: #3ddc97;
+      font-weight: 600; text-decoration: none;
+    }
+    .vergeten-link a:hover { text-decoration: underline; }
+
+    /* ── Animatie ── */
+    @keyframes pagina-in {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .wrap { animation: pagina-in 0.25s ease-out both; }
+
+    /* ── Focus states ── */
+    :focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; border-radius: 4px; }
+    input:focus-visible { outline: none; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="logo-blok">
+      <div class="logo-cirkel">
+        <svg width="34" height="34" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <line x1="11" y1="12" x2="27" y2="12" stroke="white" stroke-width="2" stroke-linecap="round" stroke-opacity="0.85"/>
+          <polyline points="11,22 17,28 29,16" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="logo-naam">Struct</div>
+      <div class="logo-sub">Plan slim, leer beter</div>
+    </div>
+
+    <!-- Tab schakelaar -->
+    <div class="tab-schakelaar" role="tablist">
+      <button class="tab-knop actief" id="tab-login" onclick="toonTab('login')" role="tab" aria-selected="true">Inloggen</button>
+      <button class="tab-knop" id="tab-registreer" onclick="toonTab('registreer')" role="tab" aria-selected="false">Registreren</button>
+    </div>
+
+    <!-- Login formulier -->
+    <form class="formulier" id="form-login" onsubmit="submitLogin(event)" novalidate>
+      <div id="login-fout" class="fout-melding" role="alert"></div>
+      <div id="login-succes" class="succes-melding" role="status"></div>
+
+      <div class="veld-groep">
+        <label class="veld-label" for="login-email">E-mailadres</label>
+        <input class="veld-input" type="email" id="login-email"
+          placeholder="jouw@email.nl" autocomplete="email" required>
+      </div>
+
+      <div class="veld-groep">
+        <label class="veld-label" for="login-ww">Wachtwoord</label>
+        <div class="ww-wrap">
+          <input class="veld-input" type="password" id="login-ww"
+            placeholder="Wachtwoord" autocomplete="current-password" required>
+          <button type="button" class="ww-toon" onclick="toggleWachtwoord('login-ww', this)" aria-label="Wachtwoord tonen">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="vergeten-link">
+        <a href="#" onclick="toonWachtwoordVergeten(event)">Wachtwoord vergeten?</a>
+      </div>
+
+      <button class="btn-primair" type="submit" id="btn-login">Inloggen</button>
+    </form>
+
+    <!-- Registreer formulier -->
+    <form class="formulier verborgen" id="form-registreer" onsubmit="submitRegistreer(event)" novalidate>
+      <div id="reg-fout" class="fout-melding" role="alert"></div>
+      <div id="reg-succes" class="succes-melding" role="status"></div>
+
+      <div class="veld-groep">
+        <label class="veld-label" for="reg-naam">Naam</label>
+        <input class="veld-input" type="text" id="reg-naam"
+          placeholder="Jouw naam" autocomplete="name" required>
+      </div>
+
+      <div class="veld-groep">
+        <label class="veld-label" for="reg-email">E-mailadres</label>
+        <input class="veld-input" type="email" id="reg-email"
+          placeholder="jouw@email.nl" autocomplete="email" required>
+      </div>
+
+      <div class="veld-groep">
+        <label class="veld-label" for="reg-ww">Wachtwoord</label>
+        <div class="ww-wrap">
+          <input class="veld-input" type="password" id="reg-ww"
+            placeholder="Minimaal 8 tekens" autocomplete="new-password" required minlength="8">
+          <button type="button" class="ww-toon" onclick="toggleWachtwoord('reg-ww', this)" aria-label="Wachtwoord tonen">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="veld-groep">
+        <label class="veld-label" for="reg-ww2">Wachtwoord herhalen</label>
+        <div class="ww-wrap">
+          <input class="veld-input" type="password" id="reg-ww2"
+            placeholder="Herhaal wachtwoord" autocomplete="new-password" required>
+          <button type="button" class="ww-toon" onclick="toggleWachtwoord('reg-ww2', this)" aria-label="Wachtwoord tonen">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <button class="btn-primair" type="submit" id="btn-registreer">Account aanmaken</button>
+    </form>
+  </div>
+
+  <script>
+    const API = 'https://planner-backend-dfa4.onrender.com';
+
+    function toonTab(tab) {
+      const isLogin = tab === 'login';
+      document.getElementById('tab-login').classList.toggle('actief', isLogin);
+      document.getElementById('tab-registreer').classList.toggle('actief', !isLogin);
+      document.getElementById('tab-login').setAttribute('aria-selected', isLogin);
+      document.getElementById('tab-registreer').setAttribute('aria-selected', !isLogin);
+      document.getElementById('form-login').classList.toggle('verborgen', !isLogin);
+      document.getElementById('form-registreer').classList.toggle('verborgen', isLogin);
+      verbergMeldingen();
+    }
+
+    function verbergMeldingen() {
+      ['login-fout','login-succes','reg-fout','reg-succes'].forEach(id => {
+        const el = document.getElementById(id);
+        el.classList.remove('zichtbaar');
+        el.textContent = '';
+      });
+      document.querySelectorAll('.veld-input').forEach(i => i.classList.remove('fout'));
+    }
+
+    function toonFout(id, tekst) {
+      const el = document.getElementById(id);
+      el.textContent = tekst;
+      el.classList.add('zichtbaar');
+    }
+
+    function toonSucces(id, tekst) {
+      const el = document.getElementById(id);
+      el.textContent = tekst;
+      el.classList.add('zichtbaar');
+    }
+
+    function setLaden(btnId, laden, oorspronkelijkeTekst) {
+      const btn = document.getElementById(btnId);
+      if (laden) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span>Even wachten…';
+      } else {
+        btn.disabled = false;
+        btn.textContent = oorspronkelijkeTekst;
+      }
+    }
+
+    function toggleWachtwoord(inputId, btn) {
+      const input = document.getElementById(inputId);
+      const toonWw = input.type === 'password';
+      input.type = toonWw ? 'text' : 'password';
+      btn.innerHTML = toonWw
+        ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`
+        : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+      btn.setAttribute('aria-label', toonWw ? 'Wachtwoord verbergen' : 'Wachtwoord tonen');
+    }
+
+    async function submitLogin(e) {
+      e.preventDefault();
+      verbergMeldingen();
+
+      const email = document.getElementById('login-email').value.trim();
+      const wachtwoord = document.getElementById('login-ww').value;
+
+      if (!email || !wachtwoord) {
+        toonFout('login-fout', 'Vul je e-mailadres en wachtwoord in.');
+        if (!email) document.getElementById('login-email').classList.add('fout');
+        if (!wachtwoord) document.getElementById('login-ww').classList.add('fout');
+        return;
+      }
+
+      setLaden('btn-login', true, 'Inloggen');
+
+      try {
+        const res = await fetch(`${API}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password: wachtwoord }),
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (res.ok) {
+          const token = data.token || data.access_token || data.jwt;
+          if (token) {
+            localStorage.setItem('struct_token', token);
+            if (data.naam || data.name) {
+              const profiel = JSON.parse(localStorage.getItem('profiel') || '{}');
+              profiel.naam = data.naam || data.name;
+              localStorage.setItem('profiel', JSON.stringify(profiel));
+            }
+            toonSucces('login-succes', 'Ingelogd! Je wordt doorgestuurd…');
+            setTimeout(() => location.replace('index.html'), 900);
+          } else {
+            toonFout('login-fout', 'Inloggen gelukt, maar geen token ontvangen. Probeer het opnieuw.');
+          }
+        } else {
+          const bericht = data.message || data.error || data.detail || '';
+          if (res.status === 401 || res.status === 403) {
+            toonFout('login-fout', 'Onjuist e-mailadres of wachtwoord.');
+          } else if (res.status === 404) {
+            toonFout('login-fout', 'Geen account gevonden met dit e-mailadres.');
+          } else {
+            toonFout('login-fout', bericht || 'Er is iets misgegaan. Probeer het opnieuw.');
+          }
+        }
+      } catch {
+        toonFout('login-fout', 'Kan de server niet bereiken. Controleer je internetverbinding.');
+      } finally {
+        setLaden('btn-login', false, 'Inloggen');
+      }
+    }
+
+    async function submitRegistreer(e) {
+      e.preventDefault();
+      verbergMeldingen();
+
+      const naam = document.getElementById('reg-naam').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const wachtwoord = document.getElementById('reg-ww').value;
+      const wachtwoord2 = document.getElementById('reg-ww2').value;
+
+      let geldig = true;
+      if (!naam) { document.getElementById('reg-naam').classList.add('fout'); geldig = false; }
+      if (!email) { document.getElementById('reg-email').classList.add('fout'); geldig = false; }
+      if (!wachtwoord) { document.getElementById('reg-ww').classList.add('fout'); geldig = false; }
+      if (!wachtwoord2) { document.getElementById('reg-ww2').classList.add('fout'); geldig = false; }
+
+      if (!geldig) { toonFout('reg-fout', 'Vul alle velden in.'); return; }
+
+      if (wachtwoord.length < 8) {
+        toonFout('reg-fout', 'Je wachtwoord moet minimaal 8 tekens lang zijn.');
+        document.getElementById('reg-ww').classList.add('fout');
+        return;
+      }
+
+      if (wachtwoord !== wachtwoord2) {
+        toonFout('reg-fout', 'De wachtwoorden komen niet overeen.');
+        document.getElementById('reg-ww2').classList.add('fout');
+        return;
+      }
+
+      setLaden('btn-registreer', true, 'Account aanmaken');
+
+      try {
+        const res = await fetch(`${API}/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ naam, name: naam, email, password: wachtwoord }),
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (res.ok) {
+          const token = data.token || data.access_token || data.jwt;
+          if (token) {
+            localStorage.setItem('struct_token', token);
+            const profiel = JSON.parse(localStorage.getItem('profiel') || '{}');
+            profiel.naam = naam;
+            localStorage.setItem('profiel', JSON.stringify(profiel));
+            toonSucces('reg-succes', 'Account aangemaakt! Je wordt doorgestuurd…');
+            setTimeout(() => location.replace('index.html'), 900);
+          } else {
+            toonSucces('reg-succes', 'Account aangemaakt! Je kunt nu inloggen.');
+            setTimeout(() => toonTab('login'), 1800);
+          }
+        } else {
+          const bericht = data.message || data.error || data.detail || '';
+          if (res.status === 409 || (bericht && bericht.toLowerCase().includes('exist'))) {
+            toonFout('reg-fout', 'Er bestaat al een account met dit e-mailadres.');
+            document.getElementById('reg-email').classList.add('fout');
+          } else {
+            toonFout('reg-fout', bericht || 'Registreren mislukt. Probeer het opnieuw.');
+          }
+        }
+      } catch {
+        toonFout('reg-fout', 'Kan de server niet bereiken. Controleer je internetverbinding.');
+      } finally {
+        setLaden('btn-registreer', false, 'Account aanmaken');
+      }
+    }
+
+    function toonWachtwoordVergeten(e) {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value.trim();
+      if (!email) {
+        toonFout('login-fout', 'Vul eerst je e-mailadres in.');
+        document.getElementById('login-email').classList.add('fout');
+        document.getElementById('login-email').focus();
+        return;
+      }
+      alert(`Een reset-link wordt verstuurd naar ${email} als dit account bestaat.`);
+    }
+
+    // Verwijder fout-stijl bij invoer
+    document.querySelectorAll('.veld-input').forEach(input => {
+      input.addEventListener('input', () => input.classList.remove('fout'));
+    });
+
+    // Al ingelogd? Doorsturen
+    if (localStorage.getItem('struct_token')) {
+      location.replace('index.html');
+    }
+  </script>
+</body>
+</html>
