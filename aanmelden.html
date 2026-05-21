@@ -381,9 +381,11 @@
           const token = data.token || data.access_token || data.jwt;
           if (token) {
             localStorage.setItem('struct_token', token);
-            if (data.naam || data.name) {
+            const naam = data.naam || data.name;
+            if (naam) {
+              localStorage.setItem('struct_naam', naam);
               const profiel = JSON.parse(localStorage.getItem('profiel') || '{}');
-              profiel.naam = data.naam || data.name;
+              profiel.naam = naam;
               localStorage.setItem('profiel', JSON.stringify(profiel));
             }
             toonSucces('login-succes', 'Ingelogd! Je wordt doorgestuurd…');
