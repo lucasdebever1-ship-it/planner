@@ -554,6 +554,8 @@
 
   <script src="planning.js"></script>
   <script>
+    if (!localStorage.getItem('struct_token')) location.replace('aanmelden.html');
+
     // ── Navigatie ──
     document.getElementById('hamburger').addEventListener('click', () => {
       document.getElementById('menu-overlay').classList.toggle('open');
