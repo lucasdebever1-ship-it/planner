@@ -387,7 +387,35 @@
 
     function getCat(id) { return CATEGORIEEN.find(c => c.id === id) || CATEGORIEEN[4]; }
     function laad()     { return JSON.parse(localStorage.getItem('afspraken') || '[]'); }
-    function slaOp(l)   { localStorage.setItem('afspraken', JSON.stringify(l)); }
+    function slaOp(l)   { localStorage.setItem('afspraken', JSON.stringify(l)); syncAfspraken(); }
+
+    const BACKEND_URL = 'https://planner-backend-dfa4.onrender.com';
+    function getToken() { return localStorage.getItem('struct_token'); }
+
+    async function laadAfsprakenVanBackend() {
+      const token = getToken();
+      if (!token) return;
+      try {
+        const res = await fetch(`${BACKEND_URL}/sync/afspraken`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.afspraken != null) localStorage.setItem('afspraken', JSON.stringify(data.afspraken));
+      } catch (e) {}
+    }
+
+    function syncAfspraken() {
+      const token = getToken();
+      if (!token) return;
+      fetch(`${BACKEND_URL}/sync/afspraken`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          afspraken: JSON.parse(localStorage.getItem('afspraken') || '[]'),
+        })
+      }).catch(() => {});
+    }
     function vandaagStr() {
       const d = new Date();
       return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -488,8 +516,10 @@
           const eindDag = a.einddatum || a.datum;
           return !eindDag || nuMs - new Date(eindDag + 'T00:00:00').getTime() <= 3 * 86400000;
         });
-        if (gefilterd.length !== alle.length)
+        if (gefilterd.length !== alle.length) {
           localStorage.setItem('afspraken', JSON.stringify(gefilterd));
+          syncAfspraken();
+        }
       })();
 
       const container = document.getElementById('afspraken-lijst');
@@ -553,7 +583,7 @@
       </div>`;
     }
 
-    render();
+    laadAfsprakenVanBackend().then(() => render());
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js?v=6');
 
     // ── Tab-overgangen ──

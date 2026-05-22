@@ -512,7 +512,37 @@
       return result;
     }
 
-    function sla(vakken) { localStorage.setItem(sleutel, JSON.stringify(vakken)); }
+    const BACKEND_URL = 'https://planner-backend-dfa4.onrender.com';
+    function getToken() { return localStorage.getItem('struct_token'); }
+
+    async function laadToetsenVanBackend() {
+      const token = getToken();
+      if (!token) return;
+      try {
+        const res = await fetch(`${BACKEND_URL}/sync/toetsen`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.vakken != null)           localStorage.setItem('vakken',           JSON.stringify(data.vakken));
+        if (data.archief_toetsen != null)  localStorage.setItem('archief_toetsen',  JSON.stringify(data.archief_toetsen));
+      } catch (e) {}
+    }
+
+    function syncToetsen() {
+      const token = getToken();
+      if (!token) return;
+      fetch(`${BACKEND_URL}/sync/toetsen`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          vakken:          JSON.parse(localStorage.getItem('vakken')          || '[]'),
+          archief_toetsen: JSON.parse(localStorage.getItem('archief_toetsen') || '[]'),
+        })
+      }).catch(() => {});
+    }
+
+    function sla(vakken) { localStorage.setItem(sleutel, JSON.stringify(vakken)); syncToetsen(); }
 
     function formatDatum(d) {
       return d ? new Date(d + 'T00:00:00').toLocaleDateString('nl-NL', { day: 'numeric', month: 'long' }) : '—';
@@ -858,32 +888,34 @@
       else if (btn.classList.contains('hw-annuleer'))    { btn.closest('.hw-formrij').remove(); }
     });
 
-    // Auto-opruimen (gedeeld met index.html)
-    (function autoOpruimen() {
-      const nu = new Date(); nu.setHours(0,0,0,0); const nuMs = nu.getTime();
-      const vk = laad();
-      const archief = JSON.parse(localStorage.getItem('archief_toetsen') || '[]');
-      let gewijzigd = false;
-      vk.forEach(v => {
-        if (v.toetsen) {
-          const behoud = [], arc = [];
-          v.toetsen.forEach(t => {
-            if (t.datum && nuMs - new Date(t.datum + 'T00:00:00').getTime() > 7 * 86400000) arc.push({ ...t, vakNaam: v.naam });
-            else behoud.push(t);
-          });
-          if (arc.length) { archief.push(...arc); v.toetsen = behoud; gewijzigd = true; }
-        }
-        if (v.huiswerk) {
-          const voor = v.huiswerk.length;
-          v.huiswerk = v.huiswerk.filter(h => !h.gedaan || !h.inleverdatum ||
-            nuMs - new Date(h.inleverdatum.slice(0,10) + 'T00:00:00').getTime() <= 86400000);
-          if (v.huiswerk.length !== voor) gewijzigd = true;
-        }
-      });
-      if (gewijzigd) { sla(vk); localStorage.setItem('archief_toetsen', JSON.stringify(archief)); }
+    (async function() {
+      await laadToetsenVanBackend();
+      // Auto-opruimen (gedeeld met index.html)
+      (function autoOpruimen() {
+        const nu = new Date(); nu.setHours(0,0,0,0); const nuMs = nu.getTime();
+        const vk = laad();
+        const archief = JSON.parse(localStorage.getItem('archief_toetsen') || '[]');
+        let gewijzigd = false;
+        vk.forEach(v => {
+          if (v.toetsen) {
+            const behoud = [], arc = [];
+            v.toetsen.forEach(t => {
+              if (t.datum && nuMs - new Date(t.datum + 'T00:00:00').getTime() > 7 * 86400000) arc.push({ ...t, vakNaam: v.naam });
+              else behoud.push(t);
+            });
+            if (arc.length) { archief.push(...arc); v.toetsen = behoud; gewijzigd = true; }
+          }
+          if (v.huiswerk) {
+            const voor = v.huiswerk.length;
+            v.huiswerk = v.huiswerk.filter(h => !h.gedaan || !h.inleverdatum ||
+              nuMs - new Date(h.inleverdatum.slice(0,10) + 'T00:00:00').getTime() <= 86400000);
+            if (v.huiswerk.length !== voor) gewijzigd = true;
+          }
+        });
+        if (gewijzigd) { sla(vk); localStorage.setItem('archief_toetsen', JSON.stringify(archief)); }
+      })();
+      render();
     })();
-
-    render();
 
     document.addEventListener('focusin', e => {
       if (e.target.type !== 'date') return;

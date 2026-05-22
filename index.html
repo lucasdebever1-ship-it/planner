@@ -1209,6 +1209,58 @@
     renderWeekRij();
     renderTip();
 
+    // ── Backend sync ──
+    const BACKEND_URL = 'https://planner-backend-dfa4.onrender.com';
+    function getToken() { return localStorage.getItem('struct_token'); }
+
+    function syncToetsen() {
+      const token = getToken();
+      if (!token) return;
+      fetch(`${BACKEND_URL}/sync/toetsen`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          vakken:          JSON.parse(localStorage.getItem('vakken')          || '[]'),
+          archief_toetsen: JSON.parse(localStorage.getItem('archief_toetsen') || '[]'),
+        })
+      }).catch(() => {});
+    }
+
+    function syncAfspraken() {
+      const token = getToken();
+      if (!token) return;
+      fetch(`${BACKEND_URL}/sync/afspraken`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          afspraken: JSON.parse(localStorage.getItem('afspraken') || '[]'),
+        })
+      }).catch(() => {});
+    }
+
+    async function laadToetsenVanBackend() {
+      const token = getToken();
+      if (!token) return;
+      try {
+        const res = await fetch(`${BACKEND_URL}/sync/toetsen`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.vakken != null)          localStorage.setItem('vakken',          JSON.stringify(data.vakken));
+        if (data.archief_toetsen != null) localStorage.setItem('archief_toetsen', JSON.stringify(data.archief_toetsen));
+      } catch (e) {}
+    }
+
+    async function laadAfsprakenVanBackend() {
+      const token = getToken();
+      if (!token) return;
+      try {
+        const res = await fetch(`${BACKEND_URL}/sync/afspraken`, { headers: { 'Authorization': `Bearer ${token}` } });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.afspraken != null) localStorage.setItem('afspraken', JSON.stringify(data.afspraken));
+      } catch (e) {}
+    }
+
     // ── Auto-opruimen ──
     function autoOpruimen() {
       const nu = new Date(); nu.setHours(0,0,0,0);
@@ -1256,6 +1308,12 @@
         localStorage.setItem('afspraken', JSON.stringify(gefilterd));
     }
     autoOpruimen();
+    Promise.all([laadToetsenVanBackend(), laadAfsprakenVanBackend()]).then(function() {
+      renderVandaag();
+      renderDagplanTijdlijn();
+      renderPlanWeek();
+      renderWeekRij();
+    });
 
     // ── Snel toevoegen ──
     let snelActief = null;
@@ -1319,6 +1377,7 @@
         if (!vk2[idx].toetsen) vk2[idx].toetsen = [];
         vk2[idx].toetsen.push({ naam: toetsType, datum, type: toetsType, id: Date.now().toString() });
         localStorage.setItem('vakken', JSON.stringify(vk2));
+        syncToetsen();
       } else if (type === 'huiswerk') {
         const vakNaam = document.getElementById('sf-hw-vak')?.value;
         const omschr  = document.getElementById('sf-hw-omschr')?.value.trim();
@@ -1329,6 +1388,7 @@
         if (!vk2[idx].huiswerk) vk2[idx].huiswerk = [];
         vk2[idx].huiswerk.push({ omschrijving: omschr, inleverdatum: datum, gedaan: false, id: Date.now().toString() });
         localStorage.setItem('vakken', JSON.stringify(vk2));
+        syncToetsen();
       } else {
         const titel = document.getElementById('sf-afsp-titel')?.value.trim();
         const datum  = document.getElementById('sf-afsp-datum')?.value;
@@ -1337,6 +1397,7 @@
         const afspr2 = JSON.parse(localStorage.getItem('afspraken') || '[]');
         afspr2.push({ id: Date.now().toString(), titel, datum, tijd: tijd || '', eindtijd: '', einddatum: '', categorie: 'overig', herhaling: 'eenmalig', afgerond: false });
         localStorage.setItem('afspraken', JSON.stringify(afspr2));
+        syncAfspraken();
       }
       sluitSnelForm();
       renderVandaag();
