@@ -750,12 +750,55 @@
 
     function laadProfiel()    { return JSON.parse(localStorage.getItem('profiel')    || '{}'); }
     function laadTrainingen() { return JSON.parse(localStorage.getItem('trainingen') || '[]'); }
-    function slaProfielOp(p)  { localStorage.setItem('profiel', JSON.stringify(p)); }
+    function slaProfielOp(p)  { localStorage.setItem('profiel', JSON.stringify(p)); syncNaarBackend(); }
+
+    const BACKEND_URL = 'https://planner-backend-dfa4.onrender.com';
+    function getToken() { return localStorage.getItem('struct_token'); }
+
+    async function laadVanBackend() {
+      const token = getToken();
+      if (!token) return;
+      try {
+        const res = await fetch(`${BACKEND_URL}/sync/profile`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.profiel != null)          localStorage.setItem('profiel',          JSON.stringify(data.profiel));
+        if (data.trainingen != null)       localStorage.setItem('trainingen',       JSON.stringify(data.trainingen));
+        if (data.regio != null)            localStorage.setItem('regio',            data.regio);
+        if (data.schooldagen != null)      localStorage.setItem('schooldagen',      JSON.stringify(data.schooldagen));
+        if (data.schoolEinde != null)      localStorage.setItem('schoolEinde',      data.schoolEinde);
+        if (data.instellingen != null)     localStorage.setItem('instellingen',     JSON.stringify(data.instellingen));
+        if (data.aangepaste_typen != null) localStorage.setItem('aangepaste_typen', JSON.stringify(data.aangepaste_typen));
+        if (data.notificaties != null)     localStorage.setItem('notificaties',     JSON.stringify(data.notificaties));
+      } catch (e) {}
+    }
+
+    function syncNaarBackend() {
+      const token = getToken();
+      if (!token) return;
+      fetch(`${BACKEND_URL}/sync/profile`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          profiel:          JSON.parse(localStorage.getItem('profiel')          || '{}'),
+          trainingen:       JSON.parse(localStorage.getItem('trainingen')       || '[]'),
+          regio:            localStorage.getItem('regio'),
+          schooldagen:      JSON.parse(localStorage.getItem('schooldagen')      || 'null'),
+          schoolEinde:      localStorage.getItem('schoolEinde'),
+          instellingen:     JSON.parse(localStorage.getItem('instellingen')     || '{}'),
+          aangepaste_typen: JSON.parse(localStorage.getItem('aangepaste_typen') || '[]'),
+          notificaties:     JSON.parse(localStorage.getItem('notificaties')     || '{}'),
+        })
+      }).catch(() => {});
+    }
 
     let bewerkId = null;
 
     // ── Init hero + velden ──
-    (function init() {
+    (async function init() {
+      await laadVanBackend();
       const p = laadProfiel();
 
       // Avatar
@@ -845,6 +888,7 @@
       document.querySelectorAll('.regio-btn-mini').forEach(b => b.classList.remove('geselecteerd'));
       el.classList.add('geselecteerd');
       localStorage.setItem('regio', el.dataset.regio);
+      syncNaarBackend();
     }
 
     // ── Schema toggles ──
@@ -910,12 +954,14 @@
       const lijst = laadTrainingen();
       lijst.push({ id: Date.now().toString(), naam, dagen, tijden });
       localStorage.setItem('trainingen', JSON.stringify(lijst));
+      syncNaarBackend();
       annuleerSport();
       renderTrainingen();
     }
     function verwijderTraining(id) {
       if (!confirm('Training verwijderen?')) return;
       localStorage.setItem('trainingen', JSON.stringify(laadTrainingen().filter(x => x.id !== id)));
+      syncNaarBackend();
       renderTrainingen();
     }
 
@@ -976,6 +1022,7 @@
       });
       const lijst = laadTrainingen().map(t => t.id === bewerkId ? { ...t, naam, dagen, tijden } : t);
       localStorage.setItem('trainingen', JSON.stringify(lijst));
+      syncNaarBackend();
       bewerkId = null;
       renderTrainingen();
     }
@@ -1050,11 +1097,13 @@
       chk.addEventListener('change', () => {
         const dagen = [...document.querySelectorAll('.sd-dag:checked')].map(c => parseInt(c.value));
         localStorage.setItem('schooldagen', JSON.stringify(dagen));
+        syncNaarBackend();
       });
     });
     document.getElementById('school-einde').addEventListener('change', function() {
       if (this.value) localStorage.setItem('schoolEinde', this.value);
       else localStorage.removeItem('schoolEinde');
+      syncNaarBackend();
     });
 
     // ── Mijn patronen ──
@@ -1146,6 +1195,7 @@
         inst[type] = isNaN(val) || val < 0 ? INST_STANDAARD[type] : Math.min(60, val);
       });
       localStorage.setItem('instellingen', JSON.stringify(inst));
+      syncNaarBackend();
     }
 
     function initInstInputs() {
@@ -1216,6 +1266,7 @@
       localStorage.setItem('instellingen', JSON.stringify(inst));
       document.getElementById('custom-type-naam').value = '';
       document.getElementById('custom-type-dagen').value = '3';
+      syncNaarBackend();
       renderCustomTypen();
     }
 
@@ -1224,6 +1275,7 @@
       const inst = JSON.parse(localStorage.getItem('instellingen') || '{}');
       delete inst[naam];
       localStorage.setItem('instellingen', JSON.stringify(inst));
+      syncNaarBackend();
       renderCustomTypen();
     }
 
@@ -1235,7 +1287,7 @@
 
     // ── Meldingen ──
     function laadNotif() { return JSON.parse(localStorage.getItem('notificaties') || '{}'); }
-    function slaNotifOp(s) { localStorage.setItem('notificaties', JSON.stringify(s)); }
+    function slaNotifOp(s) { localStorage.setItem('notificaties', JSON.stringify(s)); syncNaarBackend(); }
     function updateMeldStatus() {
       const banner = document.getElementById('meld-status-banner');
       const btn = document.getElementById('btn-meld-inschakel');
